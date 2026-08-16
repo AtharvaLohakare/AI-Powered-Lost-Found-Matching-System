@@ -67,9 +67,3 @@
     border-radius: 6px;
     transition: 2s ease-in-out;
 }
-
-
-.signup-btn:hover {
-    background-color: white;
-    color: black;
-}
