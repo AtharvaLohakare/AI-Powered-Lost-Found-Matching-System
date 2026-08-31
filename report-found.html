@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Report Found Item | Lost & Found AI</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+
+    <nav class="navbar">
+
+        <div class="logo">Lost & Found AI</div>
+
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="#">About</a>
+            <a href="report-lost.html">Report Lost</a>
+            <a href="report-found.html">Report Found</a>
+            <a href="#">Help</a>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="login-btn">Login</a>
+            <a href="#" class="signup-btn">Sign Up</a>
+        </div>
+
+    </nav>
+
+
+    <!-- Found Item Form -->
+
+    <section class="form-section">
+
+        <div class="form-container">
+
+            <h1>Report a Found Item</h1>
+
+            <p class="form-description">
+                Enter the details of the item you found to help identify its owner.
+            </p>
+
+
+            <form>
+
+                <!-- Item Name -->
+
+                <div class="form-group">
+
+                    <label>Item Name</label>
+
+                    <input
+                        type="text"
+                        placeholder="e.g. Black Backpack"
+                    >
+
+                </div>
+
+
+                <!-- Category -->
+
+                <div class="form-group">
+
+                    <label>Category</label>
+
+                    <select>
+                        <option>Select Category</option>
+                        <option>Electronics</option>
+                        <option>Bags</option>
+                        <option>Documents</option>
+                        <option>Clothing</option>
+                        <option>Accessories</option>
+                        <option>Other</option>
+                    </select>
+
+                </div>
+
+
+                <!-- Description -->
+
+                <div class="form-group">
+
+                    <label>Description</label>
+
+                    <textarea
+                        placeholder="Describe the item you found..."
+                        rows="5"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- Color and Brand -->
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label>Color</label>
+
+                        <input
+                            type="text"
+                            placeholder="e.g. Black"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Brand</label>
+
+                        <input
+                            type="text"
+                            placeholder="e.g. Nike"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- Found Location -->
+
+                <div class="form-group">
+
+                    <label>Found Location</label>
+
+                    <input
+                        type="text"
+                        placeholder="e.g. College Library"
+                    >
+
+                </div>
+
+
+                <!-- Date Found -->
+
+                <div class="form-group">
+
+                    <label>Date Found</label>
+
+                    <input type="date">
+
+                </div>
+
+
+                <!-- Image -->
+
+                <div class="form-group">
+
+                    <label>Upload Item Image</label>
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                    >
+
+                </div>
+
+
+                <!-- Submit Button -->
+
+                <button
+                    type="submit"
+                    class="submit-btn"
+                >
+                    Report Found Item
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</body>
+
+</html>
