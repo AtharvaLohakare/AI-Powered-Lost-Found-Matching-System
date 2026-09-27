@@ -127,3 +127,91 @@ def get_item(item_id: int, db: Session = Depends(get_db)):
         "item_date": str(item.item_date),
         "image_name": item.image_name
     }
+
+@app.get("/match/{item_id}")
+def match_item(item_id: int, db: Session = Depends(get_db)):
+
+    # Get the selected item
+    lost_item = db.query(Item).filter(Item.id == item_id).first()
+
+    if not lost_item:
+        return {
+            "status": "error",
+            "message": "Item not found"
+        }
+
+    # Make sure the selected item is a lost item
+    if lost_item.item_type != "lost":
+        return {
+            "status": "error",
+            "message": "Matching should be started from a lost item."
+        }
+
+    # Get all found items
+    found_items = db.query(Item).filter(
+        Item.item_type == "found"
+    ).all()
+
+    matches = []
+
+    for found_item in found_items:
+
+        score = 0
+        reasons = []
+
+        # Category match
+        if lost_item.category.lower() == found_item.category.lower():
+            score += 30
+            reasons.append("Category matches")
+
+        # Color match
+        if (
+            lost_item.color
+            and found_item.color
+            and lost_item.color.lower() == found_item.color.lower()
+        ):
+            score += 20
+            reasons.append("Color matches")
+
+        # Brand match
+        if (
+            lost_item.brand
+            and found_item.brand
+            and lost_item.brand.lower() == found_item.brand.lower()
+        ):
+            score += 20
+            reasons.append("Brand matches")
+
+        # Location match
+        if lost_item.location.lower() == found_item.location.lower():
+            score += 20
+            reasons.append("Location matches")
+
+        # Item name match
+        if lost_item.item_name.lower() == found_item.item_name.lower():
+            score += 10
+            reasons.append("Item name matches")
+
+        matches.append({
+            "item_id": found_item.id,
+            "item_name": found_item.item_name,
+            "category": found_item.category,
+            "color": found_item.color,
+            "brand": found_item.brand,
+            "location": found_item.location,
+            "image_name": found_item.image_name,
+            "match_score": score,
+            "reasons": reasons
+        })
+
+    # Highest score first
+    matches.sort(
+        key=lambda x: x["match_score"],
+        reverse=True
+    )
+
+    return {
+        "status": "success",
+        "lost_item_id": lost_item.id,
+        "matches": matches
+    }
