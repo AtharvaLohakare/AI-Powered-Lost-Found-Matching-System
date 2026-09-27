@@ -231,5 +231,75 @@
 }
 
 
+/* =========================
+   ITEMS LISTING PAGE
+   ========================= */
 
+.items-section {
+    padding: 50px 8%;
+    background: #f5f7fb;
+    min-height: 100vh;
+}
+
+.items-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.items-header h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.items-header p {
+    color: #666;
+    font-size: 16px;
+}
+
+.items-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.item-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+}
+
+.item-card:hover {
+    transform: translateY(-5px);
+}
+
+.item-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.item-card-content {
+    padding: 20px;
+}
+
+.item-card-content h2 {
+    margin: 10px 0 15px;
+    font-size: 22px;
+}
+
+.item-card-content p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.item-type {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #e8f0ff;
+    font-size: 12px;
+    font-weight: bold;
+}
 

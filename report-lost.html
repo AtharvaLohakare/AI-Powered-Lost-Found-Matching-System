@@ -4,13 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Lost Item | Lost & Found AI NATHCER</title>
+    <title>Report Lost Item | Lost & Found AI</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
     <nav class="navbar">
+
         <div class="logo">Lost & Found AI</div>
 
         <div class="nav-links">
@@ -25,83 +27,157 @@
             <a href="#" class="login-btn">Login</a>
             <a href="#" class="signup-btn">Sign Up</a>
         </div>
+
     </nav>
+
 
     <section class="form-section">
 
         <div class="form-container">
 
             <h1>Report a Lost Item</h1>
+
             <p class="form-description">
                 Enter the details of your lost item to help find a possible match.
             </p>
 
-            <form>
+
+            <form id="lost-item-form">
 
                 <div class="form-group">
+
                     <label>Item Name</label>
-                    <input type="text" placeholder="e.g. Black Backpack">
+
+                    <input
+                        type="text"
+                        name="item_name"
+                        placeholder="e.g. Black Backpack"
+                        required
+                    >
+
                 </div>
 
 
                 <div class="form-group">
+
                     <label>Category</label>
 
-                    <select>
-                        <option>Select Category</option>
-                        <option>Electronics</option>
-                        <option>Bags</option>
-                        <option>Documents</option>
-                        <option>Clothing</option>
-                        <option>Accessories</option>
-                        <option>Other</option>
+                    <select name="category" required>
+
+                        <option value="">Select Category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Bags">Bags</option>
+                        <option value="Documents">Documents</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Other">Other</option>
+
                     </select>
+
                 </div>
 
 
                 <div class="form-group">
+
                     <label>Description</label>
-                    <textarea placeholder="Describe your item..." rows="5"></textarea>
+
+                    <textarea
+                        name="description"
+                        placeholder="Describe your item..."
+                        rows="5"
+                        required
+                    ></textarea>
+
                 </div>
 
 
                 <div class="form-row">
+
                     <div class="form-group">
+
                         <label>Color</label>
-                        <input type="text" placeholder="e.g. Black">
+
+                        <input
+                            type="text"
+                            name="color"
+                            placeholder="e.g. Black"
+                        >
+
                     </div>
+
 
                     <div class="form-group">
+
                         <label>Brand</label>
-                        <input type="text" placeholder="e.g. Nike">
+
+                        <input
+                            type="text"
+                            name="brand"
+                            placeholder="e.g. Nike"
+                        >
+
                     </div>
+
                 </div>
 
 
                 <div class="form-group">
+
                     <label>Lost Location</label>
-                    <input type="text" placeholder="e.g. College Library">
+
+                    <input
+                        type="text"
+                        name="location"
+                        placeholder="e.g. College Library"
+                        required
+                    >
+
                 </div>
 
 
                 <div class="form-group">
+
                     <label>Date Lost</label>
 
-                    <input type="date">
+                    <input
+                        type="date"
+                        name="date"
+                        required
+                    >
+
                 </div>
 
 
                 <div class="form-group">
+
                     <label>Upload Item Image</label>
 
-                    <input type="file" accept="image/*">
+                    <input
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        required
+                    >
+
                 </div>
 
-                <button type="submit" class="submit-btn" >Report Lost Item</button>
+
+                <button
+                    type="submit"
+                    class="submit-btn"
+                >
+                    Report Lost Item
+                </button>
 
             </form>
+
         </div>
 
     </section>
+
+
+    <script src="script.js"></script>
+
 </body>
+
 </html>

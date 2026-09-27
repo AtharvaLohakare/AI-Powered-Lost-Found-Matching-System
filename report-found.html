@@ -12,8 +12,6 @@
 
 <body>
 
-    <!-- Navbar -->
-
     <nav class="navbar">
 
         <div class="logo">Lost & Found AI</div>
@@ -34,8 +32,6 @@
     </nav>
 
 
-    <!-- Found Item Form -->
-
     <section class="form-section">
 
         <div class="form-container">
@@ -47,9 +43,7 @@
             </p>
 
 
-            <form>
-
-                <!-- Item Name -->
+            <form id="found-item-form">
 
                 <div class="form-group">
 
@@ -57,46 +51,46 @@
 
                     <input
                         type="text"
+                        name="item_name"
                         placeholder="e.g. Black Backpack"
+                        required
                     >
 
                 </div>
 
 
-                <!-- Category -->
-
                 <div class="form-group">
 
                     <label>Category</label>
 
-                    <select>
-                        <option>Select Category</option>
-                        <option>Electronics</option>
-                        <option>Bags</option>
-                        <option>Documents</option>
-                        <option>Clothing</option>
-                        <option>Accessories</option>
-                        <option>Other</option>
+                    <select name="category" required>
+
+                        <option value="">Select Category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Bags">Bags</option>
+                        <option value="Documents">Documents</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Other">Other</option>
+
                     </select>
 
                 </div>
 
-
-                <!-- Description -->
 
                 <div class="form-group">
 
                     <label>Description</label>
 
                     <textarea
+                        name="description"
                         placeholder="Describe the item you found..."
                         rows="5"
+                        required
                     ></textarea>
 
                 </div>
 
-
-                <!-- Color and Brand -->
 
                 <div class="form-row">
 
@@ -106,6 +100,7 @@
 
                         <input
                             type="text"
+                            name="color"
                             placeholder="e.g. Black"
                         >
 
@@ -118,6 +113,7 @@
 
                         <input
                             type="text"
+                            name="brand"
                             placeholder="e.g. Nike"
                         >
 
@@ -126,32 +122,32 @@
                 </div>
 
 
-                <!-- Found Location -->
-
                 <div class="form-group">
 
                     <label>Found Location</label>
 
                     <input
                         type="text"
+                        name="location"
                         placeholder="e.g. College Library"
+                        required
                     >
 
                 </div>
 
 
-                <!-- Date Found -->
-
                 <div class="form-group">
 
                     <label>Date Found</label>
 
-                    <input type="date">
+                    <input
+                        type="date"
+                        name="date"
+                        required
+                    >
 
                 </div>
 
-
-                <!-- Image -->
 
                 <div class="form-group">
 
@@ -159,13 +155,13 @@
 
                     <input
                         type="file"
+                        name="image"
                         accept="image/*"
+                        required
                     >
 
                 </div>
 
-
-                <!-- Submit Button -->
 
                 <button
                     type="submit"
@@ -179,6 +175,9 @@
         </div>
 
     </section>
+
+
+    <script src="script.js"></script>
 
 </body>
 
