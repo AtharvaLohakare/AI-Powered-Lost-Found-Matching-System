@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+python-multipart
+python-dotenv
+fastapi-cors
+torch
+transformers
+sentence-transformers
+pillow
