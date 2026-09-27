@@ -6,6 +6,8 @@ from .database import SessionLocal
 from .models import Item
 import os
 import shutil
+from .text_matcher import calculate_text_similarity
+from .image_matcher import calculate_image_similarity
 
 app = FastAPI()
 
@@ -131,7 +133,6 @@ def get_item(item_id: int, db: Session = Depends(get_db)):
 @app.get("/match/{item_id}")
 def match_item(item_id: int, db: Session = Depends(get_db)):
 
-    # Get the selected item
     lost_item = db.query(Item).filter(Item.id == item_id).first()
 
     if not lost_item:
@@ -140,14 +141,12 @@ def match_item(item_id: int, db: Session = Depends(get_db)):
             "message": "Item not found"
         }
 
-    # Make sure the selected item is a lost item
     if lost_item.item_type != "lost":
         return {
             "status": "error",
             "message": "Matching should be started from a lost item."
         }
 
-    # Get all found items
     found_items = db.query(Item).filter(
         Item.item_type == "found"
     ).all()
@@ -156,41 +155,135 @@ def match_item(item_id: int, db: Session = Depends(get_db)):
 
     for found_item in found_items:
 
-        score = 0
+        # --------------------------------
+        # 1. TEXT SIMILARITY
+        # --------------------------------
+
+        lost_text = (
+            f"{lost_item.item_name}. "
+            f"{lost_item.description}"
+        )
+
+        found_text = (
+            f"{found_item.item_name}. "
+            f"{found_item.description}"
+        )
+
+        text_similarity = calculate_text_similarity(
+            lost_text,
+            found_text
+        )
+
+        text_score = round(text_similarity * 100, 2)
+
+        # --------------------------------
+        # 2. IMAGE SIMILARITY
+        # --------------------------------
+
+        image_score = 0
+
+        lost_image_path = os.path.join(
+            UPLOAD_DIR,
+            lost_item.image_name
+        )
+
+        found_image_path = os.path.join(
+            UPLOAD_DIR,
+            found_item.image_name
+        )
+
+        if (
+            lost_item.image_name
+            and found_item.image_name
+            and os.path.exists(lost_image_path)
+            and os.path.exists(found_image_path)
+        ):
+            image_similarity = calculate_image_similarity(
+                lost_image_path,
+                found_image_path
+            )
+
+            image_score = round(
+                image_similarity * 100,
+                2
+            )
+
+        # --------------------------------
+        # 3. METADATA MATCHING
+        # --------------------------------
+
+        metadata_score = 0
         reasons = []
 
-        # Category match
         if lost_item.category.lower() == found_item.category.lower():
-            score += 30
+            metadata_score += 30
             reasons.append("Category matches")
 
-        # Color match
         if (
             lost_item.color
             and found_item.color
             and lost_item.color.lower() == found_item.color.lower()
         ):
-            score += 20
+            metadata_score += 20
             reasons.append("Color matches")
 
-        # Brand match
         if (
             lost_item.brand
             and found_item.brand
             and lost_item.brand.lower() == found_item.brand.lower()
         ):
-            score += 20
+            metadata_score += 20
             reasons.append("Brand matches")
 
-        # Location match
         if lost_item.location.lower() == found_item.location.lower():
-            score += 20
+            metadata_score += 20
             reasons.append("Location matches")
 
-        # Item name match
         if lost_item.item_name.lower() == found_item.item_name.lower():
-            score += 10
+            metadata_score += 10
             reasons.append("Item name matches")
+
+        # --------------------------------
+        # 4. COMBINED AI SCORE
+        # --------------------------------
+
+        final_score = (
+            (image_score * 0.40) +
+            (text_score * 0.30) +
+            (metadata_score * 0.30)
+        )
+
+        final_score = round(final_score, 2)
+
+        # --------------------------------
+        # 5. EXPLAINABLE AI REASONS
+        # --------------------------------
+
+        # 5. EXPLAINABLE AI REASONS
+
+        if image_score >= 75:
+            reasons.append("✓ Strong image similarity")
+        elif image_score >= 50:
+            reasons.append("✓ Moderate image similarity")
+        else:
+            reasons.append("⚠ Low image similarity")
+
+        if text_score >= 75:
+            reasons.append("✓ Strong description similarity")
+        elif text_score >= 50:
+            reasons.append("✓ Moderate description similarity")
+        else:
+            reasons.append("⚠ Low description similarity")
+
+        if metadata_score >= 75:
+            reasons.append("✓ Strong metadata match")
+        elif metadata_score >= 50:
+            reasons.append("✓ Moderate metadata match")
+        else:
+            reasons.append("⚠ Limited metadata match")
+        # --------------------------------
+        # 6. STORE RESULT
+        # --------------------------------
 
         matches.append({
             "item_id": found_item.id,
@@ -200,18 +293,37 @@ def match_item(item_id: int, db: Session = Depends(get_db)):
             "brand": found_item.brand,
             "location": found_item.location,
             "image_name": found_item.image_name,
-            "match_score": score,
+
+            "image_similarity": image_score,
+            "text_similarity": text_score,
+            "metadata_score": metadata_score,
+            "match_score": final_score,
+
             "reasons": reasons
         })
 
     # Highest score first
     matches.sort(
-        key=lambda x: x["match_score"],
-        reverse=True
+    key=lambda x: x["match_score"],
+    reverse=True
     )
+
+# Check if there is a strong enough match
+    strong_matches = [
+        match for match in matches
+        if match["match_score"] >= 50
+    ]
+
+    if not strong_matches:
+        return {
+            "status": "success",
+            "lost_item_id": lost_item.id,
+            "matches": [],
+            "message": "No strong match found"
+        }
 
     return {
         "status": "success",
         "lost_item_id": lost_item.id,
-        "matches": matches
+        "matches": strong_matches
     }
