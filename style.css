@@ -1,4 +1,4 @@
-```css
+
 /* =========================
    GLOBAL
    ========================= */
@@ -14,10 +14,12 @@ html {
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f8fafc;
     color: #1e293b;
-    background: #f8fafc;
+    overflow-x: hidden;
 }
+
 
 img {
     max-width: 100%;
@@ -32,9 +34,9 @@ textarea {
 }
 
 
-/* =========================
+/* =========================================================
    NAVBAR
-   ========================= */
+========================================================= */
 
 .navbar {
     min-height: 70px;
@@ -44,7 +46,8 @@ textarea {
     padding: 0 50px;
     background-color: white;
     border-bottom: 1px solid #e5e7eb;
-    gap: 20px;
+    position: relative;
+    z-index: 100;
 }
 
 .logo {
@@ -56,7 +59,6 @@ textarea {
 
 .nav-links {
     display: flex;
-    align-items: center;
     gap: 30px;
 }
 
@@ -65,11 +67,27 @@ textarea {
     color: #333;
     font-size: 16px;
     font-weight: 500;
-    transition: color 0.2s ease;
+    position: relative;
+    transition: color 0.25s ease;
+}
+
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -7px;
+    width: 0;
+    height: 2px;
+    background-color: #2563eb;
+    transition: width 0.25s ease;
 }
 
 .nav-links a:hover {
     color: #2563eb;
+}
+
+.nav-links a:hover::after {
+    width: 100%;
 }
 
 .nav-buttons {
@@ -85,6 +103,11 @@ textarea {
 
 .login-btn {
     color: #333;
+    transition: color 0.25s ease;
+}
+
+.login-btn:hover {
+    color: #2563eb;
 }
 
 .signup-btn {
@@ -92,17 +115,18 @@ textarea {
     color: white;
     padding: 10px 18px;
     border-radius: 6px;
-    transition: background-color 0.2s ease;
+    transition: all 0.25s ease;
 }
 
 .signup-btn:hover {
     background-color: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.2);
 }
 
-
-/* =========================
+/* =========================================================
    HOME PAGE
-   ========================= */
+========================================================= */
 
 .home {
     min-height: calc(100vh - 70px);
@@ -110,13 +134,48 @@ textarea {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 60px 20px;
+    padding: 40px 20px;
     background-color: #f8fafc;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative background circles */
+
+.home::before,
+.home::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.home::before {
+    width: 350px;
+    height: 350px;
+    background: rgba(37, 99, 235, 0.06);
+    top: -120px;
+    left: -100px;
+    animation: floatingCircle 7s ease-in-out infinite;
+}
+
+.home::after {
+    width: 300px;
+    height: 300px;
+    background: rgba(30, 58, 138, 0.05);
+    bottom: -120px;
+    right: -80px;
+    animation: floatingCircle 8s ease-in-out infinite reverse;
 }
 
 .home-content {
-    width: 100%;
     max-width: 800px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+
+    animation: homeFadeUp 0.9s ease-out;
 }
 
 .home h1 {
@@ -124,6 +183,8 @@ textarea {
     line-height: 1.15;
     margin-bottom: 25px;
     color: #1e293b;
+    letter-spacing: -1px;
+    animation: titleAppear 0.8s ease-out;
 }
 
 .home p {
@@ -132,13 +193,15 @@ textarea {
     color: #64748b;
     max-width: 650px;
     margin: 0 auto 35px;
+    animation: paragraphAppear 1s ease-out 0.15s both;
 }
 
 .home-buttons {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 15px;
-    flex-wrap: wrap;
+    animation: buttonsAppear 1s ease-out 0.3s both;
 }
 
 .home-buttons a {
@@ -147,16 +210,27 @@ textarea {
     border-radius: 7px;
     font-size: 16px;
     font-weight: 600;
+    display: inline-block;
+    transition: all 0.3s ease;
 }
+
+
+/* Lost Button */
 
 .lost-btn {
     background-color: #2563eb;
     color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
 .lost-btn:hover {
     background-color: #1d4ed8;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25);
 }
+
+
+/* Found Button */
 
 .found-btn {
     border: 1px solid #2563eb;
@@ -166,6 +240,8 @@ textarea {
 
 .found-btn:hover {
     background-color: #eff6ff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
 }
 
 
@@ -391,20 +467,28 @@ textarea {
    ========================= */
 
 .match-btn {
-    margin-top: 20px;
-    padding: 12px 20px;
     border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    background-color: #2563eb;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: white;
+    padding: 14px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 25px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
 }
 
 .match-btn:hover {
-    background-color: #1d4ed8;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
 }
+
+.match-btn:active {
+    transform: translateY(0);
+}
+
 
 
 /* =========================
@@ -412,33 +496,31 @@ textarea {
    ========================= */
 
 .ai-results {
-    margin-top: 40px;
-}
-
-.ai-results h2 {
-    margin-bottom: 8px;
-}
-
-.ai-subtitle {
-    margin-bottom: 20px;
+    margin-top: 35px;
+    animation: fadeIn 0.6s ease-out;
 }
 
 .ai-summary {
-    margin-bottom: 25px;
-    padding: 20px;
-    border-radius: 12px;
+    background: linear-gradient(
+        135deg,
+        #eff6ff,
+        #f8fafc
+    );
     border: 1px solid #dbeafe;
-    background: #eff6ff;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
 }
 
 .ai-summary h2 {
-    margin-bottom: 10px;
     color: #1e3a8a;
+    margin-bottom: 10px;
 }
 
 .ai-summary p {
-    margin: 6px 0;
-    line-height: 1.5;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 5px;
 }
 
 
@@ -524,6 +606,130 @@ textarea {
     background: white;
 }
 
+
+/* =========================================================
+   LOADING / STATUS
+========================================================= */
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.success-message {
+    background: #ecfdf5;
+    color: #047857;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    background: #fef2f2;
+    color: #b91c1c;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes homeFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes titleAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes paragraphAppear {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes buttonsAppear {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes matchAppear {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes floatingCircle {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(20px);
+    }
+}
 
 /* =========================
    TABLET
@@ -819,3 +1025,133 @@ textarea {
     }
 }
 
+/* =========================================================
+   TOAST NOTIFICATIONS
+========================================================= */
+
+.toast-container {
+    position: fixed;
+    top: 85px;
+    right: 25px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.toast {
+    min-width: 280px;
+    max-width: 380px;
+    padding: 15px 18px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.15);
+    border-left: 4px solid #2563eb;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-size: 14px;
+    color: #334155;
+
+    animation: toastSlideIn 0.4s ease forwards;
+}
+
+.toast.success {
+    border-left-color: #16a34a;
+}
+
+.toast.error {
+    border-left-color: #dc2626;
+}
+
+.toast.warning {
+    border-left-color: #f59e0b;
+}
+
+.toast-icon {
+    font-size: 20px;
+}
+
+.toast.hide {
+    animation: toastSlideOut 0.4s ease forwards;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+@media (max-width: 600px) {
+
+    .toast-container {
+        top: 75px;
+        right: 15px;
+        left: 15px;
+    }
+
+    .toast {
+        min-width: auto;
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   AI LOADING
+========================================================= */
+
+.ai-loading {
+    text-align: center;
+    padding: 35px 20px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-top: 25px;
+    animation: fadeIn 0.4s ease;
+}
+
+.ai-spinner {
+    width: 45px;
+    height: 45px;
+    margin: 0 auto 15px;
+    border: 4px solid #dbeafe;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: aiSpin 0.8s linear infinite;
+}
+
+.ai-loading h3 {
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.ai-loading p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+@keyframes aiSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}

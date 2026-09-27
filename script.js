@@ -6,14 +6,67 @@ const lostForm = document.getElementById("lost-item-form");
 const foundForm = document.getElementById("found-item-form");
 
 
-// Function to submit item
+// =========================================================
+// TOAST NOTIFICATION
+// =========================================================
+
+function showToast(message, type = "success") {
+
+    let container = document.querySelector(".toast-container");
+
+    if (!container) {
+        container = document.createElement("div");
+        container.className = "toast-container";
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+
+    toast.className = `toast ${type}`;
+
+    let icon = "✓";
+
+    if (type === "error") {
+        icon = "✕";
+    }
+    else if (type === "warning") {
+        icon = "⚠";
+    }
+
+    toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+
+        toast.classList.add("hide");
+
+        setTimeout(() => {
+            toast.remove();
+        }, 400);
+
+    }, 3000);
+}
+
+
+// =========================================================
+// SUBMIT ITEM
+// =========================================================
+
 async function handleFormSubmit(event, type) {
 
     event.preventDefault();
 
     const form = event.target;
 
-    // Get form data
+
+    // -----------------------------------------------------
+    // GET FORM DATA
+    // -----------------------------------------------------
+
     const formData = new FormData();
 
     formData.append(
@@ -57,15 +110,24 @@ async function handleFormSubmit(event, type) {
     );
 
 
-    // Get image
-    const imageInput = form.querySelector('[name="image"]');
+    // -----------------------------------------------------
+    // GET IMAGE
+    // -----------------------------------------------------
+
+    const imageInput =
+        form.querySelector('[name="image"]');
+
 
     if (!imageInput.files.length) {
 
-        alert("Please upload an item image.");
+        showToast(
+            "Please upload an item image.",
+            "warning"
+        );
 
         return;
     }
+
 
     formData.append(
         "image",
@@ -73,11 +135,14 @@ async function handleFormSubmit(event, type) {
     );
 
 
+    // -----------------------------------------------------
+    // SEND DATA TO FASTAPI
+    // -----------------------------------------------------
+
     try {
 
-        // Send data to FastAPI
         const response = await fetch(
-            "http://127.0.0.1:8000/report-item",
+            `${API_URL}/report-item`,
             {
                 method: "POST",
                 body: formData
@@ -85,17 +150,20 @@ async function handleFormSubmit(event, type) {
         );
 
 
-        // Check response
+        // -------------------------------------------------
+        // CHECK RESPONSE
+        // -------------------------------------------------
+
         if (!response.ok) {
 
             throw new Error(
                 "Server returned an error."
             );
-
         }
 
 
-        const result = await response.json();
+        const result =
+            await response.json();
 
 
         console.log(
@@ -104,40 +172,53 @@ async function handleFormSubmit(event, type) {
         );
 
 
-        // Success message
-        alert(
+        // -------------------------------------------------
+        // SUCCESS TOAST
+        // -------------------------------------------------
+
+        showToast(
             type === "lost"
                 ? "Lost item submitted successfully!"
-                : "Found item submitted successfully!"
+                : "Found item submitted successfully!",
+            "success"
         );
 
 
-        // Reset form
+        // -------------------------------------------------
+        // RESET FORM
+        // -------------------------------------------------
+
         form.reset();
 
+    }
 
-    } catch (error) {
+
+    catch (error) {
 
         console.error(
             "Error:",
             error
         );
 
-        alert(
-            "Could not connect to the backend. Make sure FastAPI is running."
+
+        showToast(
+            "Could not connect to the backend. Make sure FastAPI is running.",
+            "error"
         );
 
     }
-
 }
 
 
-// Lost form
+// =========================================================
+// LOST FORM
+// =========================================================
+
 if (lostForm) {
 
     lostForm.addEventListener(
         "submit",
-        function(event) {
+        function (event) {
 
             handleFormSubmit(
                 event,
@@ -150,12 +231,15 @@ if (lostForm) {
 }
 
 
-// Found form
+// =========================================================
+// FOUND FORM
+// =========================================================
+
 if (foundForm) {
 
     foundForm.addEventListener(
         "submit",
-        function(event) {
+        function (event) {
 
             handleFormSubmit(
                 event,
