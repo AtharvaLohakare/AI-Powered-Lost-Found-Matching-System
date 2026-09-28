@@ -57,6 +57,7 @@ function showToast(message, type = "success") {
 // =========================================================
 
 async function handleFormSubmit(event, type) {
+    console.log("FORM HANDLER STARTED:", type);
 
     event.preventDefault();
 
@@ -64,45 +65,148 @@ async function handleFormSubmit(event, type) {
 
 
     // -----------------------------------------------------
-    // GET FORM DATA
+    // CHECK LOGIN
+    // -----------------------------------------------------
+
+    const storedUser = localStorage.getItem("user");
+
+    if (!storedUser) {
+
+        showToast(
+            "Please login before reporting an item.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    let user;
+
+    try {
+
+        user = JSON.parse(storedUser);
+
+    }
+    catch (error) {
+
+        console.error("Invalid user data:", error);
+
+        localStorage.removeItem("user");
+
+        showToast(
+            "Your login session is invalid. Please login again.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    if (!user || !user.id) {
+
+        showToast(
+            "User information not found. Please login again.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    console.log("Logged in user:", user);
+    console.log("User ID:", user.id);
+
+
+    // -----------------------------------------------------
+    // CREATE FORM DATA
     // -----------------------------------------------------
 
     const formData = new FormData();
+
+
+    // IMPORTANT:
+    // Send logged-in user's ID
+
+    formData.append(
+        "user_id",
+        user.id
+    );
+
+
+    // -----------------------------------------------------
+    // ITEM TYPE
+    // -----------------------------------------------------
 
     formData.append(
         "item_type",
         type
     );
 
+
+    // -----------------------------------------------------
+    // ITEM NAME
+    // -----------------------------------------------------
+
     formData.append(
         "item_name",
         form.querySelector('[name="item_name"]').value
     );
+
+
+    // -----------------------------------------------------
+    // CATEGORY
+    // -----------------------------------------------------
 
     formData.append(
         "category",
         form.querySelector('[name="category"]').value
     );
 
+
+    // -----------------------------------------------------
+    // DESCRIPTION
+    // -----------------------------------------------------
+
     formData.append(
         "description",
         form.querySelector('[name="description"]').value
     );
+
+
+    // -----------------------------------------------------
+    // COLOR
+    // -----------------------------------------------------
 
     formData.append(
         "color",
         form.querySelector('[name="color"]').value
     );
 
+
+    // -----------------------------------------------------
+    // BRAND
+    // -----------------------------------------------------
+
     formData.append(
         "brand",
         form.querySelector('[name="brand"]').value
     );
 
+
+    // -----------------------------------------------------
+    // LOCATION
+    // -----------------------------------------------------
+
     formData.append(
         "location",
         form.querySelector('[name="location"]').value
     );
+
+
+    // -----------------------------------------------------
+    // DATE
+    // -----------------------------------------------------
 
     formData.append(
         "date",
@@ -111,14 +215,14 @@ async function handleFormSubmit(event, type) {
 
 
     // -----------------------------------------------------
-    // GET IMAGE
+    // IMAGE
     // -----------------------------------------------------
 
     const imageInput =
         form.querySelector('[name="image"]');
 
 
-    if (!imageInput.files.length) {
+    if (!imageInput || !imageInput.files.length) {
 
         showToast(
             "Please upload an item image.",
@@ -132,6 +236,16 @@ async function handleFormSubmit(event, type) {
     formData.append(
         "image",
         imageInput.files[0]
+    );
+
+
+    // -----------------------------------------------------
+    // DEBUG FORM DATA
+    // -----------------------------------------------------
+
+    console.log(
+        "Submitting report for user ID:",
+        user.id
     );
 
 
@@ -151,19 +265,10 @@ async function handleFormSubmit(event, type) {
 
 
         // -------------------------------------------------
-        // CHECK RESPONSE
+        // GET RESPONSE
         // -------------------------------------------------
 
-        if (!response.ok) {
-
-            throw new Error(
-                "Server returned an error."
-            );
-        }
-
-
-        const result =
-            await response.json();
+        const result = await response.json();
 
 
         console.log(
@@ -173,13 +278,28 @@ async function handleFormSubmit(event, type) {
 
 
         // -------------------------------------------------
+        // CHECK RESPONSE
+        // -------------------------------------------------
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.detail ||
+                "Server returned an error."
+            );
+        }
+
+
+        // -------------------------------------------------
         // SUCCESS TOAST
         // -------------------------------------------------
 
         showToast(
+
             type === "lost"
                 ? "Lost item submitted successfully!"
                 : "Found item submitted successfully!",
+
             "success"
         );
 
@@ -202,11 +322,13 @@ async function handleFormSubmit(event, type) {
 
 
         showToast(
-            "Could not connect to the backend. Make sure FastAPI is running.",
+            error.message ||
+            "Could not connect to the backend.",
             "error"
         );
 
     }
+
 }
 
 

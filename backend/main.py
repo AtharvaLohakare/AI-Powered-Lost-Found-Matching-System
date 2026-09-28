@@ -1,12 +1,15 @@
-from fastapi import FastAPI, Form, UploadFile, File, Depends
+from fastapi import FastAPI, Form, UploadFile, File, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 import os
 import shutil
+import bcrypt
+
+from .models import Item, User
 
 from .database import SessionLocal
-from .models import Item
+from .models import Item, User
 
 from .text_matcher import calculate_text_similarity
 from .image_matcher import calculate_image_similarity
@@ -17,6 +20,7 @@ from .image_matcher import calculate_image_similarity
 # =========================================================
 
 app = FastAPI()
+
 
 
 # =========================================================
@@ -78,13 +82,97 @@ def home():
         "message": "FastAPI connected to MySQL!"
     }
 
+# =======================================
 
+@app.post("/signup")
+def signup(
+    name: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    existing_user = (
+        db.query(User)
+        .filter(User.email == email)
+        .first()
+    )
+
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+
+    password_hash = bcrypt.hashpw(
+        password.encode("utf-8"),
+        bcrypt.gensalt()
+    ).decode("utf-8")
+
+    new_user = User(
+        name=name,
+        email=email,
+        password_hash=password_hash
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {
+        "status": "success",
+        "message": "Account created successfully!",
+        "user_id": new_user.id,
+        "name": new_user.name,
+        "email": new_user.email
+    }
+
+
+@app.post("/login")
+def login(
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = (
+        db.query(User)
+        .filter(User.email == email)
+        .first()
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    password_match = bcrypt.checkpw(
+        password.encode("utf-8"),
+        user.password_hash.encode("utf-8")
+    )
+
+    if not password_match:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    return {
+        "status": "success",
+        "message": "Login successful!",
+        "user_id": user.id,
+        "name": user.name,
+        "email": user.email
+    }
 # =========================================================
 # REPORT LOST / FOUND ITEM
 # =========================================================
 
+
+
 @app.post("/report-item")
 async def report_item(
+
+    user_id: int = Form(...),
 
     item_type: str = Form(...),
 
@@ -130,6 +218,8 @@ async def report_item(
     # -----------------------------------------------------
 
     new_item = Item(
+
+        user_id=user_id,
 
         item_type=item_type,
 
