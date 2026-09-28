@@ -10,11 +10,11 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
-    raise ValueError("DATABASE_URL is not set")
+    raise ValueError("DATABASE_URL environment variable is not set.")
 
-print("DATABASE HOST CHECK:", DATABASE_URL.split("@")[-1].split("/")[0])
-
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL
+)
 
 SessionLocal = sessionmaker(
     autocommit=False,
