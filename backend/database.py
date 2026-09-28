@@ -1,7 +1,18 @@
+import os
+
+from dotenv import load_dotenv
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "mysql+pymysql://root:Atharva34047196%40@localhost:3306/lost_found_ai"
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is not set")
+
+print("DATABASE HOST CHECK:", DATABASE_URL.split("@")[-1].split("/")[0])
 
 engine = create_engine(DATABASE_URL)
 
