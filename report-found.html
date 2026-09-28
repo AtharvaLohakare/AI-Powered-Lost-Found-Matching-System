@@ -181,7 +181,60 @@
     <script src="config.js"></script>
     <script src="script.js"></script>
 
+<script>
+    const storedUser = localStorage.getItem("user");
 
+    const navButtons = document.querySelector(".nav-buttons");
+
+    if (storedUser && navButtons) {
+
+        try {
+
+            const user = JSON.parse(storedUser);
+
+            if (user && user.id) {
+
+                navButtons.innerHTML = `
+                    <span class="user-welcome">
+                        Hi, ${user.name} 👋
+                    </span>
+
+                    <a href="my-reports.html" class="login-btn">
+                        My Reports
+                    </a>
+
+                    <a href="#" class="signup-btn" id="logoutBtn">
+                        Logout
+                    </a>
+                `;
+
+                document
+                    .getElementById("logoutBtn")
+                    .addEventListener("click", function (event) {
+
+                        event.preventDefault();
+
+                        localStorage.removeItem("user");
+
+                        window.location.href = "index.html";
+
+                    });
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Invalid user data:",
+                error
+            );
+
+            localStorage.removeItem("user");
+
+        }
+
+    }
+</script>
 </body>
 
 </html>

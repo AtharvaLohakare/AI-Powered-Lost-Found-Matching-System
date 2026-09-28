@@ -6,8 +6,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Reports - Lost & Found AI</title>
-    <link rel="stylesheet" href="style.css">
 
+
+<link rel="stylesheet" href="style.css">
 
 <style>
 
@@ -200,37 +201,60 @@
     }
 
 </style>
-```
+
 
 </head>
 
 <body>
 
-```
+
 <nav class="navbar">
 
     <div class="logo">
         Lost & Found AI
     </div>
 
+
     <div class="nav-links">
 
-        <a href="index.html">Home</a>
-        <a href="items.html">Items</a>
-        <a href="report-lost.html">Report Lost</a>
-        <a href="report-found.html">Report Found</a>
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="items.html">
+            Items
+        </a>
+
+        <a href="report-lost.html">
+            Report Lost
+        </a>
+
+        <a href="report-found.html">
+            Report Found
+        </a>
 
     </div>
 
+
     <div class="nav-buttons">
 
-        <span class="user-welcome" id="userWelcome"></span>
+        <span
+            class="user-welcome"
+            id="userWelcome"
+        ></span>
 
-        <a href="my-reports.html" class="login-btn">
+        <a
+            href="my-reports.html"
+            class="login-btn"
+        >
             My Reports
         </a>
 
-        <a href="#" class="signup-btn" id="logoutBtn">
+        <a
+            href="#"
+            class="signup-btn"
+            id="logoutBtn"
+        >
             Logout
         </a>
 
@@ -243,36 +267,45 @@
 
     <div class="reports-header">
 
-        <h1>My Reports</h1>
+        <h1>
+            My Reports
+        </h1>
 
         <p>
             Manage and track the items you have reported.
         </p>
 
-        <span class="reports-count" id="reportsCount">
+        <span
+            class="reports-count"
+            id="reportsCount"
+        >
             Loading reports...
         </span>
 
     </div>
 
 
-    <div id="reports-container" class="reports-grid">
-
-    </div>
+    <div
+        id="reports-container"
+        class="reports-grid"
+    ></div>
 
 </main>
 
 
 <script src="config.js"></script>
 
+
 <script>
 
-    const storedUser = localStorage.getItem("user");
+    const storedUser =
+        localStorage.getItem("user");
 
 
     if (!storedUser) {
 
-        window.location.href = "login.html";
+        window.location.href =
+            "login.html";
 
     } else {
 
@@ -281,7 +314,8 @@
 
         try {
 
-            user = JSON.parse(storedUser);
+            user =
+                JSON.parse(storedUser);
 
         } catch (error) {
 
@@ -290,10 +324,12 @@
                 error
             );
 
-            localStorage.removeItem("user");
+            localStorage.removeItem(
+                "user"
+            );
 
-            window.location.href = "login.html";
-
+            window.location.href =
+                "login.html";
         }
 
 
@@ -324,11 +360,12 @@
 
                     event.preventDefault();
 
-                    localStorage.removeItem("user");
+                    localStorage.removeItem(
+                        "user"
+                    );
 
                     window.location.href =
                         "index.html";
-
                 }
             );
 
@@ -382,7 +419,14 @@
                             items.detail ||
                             "Could not load reports."
                         );
+                    }
 
+
+                    if (!Array.isArray(items)) {
+
+                        throw new Error(
+                            "Invalid reports data received from server."
+                        );
                     }
 
 
@@ -394,10 +438,7 @@
                         }`;
 
 
-                    if (
-                        !Array.isArray(items) ||
-                        items.length === 0
-                    ) {
+                    if (items.length === 0) {
 
                         container.innerHTML = `
 
@@ -428,7 +469,6 @@
                         `;
 
                         return;
-
                     }
 
 
@@ -449,8 +489,8 @@
 
 
                             /*
-                             * Make the complete
-                             * report card clickable.
+                             * Open the existing
+                             * item-detail.html page.
                              */
                             card.addEventListener(
                                 "click",
@@ -500,10 +540,10 @@
                                     <div
                                         class="report-image"
                                         style="
-                                            display:flex;
-                                            align-items:center;
-                                            justify-content:center;
-                                            font-size:55px;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 55px;
                                         "
                                     >
                                         📦
@@ -617,7 +657,6 @@
 
                         }
                     );
-
 
                 } catch (error) {
 
