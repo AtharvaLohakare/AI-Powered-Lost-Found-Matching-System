@@ -7,42 +7,261 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Reports - Lost & Found AI</title>
     <link rel="stylesheet" href="style.css">
+
+
+<style>
+
+    .reports-page {
+        padding: 120px 8% 60px;
+        min-height: 100vh;
+    }
+
+    .reports-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .reports-header h1 {
+        font-size: 42px;
+        margin-bottom: 10px;
+    }
+
+    .reports-header p {
+        color: #777;
+        font-size: 17px;
+    }
+
+    .reports-count {
+        display: inline-block;
+        margin-top: 15px;
+        padding: 8px 18px;
+        border-radius: 20px;
+        background: #f1f5ff;
+        color: #3157d5;
+        font-weight: 600;
+    }
+
+    .reports-grid {
+        max-width: 1100px;
+        margin: auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 25px;
+    }
+
+    .report-card {
+        background: #ffffff;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid #eeeeee;
+        transition: 0.25s ease;
+        cursor: pointer;
+    }
+
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 14px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .report-image {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
+        background: #f4f4f4;
+    }
+
+    .report-content {
+        padding: 22px;
+    }
+
+    .report-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .report-title {
+        font-size: 23px;
+        margin: 0;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-lost {
+        background: #ffe8e8;
+        color: #d63031;
+    }
+
+    .status-found {
+        background: #e5f8ed;
+        color: #16804b;
+    }
+
+    .report-description {
+        color: #666;
+        line-height: 1.6;
+        margin: 12px 0 18px;
+    }
+
+    .report-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 15px;
+    }
+
+    .info-box {
+        background: #f8f9fb;
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    .info-label {
+        display: block;
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 4px;
+    }
+
+    .info-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .click-hint {
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px solid #eeeeee;
+        color: #3157d5;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .empty-state {
+        max-width: 600px;
+        margin: 60px auto;
+        text-align: center;
+        background: white;
+        padding: 50px 30px;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    }
+
+    .empty-icon {
+        font-size: 55px;
+        margin-bottom: 15px;
+    }
+
+    .empty-state h2 {
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #777;
+        margin-bottom: 25px;
+    }
+
+    .report-button {
+        display: inline-block;
+        padding: 12px 22px;
+        border-radius: 10px;
+        text-decoration: none;
+        background: #3157d5;
+        color: white;
+        font-weight: 600;
+    }
+
+    @media (max-width: 600px) {
+
+        .reports-page {
+            padding: 100px 20px 40px;
+        }
+
+        .reports-header h1 {
+            font-size: 32px;
+        }
+
+        .report-info {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+</style>
+```
+
 </head>
 
 <body>
 
-<nav class="navbar"> 
-    <div class="logo"> Lost & Found AI </div> 
-    <div class="nav-links"> 
-        <a href="index.html">Home</a> 
-        <a href="items.html">Items</a> 
-        <a href="report-lost.html">Report Lost</a> 
-        <a href="report-found.html">Report Found</a> 
-    </div> 
-    <div class="nav-buttons"> 
+```
+<nav class="navbar">
+
+    <div class="logo">
+        Lost & Found AI
+    </div>
+
+    <div class="nav-links">
+
+        <a href="index.html">Home</a>
+        <a href="items.html">Items</a>
+        <a href="report-lost.html">Report Lost</a>
+        <a href="report-found.html">Report Found</a>
+
+    </div>
+
+    <div class="nav-buttons">
+
         <span class="user-welcome" id="userWelcome"></span>
-        <a href="my-reports.html" class="login-btn">My Reports</a>
-        <a href="#" class="signup-btn" id="logoutBtn">Logout</a>
-    </div> 
+
+        <a href="my-reports.html" class="login-btn">
+            My Reports
+        </a>
+
+        <a href="#" class="signup-btn" id="logoutBtn">
+            Logout
+        </a>
+
+    </div>
+
 </nav>
 
-<section class="home">
 
-    <div class="home-content">
+<main class="reports-page">
+
+    <div class="reports-header">
 
         <h1>My Reports</h1>
 
         <p>
-            View the lost and found items you have reported.
+            Manage and track the items you have reported.
         </p>
 
-        <div id="reports-container">
-            <p>Loading your reports...</p>
-        </div>
+        <span class="reports-count" id="reportsCount">
+            Loading reports...
+        </span>
 
     </div>
 
-</section>
+
+    <div id="reports-container" class="reports-grid">
+
+    </div>
+
+</main>
+
 
 <script src="config.js"></script>
 
@@ -50,35 +269,56 @@
 
     const storedUser = localStorage.getItem("user");
 
-    console.log("Stored user:", storedUser);
 
     if (!storedUser) {
+
         window.location.href = "login.html";
+
     } else {
 
-        let user;
+        let user = null;
+
 
         try {
+
             user = JSON.parse(storedUser);
-
-            document.getElementById("userWelcome").textContent =
-                `Hi, ${user.name} 👋`;
-
-            console.log("Logged in user:", user);
-            console.log("User ID:", user.id);
 
         } catch (error) {
 
-            console.error("Invalid user data:", error);
+            console.error(
+                "Invalid user data:",
+                error
+            );
 
             localStorage.removeItem("user");
+
             window.location.href = "login.html";
+
         }
 
 
         if (user && user.id) {
 
-            document.getElementById("logoutBtn").addEventListener(
+            console.log(
+                "Logged in user:",
+                user
+            );
+
+            console.log(
+                "User ID:",
+                user.id
+            );
+
+
+            document.getElementById(
+                "userWelcome"
+            ).textContent =
+                `Hi, ${user.name} 👋`;
+
+
+            document.getElementById(
+                "logoutBtn"
+            ).addEventListener(
                 "click",
                 function (event) {
 
@@ -86,7 +326,9 @@
 
                     localStorage.removeItem("user");
 
-                    window.location.href = "index.html";
+                    window.location.href =
+                        "index.html";
+
                 }
             );
 
@@ -94,28 +336,42 @@
             async function loadMyReports() {
 
                 const container =
-                    document.getElementById("reports-container");
+                    document.getElementById(
+                        "reports-container"
+                    );
+
+                const count =
+                    document.getElementById(
+                        "reportsCount"
+                    );
+
 
                 try {
 
                     console.log(
-                        "Loading reports for user:",
-                        user.id
-                    );
-
-                    const response = await fetch(
+                        "Fetching:",
                         `${API_URL}/my-items/${user.id}`
                     );
 
+
+                    const response =
+                        await fetch(
+                            `${API_URL}/my-items/${user.id}`
+                        );
+
+
                     console.log(
-                        "API response status:",
+                        "Response status:",
                         response.status
                     );
 
-                    const items = await response.json();
+
+                    const items =
+                        await response.json();
+
 
                     console.log(
-                        "My reports:",
+                        "Reports received:",
                         items
                     );
 
@@ -126,86 +382,291 @@
                             items.detail ||
                             "Could not load reports."
                         );
+
                     }
 
 
-                    if (!items.length) {
+                    count.textContent =
+                        `${items.length} Report${
+                            items.length === 1
+                                ? ""
+                                : "s"
+                        }`;
+
+
+                    if (
+                        !Array.isArray(items) ||
+                        items.length === 0
+                    ) {
 
                         container.innerHTML = `
-                            <p>You have not reported any items yet.</p>
+
+                            <div class="empty-state">
+
+                                <div class="empty-icon">
+                                    📦
+                                </div>
+
+                                <h2>
+                                    No Reports Yet
+                                </h2>
+
+                                <p>
+                                    You haven't reported
+                                    any lost or found items yet.
+                                </p>
+
+                                <a
+                                    href="report-lost.html"
+                                    class="report-button"
+                                >
+                                    Report an Item
+                                </a>
+
+                            </div>
+
                         `;
 
                         return;
+
                     }
 
 
                     container.innerHTML = "";
 
 
-                    items.forEach(item => {
+                    items.forEach(
+                        item => {
 
-                        const card =
-                            document.createElement("div");
-
-                        card.className = "report-card";
-
-
-                        card.innerHTML = `
-                            <h2>${item.item_name}</h2>
-
-                            <p>
-                                <strong>Type:</strong>
-                                ${item.item_type}
-                            </p>
-
-                            <p>
-                                <strong>Category:</strong>
-                                ${item.category}
-                            </p>
-
-                            <p>
-                                <strong>Location:</strong>
-                                ${item.location}
-                            </p>
-
-                            <p>
-                                <strong>Date:</strong>
-                                ${item.item_date}
-                            </p>
-
-                            <p>
-                                <strong>Description:</strong>
-                                ${item.description}
-                            </p>
-                        `;
+                            const card =
+                                document.createElement(
+                                    "article"
+                                );
 
 
-                        container.appendChild(card);
+                            card.className =
+                                "report-card";
 
-                    });
+
+                            /*
+                             * Make the complete
+                             * report card clickable.
+                             */
+                            card.addEventListener(
+                                "click",
+                                function () {
+
+                                    window.location.href =
+                                        `item-detail.html?id=${item.id}`;
+
+                                }
+                            );
+
+
+                            const status =
+                                item.item_type === "lost"
+                                    ? "Lost"
+                                    : "Found";
+
+
+                            const statusClass =
+                                item.item_type === "lost"
+                                    ? "status-lost"
+                                    : "status-found";
+
+
+                            let imageHTML = "";
+
+
+                            if (item.image_name) {
+
+                                imageHTML = `
+
+                                    <img
+                                        class="report-image"
+                                        src="${API_URL}/uploads/${encodeURIComponent(
+                                            item.image_name
+                                        )}"
+                                        alt="${item.item_name}"
+                                        onerror="this.style.display='none'"
+                                    >
+
+                                `;
+
+                            } else {
+
+                                imageHTML = `
+
+                                    <div
+                                        class="report-image"
+                                        style="
+                                            display:flex;
+                                            align-items:center;
+                                            justify-content:center;
+                                            font-size:55px;
+                                        "
+                                    >
+                                        📦
+                                    </div>
+
+                                `;
+
+                            }
+
+
+                            card.innerHTML = `
+
+                                ${imageHTML}
+
+                                <div class="report-content">
+
+                                    <div class="report-top">
+
+                                        <h2 class="report-title">
+                                            ${item.item_name}
+                                        </h2>
+
+                                        <span
+                                            class="status-badge ${statusClass}"
+                                        >
+                                            ${status}
+                                        </span>
+
+                                    </div>
+
+
+                                    <p class="report-description">
+                                        ${item.description}
+                                    </p>
+
+
+                                    <div class="report-info">
+
+                                        <div class="info-box">
+
+                                            <span class="info-label">
+                                                📍 Location
+                                            </span>
+
+                                            <span class="info-value">
+                                                ${item.location}
+                                            </span>
+
+                                        </div>
+
+
+                                        <div class="info-box">
+
+                                            <span class="info-label">
+                                                📅 Date
+                                            </span>
+
+                                            <span class="info-value">
+                                                ${item.item_date}
+                                            </span>
+
+                                        </div>
+
+
+                                        <div class="info-box">
+
+                                            <span class="info-label">
+                                                🎨 Color
+                                            </span>
+
+                                            <span class="info-value">
+                                                ${
+                                                    item.color ||
+                                                    "Not specified"
+                                                }
+                                            </span>
+
+                                        </div>
+
+
+                                        <div class="info-box">
+
+                                            <span class="info-label">
+                                                🏷️ Brand
+                                            </span>
+
+                                            <span class="info-value">
+                                                ${
+                                                    item.brand ||
+                                                    "Not specified"
+                                                }
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="click-hint">
+                                        Click to view full details →
+                                    </div>
+
+                                </div>
+
+                            `;
+
+
+                            container.appendChild(
+                                card
+                            );
+
+                        }
+                    );
+
 
                 } catch (error) {
 
                     console.error(
-                        "Error loading reports:",
+                        "My Reports Error:",
                         error
                     );
 
+
+                    document.getElementById(
+                        "reportsCount"
+                    ).textContent =
+                        "Error";
+
+
                     container.innerHTML = `
-                        <p>
-                            Could not load your reports.
-                        </p>
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                ⚠️
+                            </div>
+
+                            <h2>
+                                Could Not Load Reports
+                            </h2>
+
+                            <p>
+                                Something went wrong
+                                while loading your reports.
+                            </p>
+
+                        </div>
+
                     `;
+
                 }
+
             }
 
 
             loadMyReports();
 
         }
+
     }
 
 </script>
+
 
 </body>
 
