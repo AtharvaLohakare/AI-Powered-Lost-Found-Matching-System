@@ -306,6 +306,21 @@ def get_items(
     ]
 
 
+@app.get("/my-items/{user_id}")
+def get_my_items(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    items = (
+        db.query(Item)
+        .filter(Item.user_id == user_id)
+        .order_by(Item.id.desc())
+        .all()
+    )
+
+    return items
+
+
 # =========================================================
 # GET SINGLE ITEM
 # =========================================================

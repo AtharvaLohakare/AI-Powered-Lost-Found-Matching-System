@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reports - Lost & Found AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<nav class="navbar"> 
+    <div class="logo"> Lost & Found AI </div> 
+    <div class="nav-links"> 
+        <a href="index.html">Home</a> 
+        <a href="items.html">Items</a> 
+        <a href="report-lost.html">Report Lost</a> 
+        <a href="report-found.html">Report Found</a> 
+    </div> 
+    <div class="nav-buttons"> 
+        <span class="user-welcome" id="userWelcome"></span>
+        <a href="my-reports.html" class="login-btn">My Reports</a>
+        <a href="#" class="signup-btn" id="logoutBtn">Logout</a>
+    </div> 
+</nav>
+
+<section class="home">
+
+    <div class="home-content">
+
+        <h1>My Reports</h1>
+
+        <p>
+            View the lost and found items you have reported.
+        </p>
+
+        <div id="reports-container">
+            <p>Loading your reports...</p>
+        </div>
+
+    </div>
+
+</section>
+
+<script src="config.js"></script>
+
+<script>
+
+    const storedUser = localStorage.getItem("user");
+
+    console.log("Stored user:", storedUser);
+
+    if (!storedUser) {
+        window.location.href = "login.html";
+    } else {
+
+        let user;
+
+        try {
+            user = JSON.parse(storedUser);
+
+            document.getElementById("userWelcome").textContent =
+                `Hi, ${user.name} 👋`;
+
+            console.log("Logged in user:", user);
+            console.log("User ID:", user.id);
+
+        } catch (error) {
+
+            console.error("Invalid user data:", error);
+
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+
+
+        if (user && user.id) {
+
+            document.getElementById("logoutBtn").addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+
+                    localStorage.removeItem("user");
+
+                    window.location.href = "index.html";
+                }
+            );
+
+
+            async function loadMyReports() {
+
+                const container =
+                    document.getElementById("reports-container");
+
+                try {
+
+                    console.log(
+                        "Loading reports for user:",
+                        user.id
+                    );
+
+                    const response = await fetch(
+                        `${API_URL}/my-items/${user.id}`
+                    );
+
+                    console.log(
+                        "API response status:",
+                        response.status
+                    );
+
+                    const items = await response.json();
+
+                    console.log(
+                        "My reports:",
+                        items
+                    );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            items.detail ||
+                            "Could not load reports."
+                        );
+                    }
+
+
+                    if (!items.length) {
+
+                        container.innerHTML = `
+                            <p>You have not reported any items yet.</p>
+                        `;
+
+                        return;
+                    }
+
+
+                    container.innerHTML = "";
+
+
+                    items.forEach(item => {
+
+                        const card =
+                            document.createElement("div");
+
+                        card.className = "report-card";
+
+
+                        card.innerHTML = `
+                            <h2>${item.item_name}</h2>
+
+                            <p>
+                                <strong>Type:</strong>
+                                ${item.item_type}
+                            </p>
+
+                            <p>
+                                <strong>Category:</strong>
+                                ${item.category}
+                            </p>
+
+                            <p>
+                                <strong>Location:</strong>
+                                ${item.location}
+                            </p>
+
+                            <p>
+                                <strong>Date:</strong>
+                                ${item.item_date}
+                            </p>
+
+                            <p>
+                                <strong>Description:</strong>
+                                ${item.description}
+                            </p>
+                        `;
+
+
+                        container.appendChild(card);
+
+                    });
+
+                } catch (error) {
+
+                    console.error(
+                        "Error loading reports:",
+                        error
+                    );
+
+                    container.innerHTML = `
+                        <p>
+                            Could not load your reports.
+                        </p>
+                    `;
+                }
+            }
+
+
+            loadMyReports();
+
+        }
+    }
+
+</script>
+
+</body>
+
+</html>

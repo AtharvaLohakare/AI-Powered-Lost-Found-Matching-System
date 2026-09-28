@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -16,6 +17,7 @@
             <a href="items.html">Items</a>
             <a href="report-lost.html">Report Lost</a>
             <a href="report-found.html">Report Found</a>
+
 
         </div>
         <div class="nav-buttons">
@@ -46,6 +48,42 @@
 
     <script src="script.js"></script>
     <script src="config.js"></script>
+
+    <!-- Login / Signup UI -->
+    <script>
+        const navButtons = document.querySelector(".nav-buttons");
+
+        const storedUser = localStorage.getItem("user");
+
+        if (storedUser && navButtons) {
+
+            try {
+                const user = JSON.parse(storedUser);
+
+                if (user && user.id) {
+
+                    navButtons.innerHTML = `
+                    <span class="user-welcome">Hi, ${user.name} 👋</span>
+                    <a href="my-reports.html" class="login-btn">My Reports</a>
+                    <a href="#" class="signup-btn" id="logoutBtn">Logout</a>
+                `;
+
+                    document.getElementById("logoutBtn").addEventListener("click", function (event) {
+                        event.preventDefault();
+
+                        localStorage.removeItem("user");
+
+                        window.location.reload();
+                    });
+                }
+
+            } catch (error) {
+                console.error("Invalid user data:", error);
+                localStorage.removeItem("user");
+            }
+        }
+    </script>
+    ```
 
 </body>
 
