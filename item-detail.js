@@ -101,10 +101,9 @@ async function loadItem() {
                     </p>
 
 
-                    ${
-                        item.item_type === "lost"
-                        ?
-                        `
+                    ${item.item_type === "lost"
+                ?
+                `
                             <button
                                 class="match-btn"
                                 onclick="findMatches(${item.id})"
@@ -112,9 +111,9 @@ async function loadItem() {
                                 🤖 Find AI Matches
                             </button>
                         `
-                        :
-                        ""
-                    }
+                :
+                ""
+            }
 
                 </div>
 
@@ -301,11 +300,10 @@ async function findMatches(id) {
                             ${data.matches.length}
                         </strong>
 
-                        possible match${
-                            data.matches.length === 1
-                            ? ""
-                            : "es"
-                        }
+                        possible match${data.matches.length === 1
+                ? ""
+                : "es"
+            }
 
                         for this lost item.
 
@@ -353,51 +351,50 @@ async function findMatches(id) {
 
                 <!-- MATCH CARDS -->
 
-                ${
-                    topMatches
-                        .map(match => {
+                ${topMatches
+                .map(match => {
 
-                            // =================================
-                            // CONFIDENCE LEVEL
-                            // =================================
+                    // =================================
+                    // CONFIDENCE LEVEL
+                    // =================================
 
-                            let confidence =
-                                "Low Match";
-
-
-                            if (
-                                match.match_score >= 90
-                            ) {
-
-                                confidence =
-                                    "Very High Match";
-
-                            }
-
-                            else if (
-                                match.match_score >= 75
-                            ) {
-
-                                confidence =
-                                    "High Match";
-
-                            }
-
-                            else if (
-                                match.match_score >= 50
-                            ) {
-
-                                confidence =
-                                    "Possible Match";
-
-                            }
+                    let confidence =
+                        "Low Match";
 
 
-                            // =================================
-                            // RETURN MATCH CARD
-                            // =================================
+                    if (
+                        match.match_score >= 90
+                    ) {
 
-                            return `
+                        confidence =
+                            "Very High Match";
+
+                    }
+
+                    else if (
+                        match.match_score >= 75
+                    ) {
+
+                        confidence =
+                            "High Match";
+
+                    }
+
+                    else if (
+                        match.match_score >= 50
+                    ) {
+
+                        confidence =
+                            "Possible Match";
+
+                    }
+
+
+                    // =================================
+                    // RETURN MATCH CARD
+                    // =================================
+
+                    return `
 
                                 <div class="match-card">
 
@@ -489,41 +486,49 @@ async function findMatches(id) {
 
                                         <ul>
 
-                                            ${
-                                                match.reasons &&
-                                                match.reasons.length > 0
+                                            ${match.reasons &&
+                            match.reasons.length > 0
 
-                                                ?
+                            ?
 
-                                                match.reasons
-                                                    .map(
-                                                        reason =>
-                                                        `<li>${reason}</li>`
-                                                    )
-                                                    .join("")
+                            match.reasons
+                                .map(
+                                    reason =>
+                                        `<li>${reason}</li>`
+                                )
+                                .join("")
 
-                                                :
+                            :
 
-                                                `
+                            `
                                                     <li>
                                                         No strong matching features
                                                     </li>
                                                 `
-                                            }
+                        }
 
                                         </ul>
 
 
                                         <!-- VIEW MATCH BUTTON -->
 
-                                        <button
-                                            class="view-match-btn"
-                                            onclick="viewItem(${match.item_id})"
-                                        >
+                                        <div class="match-actions">
 
-                                            View Possible Match
+                                            <button
+                                                class="view-match-btn"
+                                                onclick="viewItem(${match.item_id})"
+                                            >
+                                                View Possible Match
+                                            </button>
 
-                                        </button>
+                                            <button
+                                                class="contact-btn"
+                                                onclick="contactReporter(${match.item_id})"
+                                            >
+                                                📩 Contact Reporter
+                                            </button>
+
+                                        </div>
 
 
                                     </div>
@@ -532,9 +537,9 @@ async function findMatches(id) {
 
                             `;
 
-                        })
-                        .join("")
-                }
+                })
+                .join("")
+            }
 
 
             </div>
@@ -546,22 +551,34 @@ async function findMatches(id) {
         // SUCCESS TOAST
         // =================================================
 
+        // =================================================
+        // MATCH ALERT
+        // =================================================
+
         if (typeof showToast === "function") {
 
+            const topMatch = data.matches[0];
+            const score = topMatch.match_score;
+
+            let alertMessage = "";
+
+            if (score >= 90) {
+                alertMessage =
+                    `🔔 Very High Match Found! ${score}%`;
+            }
+            else if (score >= 75) {
+                alertMessage =
+                    `🔔 High Match Found! ${score}%`;
+            }
+            else {
+                alertMessage =
+                    `🔔 Possible Match Found! ${score}%`;
+            }
+
             showToast(
-
-                `🤖 AI found ${
-                    data.matches.length
-                } possible match${
-                    data.matches.length === 1
-                    ? ""
-                    : "es"
-                }!`,
-
+                alertMessage,
                 "success"
-
             );
-
         }
 
     }
@@ -630,8 +647,140 @@ function viewItem(id) {
         `item-detail.html?id=${id}`;
 
 }
+// =========================================================
+// CONTACT REPORTER
+// =========================================================
+
+async function contactReporter(id) {
+
+    const storedUser = localStorage.getItem("user");
 
 
+    // -----------------------------------------------------
+    // CHECK LOGIN
+    // -----------------------------------------------------
+
+    if (!storedUser) {
+
+        showToast(
+            "Please login before contacting the reporter.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    let user;
+
+
+    try {
+
+        user = JSON.parse(storedUser);
+
+    } catch (error) {
+
+        localStorage.removeItem("user");
+
+        showToast(
+            "Your login session is invalid. Please login again.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    if (!user || !user.id) {
+
+        showToast(
+            "User information not found. Please login again.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    try {
+
+        // -------------------------------------------------
+        // GET MATCHED ITEM
+        // -------------------------------------------------
+
+        const response = await fetch(
+            `${API_URL}/items/${id}`
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to get item information."
+            );
+
+        }
+
+
+        const item = await response.json();
+
+
+        // -------------------------------------------------
+        // CHECK REPORTER
+        // -------------------------------------------------
+
+        if (!item.user_id) {
+
+            showToast(
+                "Reporter information is unavailable.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // PREVENT CONTACTING YOURSELF
+        // -------------------------------------------------
+
+        if (
+            Number(item.user_id) ===
+            Number(user.id)
+        ) {
+
+            showToast(
+                "This is your own reported item.",
+                "warning"
+            );
+
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // OPEN MESSAGES PAGE
+        // -------------------------------------------------
+
+        window.location.href =
+            `messages.html?item_id=${encodeURIComponent(id)}`;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Contact Reporter Error:",
+            error
+        );
+
+        showToast(
+            "Unable to contact reporter.",
+            "error"
+        );
+
+    }
+}
 // =========================================================
 // START
 // =========================================================
