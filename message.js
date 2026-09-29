@@ -9,16 +9,24 @@
 // =========================================================
 
 const conversation =
-    document.getElementById("conversation");
+    document.getElementById(
+        "conversation"
+    );
 
 const messageForm =
-    document.getElementById("messageForm");
+    document.getElementById(
+        "messageForm"
+    );
 
 const messageInput =
-    document.getElementById("messageInput");
+    document.getElementById(
+        "messageInput"
+    );
 
 const itemInfo =
-    document.getElementById("item-info");
+    document.getElementById(
+        "item-info"
+    );
 
 
 // =========================================================
@@ -50,7 +58,7 @@ if (!storedUser) {
 }
 
 
-let currentUser;
+let currentUser = null;
 
 
 try {
@@ -61,10 +69,106 @@ try {
 }
 catch (error) {
 
-    localStorage.removeItem("user");
+    console.error(
+        "Invalid user data:",
+        error
+    );
+
+    localStorage.removeItem(
+        "user"
+    );
 
     window.location.href =
         "login.html";
+
+}
+
+
+// =========================================================
+// CHECK USER
+// =========================================================
+
+if (
+    !currentUser ||
+    !currentUser.id
+) {
+
+    localStorage.removeItem(
+        "user"
+    );
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+// =========================================================
+// ESCAPE HTML
+// =========================================================
+
+function escapeHtml(text) {
+
+    if (
+        text === null ||
+        text === undefined
+    ) {
+        return "";
+    }
+
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        String(text);
+
+
+    return div.innerHTML;
+
+}
+
+
+// =========================================================
+// FORMAT DATE
+// =========================================================
+
+function formatDate(
+    dateString
+) {
+
+    if (!dateString) {
+        return "";
+    }
+
+
+    const date =
+        new Date(dateString);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return String(
+            dateString
+        );
+
+    }
+
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            dateStyle: "short",
+            timeStyle: "short"
+        }
+    );
 
 }
 
@@ -75,25 +179,34 @@ catch (error) {
 
 if (!itemId) {
 
-    conversation.innerHTML = `
+    if (conversation) {
 
-        <div class="empty-messages">
+        conversation.innerHTML = `
 
-            <h3>
-                No item selected
-            </h3>
+            <div class="empty-messages">
 
-            <p>
-                Please open communication
-                from a possible match.
-            </p>
+                <h3>
+                    No item selected
+                </h3>
 
-        </div>
+                <p>
+                    Please open communication
+                    from a possible match.
+                </p>
 
-    `;
+            </div>
 
-    messageForm.style.display =
-        "none";
+        `;
+
+    }
+
+
+    if (messageForm) {
+
+        messageForm.style.display =
+            "none";
+
+    }
 
 }
 
@@ -104,40 +217,75 @@ if (!itemId) {
 
 async function loadItemInfo() {
 
+    if (!itemId) {
+        return;
+    }
+
+
     try {
 
         const response =
             await fetch(
-                `${API_URL}/items/${itemId}`
+                `${API_URL}/items/${encodeURIComponent(
+                    itemId
+                )}`
             );
+
+
+        let item = null;
+
+
+        try {
+
+            item =
+                await response.json();
+
+        }
+        catch {
+
+            item = null;
+
+        }
 
 
         if (!response.ok) {
 
             throw new Error(
+                item?.detail ||
+                item?.message ||
                 "Item not found"
             );
 
         }
 
 
-        const item =
-            await response.json();
+        if (itemInfo) {
 
+            itemInfo.innerHTML = `
 
-        itemInfo.innerHTML = `
+                Communication regarding:
 
-            Communication regarding:
+                <strong>
 
-            <strong>
-                ${item.item_name}
-            </strong>
+                    ${escapeHtml(
+                        item.item_name ||
+                        "Item"
+                    )}
 
-            (${item.item_type})
+                </strong>
 
-        `;
+                (${escapeHtml(
+                    item.item_type ||
+                    ""
+                )})
+
+            `;
+
+        }
 
     }
+
+
     catch (error) {
 
         console.error(
@@ -145,8 +293,14 @@ async function loadItemInfo() {
             error
         );
 
-        itemInfo.textContent =
-            "Unable to load item information.";
+
+        if (itemInfo) {
+
+            itemInfo.textContent =
+                error.message ||
+                "Unable to load item information.";
+
+        }
 
     }
 
@@ -159,30 +313,69 @@ async function loadItemInfo() {
 
 async function loadMessages() {
 
+    if (
+        !itemId ||
+        !currentUser ||
+        !currentUser.id ||
+        !conversation
+    ) {
+        return;
+    }
+
+
     try {
 
         const response =
             await fetch(
-                `${API_URL}/messages/${currentUser.id}/${itemId}`
+                `${API_URL}/messages/${encodeURIComponent(
+                    currentUser.id
+                )}/${encodeURIComponent(
+                    itemId
+                )}`
             );
+
+
+        let data = null;
+
+
+        try {
+
+            data =
+                await response.json();
+
+        }
+        catch {
+
+            data = null;
+
+        }
 
 
         if (!response.ok) {
 
             throw new Error(
+                data?.detail ||
+                data?.message ||
                 "Unable to load messages"
             );
 
         }
 
 
-        const data =
-            await response.json();
+        const messages =
+            Array.isArray(data?.messages)
+                ? data.messages
+                : Array.isArray(data)
+                    ? data
+                    : [];
 
+
+        // =================================================
+        // NO MESSAGES
+        // =================================================
 
         if (
-            !data.messages ||
-            data.messages.length === 0
+            messages.length === 0
         ) {
 
             conversation.innerHTML = `
@@ -207,73 +400,92 @@ async function loadMessages() {
         }
 
 
+        // =================================================
+        // RENDER MESSAGES
+        // =================================================
+
         conversation.innerHTML =
-            data.messages
-                .map(message => {
+            messages
+                .map(
+                    message => {
 
-                    const isSent =
-                        Number(message.sender_id) ===
-                        Number(currentUser.id);
-
-
-                    const messageClass =
-                        isSent
-                            ? "sent"
-                            : "received";
-
-
-                    return `
-
-                        <div
-                            class="message ${messageClass}"
-                        >
-
-                            <div
-                                class="message-name"
-                            >
-
-                                ${
-                                    isSent
-                                        ? "You"
-                                        : message.sender_name
-                                }
-
-                            </div>
+                        const isSent =
+                            Number(
+                                message.sender_id
+                            ) ===
+                            Number(
+                                currentUser.id
+                            );
 
 
-                            <div>
+                        const messageClass =
+                            isSent
+                                ? "sent"
+                                : "received";
 
-                                ${escapeHtml(
-                                    message.message
-                                )}
 
-                            </div>
+                        const senderName =
+                            isSent
+                                ? "You"
+                                : (
+                                    message.sender_name ||
+                                    "Reporter"
+                                );
 
+
+                        return `
 
                             <div
-                                class="message-time"
+                                class="message ${messageClass}"
                             >
 
-                                ${formatDate(
-                                    message.created_at
-                                )}
+                                <div class="message-name">
+
+                                    ${escapeHtml(
+                                        senderName
+                                    )}
+
+                                </div>
+
+
+                                <div>
+
+                                    ${escapeHtml(
+                                        message.message
+                                    )}
+
+                                </div>
+
+
+                                <div class="message-time">
+
+                                    ${escapeHtml(
+                                        formatDate(
+                                            message.created_at
+                                        )
+                                    )}
+
+                                </div>
 
                             </div>
 
-                        </div>
+                        `;
 
-                    `;
-
-                })
+                    }
+                )
                 .join("");
 
 
-        // Scroll to bottom
+        // =================================================
+        // SCROLL TO BOTTOM
+        // =================================================
 
         conversation.scrollTop =
             conversation.scrollHeight;
 
     }
+
+
     catch (error) {
 
         console.error(
@@ -286,7 +498,18 @@ async function loadMessages() {
 
             <div class="empty-messages">
 
-                ❌ Unable to load messages.
+                <h3>
+                    ❌ Unable to load messages
+                </h3>
+
+                <p>
+
+                    ${escapeHtml(
+                        error.message ||
+                        "Something went wrong."
+                    )}
+
+                </p>
 
             </div>
 
@@ -301,174 +524,223 @@ async function loadMessages() {
 // SEND MESSAGE
 // =========================================================
 
-messageForm.addEventListener(
-    "submit",
-    async function(event) {
+if (messageForm) {
 
-        event.preventDefault();
+    messageForm.addEventListener(
+        "submit",
+        async function(event) {
 
+            event.preventDefault();
 
-        const message =
-            messageInput.value.trim();
-
-
-        if (!message) {
 
             if (
-                typeof showToast ===
-                "function"
+                !currentUser ||
+                !currentUser.id
             ) {
 
                 showToast(
-                    "Please type a message.",
+                    "Please login again.",
                     "warning"
                 );
 
-            }
-
-            return;
-
-        }
-
-
-        const formData =
-            new FormData();
-
-
-        formData.append(
-            "sender_id",
-            currentUser.id
-        );
-
-
-        formData.append(
-            "item_id",
-            itemId
-        );
-
-
-        formData.append(
-            "message",
-            message
-        );
-
-
-        try {
-
-            const response =
-                await fetch(
-                    `${API_URL}/messages/send`,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
-
-
-            const data =
-                await response.json();
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.detail ||
-                    "Unable to send message."
-                );
+                return;
 
             }
 
 
-            messageInput.value = "";
+            if (!itemId) {
+
+                showToast(
+                    "No item selected.",
+                    "warning"
+                );
+
+                return;
+
+            }
+
+
+            const message =
+                messageInput.value.trim();
+
+
+            if (!message) {
+
+                if (
+                    typeof showToast ===
+                    "function"
+                ) {
+
+                    showToast(
+                        "Please type a message.",
+                        "warning"
+                    );
+
+                }
+
+                return;
+
+            }
 
 
             if (
-                typeof showToast ===
-                "function"
+                message.length > 2000
             ) {
 
                 showToast(
-                    "📩 Message sent successfully!",
-                    "success"
+                    "Message cannot exceed 2000 characters.",
+                    "warning"
                 );
+
+                return;
 
             }
 
 
-            await loadMessages();
+            const formData =
+                new FormData();
 
-        }
-        catch (error) {
 
-            console.error(
-                "Send message error:",
-                error
+            formData.append(
+                "sender_id",
+                currentUser.id
             );
 
 
-            if (
-                typeof showToast ===
-                "function"
-            ) {
+            formData.append(
+                "item_id",
+                itemId
+            );
 
-                showToast(
-                    error.message ||
-                    "Unable to send message.",
-                    "error"
+
+            formData.append(
+                "message",
+                message
+            );
+
+
+            const submitButton =
+                messageForm.querySelector(
+                    'button[type="submit"]'
                 );
+
+
+            const originalText =
+                submitButton
+                    ? submitButton.textContent
+                    : "";
+
+
+            if (submitButton) {
+
+                submitButton.disabled =
+                    true;
+
+                submitButton.textContent =
+                    "Sending...";
 
             }
 
-        }
 
-    }
-);
+            try {
 
-
-// =========================================================
-// ESCAPE HTML
-// =========================================================
-
-function escapeHtml(text) {
-
-    const div =
-        document.createElement("div");
-
-    div.textContent =
-        text;
-
-    return div.innerHTML;
-
-}
+                const response =
+                    await fetch(
+                        `${API_URL}/messages/send`,
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
 
 
-// =========================================================
-// FORMAT DATE
-// =========================================================
-
-function formatDate(dateString) {
-
-    if (!dateString) {
-        return "";
-    }
+                let data = null;
 
 
-    const date =
-        new Date(dateString);
+                try {
+
+                    data =
+                        await response.json();
+
+                }
+                catch {
+
+                    data = null;
+
+                }
 
 
-    if (isNaN(date.getTime())) {
+                if (!response.ok) {
 
-        return dateString;
+                    throw new Error(
+                        data?.detail ||
+                        data?.message ||
+                        "Unable to send message."
+                    );
 
-    }
+                }
 
 
-    return date.toLocaleString(
-        "en-IN",
-        {
-            dateStyle: "short",
-            timeStyle: "short"
+                messageInput.value =
+                    "";
+
+
+                if (
+                    typeof showToast ===
+                    "function"
+                ) {
+
+                    showToast(
+                        "📩 Message sent successfully!",
+                        "success"
+                    );
+
+                }
+
+
+                await loadMessages();
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "Send message error:",
+                    error
+                );
+
+
+                if (
+                    typeof showToast ===
+                    "function"
+                ) {
+
+                    showToast(
+                        error.message ||
+                        "Unable to send message.",
+                        "error"
+                    );
+
+                }
+
+            }
+
+
+            finally {
+
+                if (submitButton) {
+
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.textContent =
+                        originalText;
+
+                }
+
+            }
+
         }
     );
 
@@ -479,7 +751,10 @@ function formatDate(dateString) {
 // START
 // =========================================================
 
-if (itemId && currentUser) {
+if (
+    itemId &&
+    currentUser
+) {
 
     loadItemInfo();
 

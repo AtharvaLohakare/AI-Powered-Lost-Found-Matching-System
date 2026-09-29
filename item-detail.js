@@ -10,6 +10,68 @@ const itemId = params.get("id");
 
 
 // =========================================================
+// HELPER - ESCAPE HTML
+// =========================================================
+
+function escapeHtml(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    const div = document.createElement("div");
+    div.textContent = String(value);
+    return div.innerHTML;
+}
+
+
+// =========================================================
+// HELPER - IMAGE URL
+// =========================================================
+
+function getImageUrl(item) {
+
+    if (!item) {
+        return "";
+    }
+
+    // If backend gives complete image URL
+    if (item.image_url) {
+        return item.image_url;
+    }
+
+    // If there is no image
+    if (!item.image_name) {
+        return "";
+    }
+
+    return `${API_URL}/uploads/${encodeURIComponent(item.image_name)}`;
+}
+
+
+// =========================================================
+// IMAGE ERROR FALLBACK
+// =========================================================
+
+function imageErrorHandler(img) {
+
+    img.onerror = null;
+
+    img.style.display = "none";
+
+    if (img.parentElement) {
+        img.parentElement.classList.add("image-failed");
+
+        img.parentElement.innerHTML = `
+            <div class="image-placeholder">
+                📦
+                <span>Image unavailable</span>
+            </div>
+        `;
+    }
+}
+
+
+// =========================================================
 // LOAD ITEM DETAILS
 // =========================================================
 
@@ -30,14 +92,46 @@ async function loadItem() {
     try {
 
         const response = await fetch(
-            `${API_URL}/items/${itemId}`
+            `${API_URL}/items/${encodeURIComponent(itemId)}`
         );
 
-        if (!response.ok) {
-            throw new Error("Item not found");
+        let data = null;
+
+        try {
+            data = await response.json();
+        }
+        catch {
+            data = null;
         }
 
-        const item = await response.json();
+        if (!response.ok) {
+
+            throw new Error(
+                data?.detail ||
+                data?.message ||
+                "Item not found"
+            );
+        }
+
+        const item = data;
+
+        const imageUrl = getImageUrl(item);
+
+        const imageHTML = imageUrl
+            ? `
+                <img
+                    src="${escapeHtml(imageUrl)}"
+                    alt="${escapeHtml(item.item_name)}"
+                    onerror="imageErrorHandler(this)"
+                >
+              `
+            : `
+                <div class="image-placeholder">
+                    📦
+                    <span>No image available</span>
+                </div>
+              `;
+
 
         itemDetail.innerHTML = `
 
@@ -45,10 +139,7 @@ async function loadItem() {
 
                 <div class="detail-image">
 
-                    <img
-                        src="${API_URL}/uploads/${item.image_name}"
-                        alt="${item.item_name}"
-                    >
+                    ${imageHTML}
 
                 </div>
 
@@ -56,64 +147,89 @@ async function loadItem() {
                 <div class="detail-content">
 
                     <span class="item-type">
-                        ${item.item_type.toUpperCase()}
+
+                        ${escapeHtml(
+                            String(item.item_type || "").toUpperCase()
+                        )}
+
                     </span>
 
 
                     <h1>
-                        ${item.item_name}
+
+                        ${escapeHtml(
+                            item.item_name || "Unnamed Item"
+                        )}
+
                     </h1>
 
 
                     <p>
                         <strong>Category:</strong>
-                        ${item.category}
+                        ${escapeHtml(
+                            item.category || "Not specified"
+                        )}
                     </p>
 
 
                     <p>
                         <strong>Description:</strong>
-                        ${item.description}
+                        ${escapeHtml(
+                            item.description || "Not specified"
+                        )}
                     </p>
 
 
                     <p>
                         <strong>Color:</strong>
-                        ${item.color || "Not specified"}
+                        ${escapeHtml(
+                            item.color || "Not specified"
+                        )}
                     </p>
 
 
                     <p>
                         <strong>Brand:</strong>
-                        ${item.brand || "Not specified"}
+                        ${escapeHtml(
+                            item.brand || "Not specified"
+                        )}
                     </p>
 
 
                     <p>
                         <strong>Location:</strong>
-                        ${item.location}
+                        ${escapeHtml(
+                            item.location || "Not specified"
+                        )}
                     </p>
 
 
                     <p>
                         <strong>Date:</strong>
-                        ${item.item_date}
+                        ${escapeHtml(
+                            item.item_date || "Not specified"
+                        )}
                     </p>
 
 
-                    ${item.item_type === "lost"
-                ?
-                `
+                    ${
+                        String(item.item_type).toLowerCase() === "lost"
+
+                        ?
+
+                        `
                             <button
                                 class="match-btn"
-                                onclick="findMatches(${item.id})"
+                                onclick="findMatches(${Number(item.id)})"
                             >
                                 🤖 Find AI Matches
                             </button>
                         `
-                :
-                ""
-            }
+
+                        :
+
+                        ""
+                    }
 
                 </div>
 
@@ -142,16 +258,16 @@ async function loadItem() {
                 </h2>
 
                 <p>
-                    Something went wrong while loading
-                    the item.
+                    ${escapeHtml(
+                        error.message ||
+                        "Something went wrong while loading the item."
+                    )}
                 </p>
 
             </div>
 
         `;
-
     }
-
 }
 
 
@@ -165,7 +281,10 @@ async function findMatches(id) {
         document.getElementById("match-results");
 
 
-    // Show loading animation
+    if (!matchResults) {
+        return;
+    }
+
 
     matchResults.innerHTML = `
 
@@ -187,8 +306,6 @@ async function findMatches(id) {
     `;
 
 
-    // Toast notification
-
     if (typeof showToast === "function") {
 
         showToast(
@@ -201,23 +318,30 @@ async function findMatches(id) {
 
     try {
 
-        // Call backend AI matching API
-
         const response = await fetch(
-            `${API_URL}/match/${id}`
+            `${API_URL}/match/${encodeURIComponent(id)}`
         );
+
+
+        let data = null;
+
+        try {
+            data = await response.json();
+        }
+        catch {
+            data = null;
+        }
 
 
         if (!response.ok) {
 
             throw new Error(
+                data?.detail ||
+                data?.message ||
                 "Matching failed"
             );
 
         }
-
-
-        const data = await response.json();
 
 
         console.log(
@@ -232,6 +356,7 @@ async function findMatches(id) {
 
         if (
             !data.matches ||
+            !Array.isArray(data.matches) ||
             data.matches.length === 0
         ) {
 
@@ -244,8 +369,8 @@ async function findMatches(id) {
                     </h2>
 
                     <p>
-                        The AI could not find a
-                        strong matching found item.
+                        The AI could not find a strong
+                        matching found item.
                     </p>
 
                 </div>
@@ -283,14 +408,11 @@ async function findMatches(id) {
             <div class="ai-results">
 
 
-                <!-- AI SUMMARY -->
-
                 <div class="ai-summary">
 
                     <h2>
                         🤖 AI Analysis Complete
                     </h2>
-
 
                     <p>
 
@@ -300,10 +422,13 @@ async function findMatches(id) {
                             ${data.matches.length}
                         </strong>
 
-                        possible match${data.matches.length === 1
-                ? ""
-                : "es"
-            }
+                        possible match${
+
+                            data.matches.length === 1
+                                ? ""
+                                : "es"
+
+                        }
 
                         for this lost item.
 
@@ -312,7 +437,7 @@ async function findMatches(id) {
 
                     <p>
 
-                        The results are based on
+                        Results are based on
 
                         <strong>
                             image similarity
@@ -320,7 +445,7 @@ async function findMatches(id) {
 
                         <strong>
                             description similarity
-                        </strong>,
+                        </strong>
 
                         and
 
@@ -333,8 +458,6 @@ async function findMatches(id) {
                 </div>
 
 
-                <!-- MATCH HEADING -->
-
                 <h2>
                     🤖 AI Possible Matches
                 </h2>
@@ -342,205 +465,228 @@ async function findMatches(id) {
 
                 <p class="ai-subtitle">
 
-                    Matches are ranked using
-                    image similarity, text similarity
-                    and item metadata.
+                    Matches are ranked using image similarity,
+                    text similarity and item metadata.
 
                 </p>
 
 
-                <!-- MATCH CARDS -->
+                ${
 
-                ${topMatches
-                .map(match => {
+                    topMatches.map(match => {
 
-                    // =================================
-                    // CONFIDENCE LEVEL
-                    // =================================
+                        const score =
+                            Number(match.match_score || 0);
 
-                    let confidence =
-                        "Low Match";
+                        const imageScore =
+                            Number(
+                                match.image_similarity || 0
+                            );
 
+                        const textScore =
+                            Number(
+                                match.text_similarity || 0
+                            );
 
-                    if (
-                        match.match_score >= 90
-                    ) {
-
-                        confidence =
-                            "Very High Match";
-
-                    }
-
-                    else if (
-                        match.match_score >= 75
-                    ) {
-
-                        confidence =
-                            "High Match";
-
-                    }
-
-                    else if (
-                        match.match_score >= 50
-                    ) {
-
-                        confidence =
-                            "Possible Match";
-
-                    }
+                        const metadataScore =
+                            Number(
+                                match.metadata_score || 0
+                            );
 
 
-                    // =================================
-                    // RETURN MATCH CARD
-                    // =================================
-
-                    return `
-
-                                <div class="match-card">
+                        let confidence =
+                            "Low Match";
 
 
-                                    <!-- MATCH IMAGE -->
+                        if (score >= 90) {
 
-                                    <div class="match-image">
+                            confidence =
+                                "Very High Match";
 
-                                        <img
-                                            src="${API_URL}/uploads/${match.image_name}"
-                                            alt="${match.item_name}"
-                                        >
+                        }
+                        else if (score >= 75) {
 
-                                    </div>
+                            confidence =
+                                "High Match";
 
+                        }
+                        else if (score >= 50) {
 
-                                    <!-- MATCH INFORMATION -->
+                            confidence =
+                                "Possible Match";
 
-                                    <div class="match-info">
-
-
-                                        <h3>
-                                            ${match.item_name}
-                                        </h3>
+                        }
 
 
-                                        <!-- MATCH SCORE -->
-
-                                        <div class="match-score">
-
-                                            ${match.match_score}%
-
-                                        </div>
+                        const imageUrl =
+                            getImageUrl(match);
 
 
-                                        <!-- CONFIDENCE -->
-
-                                        <p>
-
-                                            <strong>
-                                                ${confidence}
-                                            </strong>
-
-                                        </p>
-
-
-                                        <!-- IMAGE SCORE -->
-
-                                        <p>
-
-                                            🖼️
-                                            Image Similarity:
-
-                                            ${match.image_similarity}%
-
-                                        </p>
-
-
-                                        <!-- TEXT SCORE -->
-
-                                        <p>
-
-                                            📝
-                                            Text Similarity:
-
-                                            ${match.text_similarity}%
-
-                                        </p>
-
-
-                                        <!-- METADATA SCORE -->
-
-                                        <p>
-
-                                            📋
-                                            Metadata Score:
-
-                                            ${match.metadata_score}%
-
-                                        </p>
-
-
-                                        <!-- REASONS -->
-
-                                        <h4>
-                                            Why this may be a match:
-                                        </h4>
-
-
-                                        <ul>
-
-                                            ${match.reasons &&
-                            match.reasons.length > 0
+                        const matchImage = imageUrl
 
                             ?
 
-                            match.reasons
-                                .map(
-                                    reason =>
-                                        `<li>${reason}</li>`
-                                )
-                                .join("")
+                            `
+                                <img
+                                    src="${escapeHtml(imageUrl)}"
+                                    alt="${escapeHtml(
+                                        match.item_name || "Possible match"
+                                    )}"
+                                    onerror="imageErrorHandler(this)"
+                                >
+                            `
 
                             :
 
                             `
+                                <div class="image-placeholder">
+                                    📦
+                                    <span>No image</span>
+                                </div>
+                            `;
+
+
+                        const reasons =
+                            Array.isArray(match.reasons)
+                                ? match.reasons
+                                : [];
+
+
+                        return `
+
+                            <div class="match-card">
+
+
+                                <div class="match-image">
+
+                                    ${matchImage}
+
+                                </div>
+
+
+                                <div class="match-info">
+
+
+                                    <h3>
+
+                                        ${escapeHtml(
+                                            match.item_name ||
+                                            "Possible Match"
+                                        )}
+
+                                    </h3>
+
+
+                                    <div class="match-score">
+
+                                        ${score.toFixed(1)}%
+
+                                    </div>
+
+
+                                    <p>
+
+                                        <strong>
+                                            ${confidence}
+                                        </strong>
+
+                                    </p>
+
+
+                                    <p>
+
+                                        🖼️
+                                        Image Similarity:
+
+                                        ${imageScore.toFixed(1)}%
+
+                                    </p>
+
+
+                                    <p>
+
+                                        📝
+                                        Text Similarity:
+
+                                        ${textScore.toFixed(1)}%
+
+                                    </p>
+
+
+                                    <p>
+
+                                        📋
+                                        Metadata Score:
+
+                                        ${metadataScore.toFixed(1)}%
+
+                                    </p>
+
+
+                                    <h4>
+
+                                        Why this may be a match:
+
+                                    </h4>
+
+
+                                    <ul>
+
+                                        ${
+                                            reasons.length > 0
+
+                                                ?
+
+                                                reasons
+                                                    .map(
+                                                        reason =>
+                                                            `<li>${escapeHtml(reason)}</li>`
+                                                    )
+                                                    .join("")
+
+                                                :
+
+                                                `
                                                     <li>
-                                                        No strong matching features
+                                                        No strong matching features found.
                                                     </li>
                                                 `
-                        }
+                                        }
 
-                                        </ul>
+                                    </ul>
 
 
-                                        <!-- VIEW MATCH BUTTON -->
+                                    <div class="match-actions">
 
-                                        <div class="match-actions">
 
-                                            <button
-                                                class="view-match-btn"
-                                                onclick="viewItem(${match.item_id})"
-                                            >
-                                                View Possible Match
-                                            </button>
+                                        <button
+                                            class="view-match-btn"
+                                            onclick="viewItem(${Number(match.item_id)})"
+                                        >
+                                            View Possible Match
+                                        </button>
 
-                                            <button
-                                                class="contact-btn"
-                                                onclick="contactReporter(${match.item_id})"
-                                            >
-                                                📩 Contact Reporter
-                                            </button>
 
-                                        </div>
+                                        <button
+                                            class="contact-btn"
+                                            onclick="contactReporter(${Number(match.item_id)})"
+                                        >
+                                            📩 Contact Reporter
+                                        </button>
 
 
                                     </div>
 
+
                                 </div>
 
-                            `;
+                            </div>
 
-                })
-                .join("")
-            }
+                        `;
 
+                    }).join("")
+
+                }
 
             </div>
 
@@ -548,37 +694,46 @@ async function findMatches(id) {
 
 
         // =================================================
-        // SUCCESS TOAST
-        // =================================================
-
-        // =================================================
         // MATCH ALERT
         // =================================================
 
         if (typeof showToast === "function") {
 
-            const topMatch = data.matches[0];
-            const score = topMatch.match_score;
+            const topMatch =
+                data.matches[0];
 
-            let alertMessage = "";
+            const score =
+                Number(topMatch.match_score || 0);
+
+
+            let alertMessage;
+
 
             if (score >= 90) {
+
                 alertMessage =
-                    `🔔 Very High Match Found! ${score}%`;
+                    `🔔 Very High Match Found! ${score.toFixed(1)}%`;
+
             }
             else if (score >= 75) {
+
                 alertMessage =
-                    `🔔 High Match Found! ${score}%`;
+                    `🔔 High Match Found! ${score.toFixed(1)}%`;
+
             }
             else {
+
                 alertMessage =
-                    `🔔 Possible Match Found! ${score}%`;
+                    `🔔 Possible Match Found! ${score.toFixed(1)}%`;
+
             }
+
 
             showToast(
                 alertMessage,
                 "success"
             );
+
         }
 
     }
@@ -592,10 +747,6 @@ async function findMatches(id) {
         );
 
 
-        // =================================================
-        // ERROR MESSAGE
-        // =================================================
-
         matchResults.innerHTML = `
 
             <div class="no-match">
@@ -605,10 +756,10 @@ async function findMatches(id) {
                 </h2>
 
                 <p>
-
-                    The AI matching service could
-                    not be reached.
-
+                    ${escapeHtml(
+                        error.message ||
+                        "The AI matching service could not be reached."
+                    )}
                 </p>
 
             </div>
@@ -616,18 +767,12 @@ async function findMatches(id) {
         `;
 
 
-        // =================================================
-        // ERROR TOAST
-        // =================================================
-
         if (typeof showToast === "function") {
 
             showToast(
-
+                error.message ||
                 "AI matching service could not be reached.",
-
                 "error"
-
             );
 
         }
@@ -643,17 +788,23 @@ async function findMatches(id) {
 
 function viewItem(id) {
 
-    window.location.href =
-        `item-detail.html?id=${id}`;
+    if (!id) {
+        return;
+    }
 
+    window.location.href =
+        `item-detail.html?id=${encodeURIComponent(id)}`;
 }
+
+
 // =========================================================
 // CONTACT REPORTER
 // =========================================================
 
 async function contactReporter(id) {
 
-    const storedUser = localStorage.getItem("user");
+    const storedUser =
+        localStorage.getItem("user");
 
 
     // -----------------------------------------------------
@@ -676,9 +827,16 @@ async function contactReporter(id) {
 
     try {
 
-        user = JSON.parse(storedUser);
+        user =
+            JSON.parse(storedUser);
 
-    } catch (error) {
+    }
+    catch (error) {
+
+        console.error(
+            "Invalid user:",
+            error
+        );
 
         localStorage.removeItem("user");
 
@@ -708,32 +866,58 @@ async function contactReporter(id) {
         // GET MATCHED ITEM
         // -------------------------------------------------
 
-        const response = await fetch(
-            `${API_URL}/items/${id}`
-        );
+        const response =
+            await fetch(
+                `${API_URL}/items/${encodeURIComponent(id)}`
+            );
+
+
+        let item = null;
+
+
+        try {
+            item = await response.json();
+        }
+        catch {
+            item = null;
+        }
 
 
         if (!response.ok) {
 
             throw new Error(
+                item?.detail ||
+                item?.message ||
                 "Unable to get item information."
             );
 
         }
 
 
-        const item = await response.json();
+        console.log(
+            "Matched item:",
+            item
+        );
 
 
         // -------------------------------------------------
         // CHECK REPORTER
         // -------------------------------------------------
 
-        if (!item.user_id) {
+        if (
+            item.user_id === null ||
+            item.user_id === undefined ||
+            item.user_id === ""
+        ) {
 
             showToast(
-                "Reporter information is unavailable.",
+                "Reporter information is unavailable. Backend must return user_id for this item.",
                 "error"
+            );
+
+            console.error(
+                "Missing user_id in /items response:",
+                item
             );
 
             return;
@@ -759,13 +943,14 @@ async function contactReporter(id) {
 
 
         // -------------------------------------------------
-        // OPEN MESSAGES PAGE
+        // OPEN MESSAGES
         // -------------------------------------------------
 
         window.location.href =
             `messages.html?item_id=${encodeURIComponent(id)}`;
 
     }
+
 
     catch (error) {
 
@@ -774,13 +959,18 @@ async function contactReporter(id) {
             error
         );
 
+
         showToast(
+            error.message ||
             "Unable to contact reporter.",
             "error"
         );
 
     }
+
 }
+
+
 // =========================================================
 // START
 // =========================================================

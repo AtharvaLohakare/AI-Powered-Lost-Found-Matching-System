@@ -1,9 +1,13 @@
-// Lost & Found AI
-// Frontend → FastAPI connection
+// =========================================================
+// LOST & FOUND AI
+// MAIN FRONTEND SCRIPT
+// =========================================================
 
+const lostForm =
+    document.getElementById("lost-item-form");
 
-const lostForm = document.getElementById("lost-item-form");
-const foundForm = document.getElementById("found-item-form");
+const foundForm =
+    document.getElementById("found-item-form");
 
 
 // =========================================================
@@ -12,43 +16,93 @@ const foundForm = document.getElementById("found-item-form");
 
 function showToast(message, type = "success") {
 
-    let container = document.querySelector(".toast-container");
+    let container =
+        document.querySelector(".toast-container");
+
 
     if (!container) {
-        container = document.createElement("div");
-        container.className = "toast-container";
-        document.body.appendChild(container);
+
+        container =
+            document.createElement("div");
+
+        container.className =
+            "toast-container";
+
+        document.body.appendChild(
+            container
+        );
+
     }
 
-    const toast = document.createElement("div");
 
-    toast.className = `toast ${type}`;
+    const toast =
+        document.createElement("div");
+
+    toast.className =
+        `toast ${type}`;
+
 
     let icon = "✓";
 
+
     if (type === "error") {
+
         icon = "✕";
+
     }
     else if (type === "warning") {
+
         icon = "⚠";
+
     }
 
-    toast.innerHTML = `
-        <span class="toast-icon">${icon}</span>
-        <span>${message}</span>
-    `;
 
-    container.appendChild(toast);
+    const iconSpan =
+        document.createElement("span");
+
+    iconSpan.className =
+        "toast-icon";
+
+    iconSpan.textContent =
+        icon;
+
+
+    const messageSpan =
+        document.createElement("span");
+
+    messageSpan.textContent =
+        message;
+
+
+    toast.appendChild(
+        iconSpan
+    );
+
+    toast.appendChild(
+        messageSpan
+    );
+
+
+    container.appendChild(
+        toast
+    );
+
 
     setTimeout(() => {
 
-        toast.classList.add("hide");
+        toast.classList.add(
+            "hide"
+        );
+
 
         setTimeout(() => {
+
             toast.remove();
+
         }, 400);
 
     }, 3000);
+
 }
 
 
@@ -56,19 +110,31 @@ function showToast(message, type = "success") {
 // SUBMIT ITEM
 // =========================================================
 
-async function handleFormSubmit(event, type) {
-    console.log("FORM HANDLER STARTED:", type);
+async function handleFormSubmit(
+    event,
+    type
+) {
+
+    console.log(
+        "FORM HANDLER STARTED:",
+        type
+    );
+
 
     event.preventDefault();
 
-    const form = event.target;
+
+    const form =
+        event.target;
 
 
     // -----------------------------------------------------
     // CHECK LOGIN
     // -----------------------------------------------------
 
-    const storedUser = localStorage.getItem("user");
+    const storedUser =
+        localStorage.getItem("user");
+
 
     if (!storedUser) {
 
@@ -83,16 +149,23 @@ async function handleFormSubmit(event, type) {
 
     let user;
 
+
     try {
 
-        user = JSON.parse(storedUser);
+        user =
+            JSON.parse(storedUser);
 
     }
     catch (error) {
 
-        console.error("Invalid user data:", error);
+        console.error(
+            "Invalid user data:",
+            error
+        );
 
-        localStorage.removeItem("user");
+        localStorage.removeItem(
+            "user"
+        );
 
         showToast(
             "Your login session is invalid. Please login again.",
@@ -114,115 +187,140 @@ async function handleFormSubmit(event, type) {
     }
 
 
-    console.log("Logged in user:", user);
-    console.log("User ID:", user.id);
-
-
-    // -----------------------------------------------------
-    // CREATE FORM DATA
-    // -----------------------------------------------------
-
-    const formData = new FormData();
-
-
-    // IMPORTANT:
-    // Send logged-in user's ID
-
-    formData.append(
-        "user_id",
-        user.id
+    console.log(
+        "Logged in user:",
+        user
     );
 
 
     // -----------------------------------------------------
-    // ITEM TYPE
+    // GET FORM FIELDS
     // -----------------------------------------------------
 
-    formData.append(
-        "item_type",
-        type
-    );
+    const itemName =
+        form.querySelector(
+            '[name="item_name"]'
+        );
 
+    const category =
+        form.querySelector(
+            '[name="category"]'
+        );
 
-    // -----------------------------------------------------
-    // ITEM NAME
-    // -----------------------------------------------------
+    const description =
+        form.querySelector(
+            '[name="description"]'
+        );
 
-    formData.append(
-        "item_name",
-        form.querySelector('[name="item_name"]').value
-    );
+    const color =
+        form.querySelector(
+            '[name="color"]'
+        );
 
+    const brand =
+        form.querySelector(
+            '[name="brand"]'
+        );
 
-    // -----------------------------------------------------
-    // CATEGORY
-    // -----------------------------------------------------
+    const location =
+        form.querySelector(
+            '[name="location"]'
+        );
 
-    formData.append(
-        "category",
-        form.querySelector('[name="category"]').value
-    );
-
-
-    // -----------------------------------------------------
-    // DESCRIPTION
-    // -----------------------------------------------------
-
-    formData.append(
-        "description",
-        form.querySelector('[name="description"]').value
-    );
-
-
-    // -----------------------------------------------------
-    // COLOR
-    // -----------------------------------------------------
-
-    formData.append(
-        "color",
-        form.querySelector('[name="color"]').value
-    );
-
-
-    // -----------------------------------------------------
-    // BRAND
-    // -----------------------------------------------------
-
-    formData.append(
-        "brand",
-        form.querySelector('[name="brand"]').value
-    );
-
-
-    // -----------------------------------------------------
-    // LOCATION
-    // -----------------------------------------------------
-
-    formData.append(
-        "location",
-        form.querySelector('[name="location"]').value
-    );
-
-
-    // -----------------------------------------------------
-    // DATE
-    // -----------------------------------------------------
-
-    formData.append(
-        "date",
-        form.querySelector('[name="date"]').value
-    );
-
-
-    // -----------------------------------------------------
-    // IMAGE
-    // -----------------------------------------------------
+    const date =
+        form.querySelector(
+            '[name="date"]'
+        );
 
     const imageInput =
-        form.querySelector('[name="image"]');
+        form.querySelector(
+            '[name="image"]'
+        );
 
 
-    if (!imageInput || !imageInput.files.length) {
+    // -----------------------------------------------------
+    // VALIDATE REQUIRED FIELDS
+    // -----------------------------------------------------
+
+    if (
+        !itemName ||
+        !itemName.value.trim()
+    ) {
+
+        showToast(
+            "Please enter the item name.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    if (
+        !category ||
+        !category.value.trim()
+    ) {
+
+        showToast(
+            "Please select a category.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    if (
+        !description ||
+        !description.value.trim()
+    ) {
+
+        showToast(
+            "Please enter a description.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    if (
+        !location ||
+        !location.value.trim()
+    ) {
+
+        showToast(
+            "Please enter the location.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    if (
+        !date ||
+        !date.value
+    ) {
+
+        showToast(
+            "Please select the date.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    // -----------------------------------------------------
+    // IMAGE VALIDATION
+    // -----------------------------------------------------
+
+    if (
+        !imageInput ||
+        !imageInput.files ||
+        imageInput.files.length === 0
+    ) {
 
         showToast(
             "Please upload an item image.",
@@ -233,42 +331,193 @@ async function handleFormSubmit(event, type) {
     }
 
 
+    const image =
+        imageInput.files[0];
+
+
+    // Maximum 10 MB frontend validation
+
+    const maxSize =
+        10 * 1024 * 1024;
+
+
+    if (image.size > maxSize) {
+
+        showToast(
+            "Image must be smaller than 10 MB.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    // -----------------------------------------------------
+    // IMAGE TYPE VALIDATION
+    // -----------------------------------------------------
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/jpg"
+    ];
+
+
+    if (
+        !allowedTypes.includes(
+            image.type
+        )
+    ) {
+
+        showToast(
+            "Please upload JPG, PNG or WEBP image.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    // -----------------------------------------------------
+    // CREATE FORM DATA
+    // -----------------------------------------------------
+
+    const formData =
+        new FormData();
+
+
     formData.append(
-        "image",
-        imageInput.files[0]
-    );
-
-
-    // -----------------------------------------------------
-    // DEBUG FORM DATA
-    // -----------------------------------------------------
-
-    console.log(
-        "Submitting report for user ID:",
+        "user_id",
         user.id
     );
 
 
+    formData.append(
+        "item_type",
+        type
+    );
+
+
+    formData.append(
+        "item_name",
+        itemName.value.trim()
+    );
+
+
+    formData.append(
+        "category",
+        category.value.trim()
+    );
+
+
+    formData.append(
+        "description",
+        description.value.trim()
+    );
+
+
+    formData.append(
+        "color",
+        color
+            ? color.value.trim()
+            : ""
+    );
+
+
+    formData.append(
+        "brand",
+        brand
+            ? brand.value.trim()
+            : ""
+    );
+
+
+    formData.append(
+        "location",
+        location.value.trim()
+    );
+
+
+    formData.append(
+        "date",
+        date.value
+    );
+
+
+    formData.append(
+        "image",
+        image
+    );
+
+
+    console.log(
+        "Submitting item:",
+        {
+            user_id: user.id,
+            item_type: type,
+            item_name: itemName.value
+        }
+    );
+
+
     // -----------------------------------------------------
-    // SEND DATA TO FASTAPI
+    // DISABLE SUBMIT BUTTON
+    // -----------------------------------------------------
+
+    const submitButton =
+        form.querySelector(
+            'button[type="submit"]'
+        );
+
+
+    const originalButtonText =
+        submitButton
+            ? submitButton.textContent
+            : "";
+
+
+    if (submitButton) {
+
+        submitButton.disabled =
+            true;
+
+        submitButton.textContent =
+            "Submitting...";
+
+    }
+
+
+    // -----------------------------------------------------
+    // SEND TO BACKEND
     // -----------------------------------------------------
 
     try {
 
-        const response = await fetch(
-            `${API_URL}/report-item`,
-            {
-                method: "POST",
-                body: formData
-            }
-        );
+        const response =
+            await fetch(
+                `${API_URL}/report-item`,
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
 
 
-        // -------------------------------------------------
-        // GET RESPONSE
-        // -------------------------------------------------
+        let result = null;
 
-        const result = await response.json();
+
+        try {
+
+            result =
+                await response.json();
+
+        }
+        catch {
+
+            result = null;
+
+        }
 
 
         console.log(
@@ -277,29 +526,25 @@ async function handleFormSubmit(event, type) {
         );
 
 
-        // -------------------------------------------------
-        // CHECK RESPONSE
-        // -------------------------------------------------
-
         if (!response.ok) {
 
             throw new Error(
-                result.detail ||
+                result?.detail ||
+                result?.message ||
                 "Server returned an error."
             );
+
         }
 
 
         // -------------------------------------------------
-        // SUCCESS TOAST
+        // SUCCESS
         // -------------------------------------------------
 
         showToast(
-
             type === "lost"
                 ? "Lost item submitted successfully!"
                 : "Found item submitted successfully!",
-
             "success"
         );
 
@@ -310,13 +555,34 @@ async function handleFormSubmit(event, type) {
 
         form.reset();
 
+
+        // -------------------------------------------------
+        // OPTIONAL REDIRECT
+        // -------------------------------------------------
+
+        if (
+            result &&
+            result.id
+        ) {
+
+            setTimeout(() => {
+
+                window.location.href =
+                    `item-detail.html?id=${encodeURIComponent(
+                        result.id
+                    )}`;
+
+            }, 1000);
+
+        }
+
     }
 
 
     catch (error) {
 
         console.error(
-            "Error:",
+            "Report submission error:",
             error
         );
 
@@ -326,6 +592,21 @@ async function handleFormSubmit(event, type) {
             "Could not connect to the backend.",
             "error"
         );
+
+    }
+
+
+    finally {
+
+        if (submitButton) {
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                originalButtonText;
+
+        }
 
     }
 
@@ -340,7 +621,7 @@ if (lostForm) {
 
     lostForm.addEventListener(
         "submit",
-        function (event) {
+        function(event) {
 
             handleFormSubmit(
                 event,
@@ -361,7 +642,7 @@ if (foundForm) {
 
     foundForm.addEventListener(
         "submit",
-        function (event) {
+        function(event) {
 
             handleFormSubmit(
                 event,
