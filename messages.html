@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -16,152 +15,113 @@
 
     <style>
 
+        /* =====================================================
+           MESSAGES SECTION
+        ===================================================== */
+
         .messages-section {
-
             max-width: 900px;
-
             margin: 40px auto;
-
             padding: 20px;
-
         }
 
 
         .message-container {
-
             background: white;
-
             border-radius: 15px;
-
             padding: 25px;
 
             box-shadow:
                 0 5px 20px
                 rgba(0, 0, 0, 0.08);
-
         }
 
 
         .message-header {
-
             border-bottom:
                 1px solid #e5e7eb;
 
             padding-bottom: 15px;
-
             margin-bottom: 20px;
-
         }
 
 
         .message-header h1 {
-
             margin-bottom: 5px;
-
         }
 
 
         .message-header p {
-
             color: #666;
-
         }
 
 
         #conversation {
-
             min-height: 300px;
-
             max-height: 500px;
-
             overflow-y: auto;
-
             padding: 10px;
-
         }
 
 
         .message {
-
             max-width: 70%;
-
             padding: 12px 16px;
-
             margin: 10px 0;
 
             border-radius: 15px;
 
             line-height: 1.5;
-
         }
 
 
         .message.sent {
-
             margin-left: auto;
 
             background: #2563eb;
-
             color: white;
 
             border-bottom-right-radius: 4px;
-
         }
 
 
         .message.received {
-
             margin-right: auto;
 
             background: #f1f5f9;
-
             color: #222;
 
             border-bottom-left-radius: 4px;
-
         }
 
 
         .message-name {
-
             font-size: 12px;
-
             font-weight: bold;
-
             margin-bottom: 4px;
-
         }
 
 
         .message-time {
-
             font-size: 10px;
-
             opacity: 0.7;
-
             margin-top: 5px;
-
         }
 
 
         .message-form {
-
             display: flex;
-
             gap: 10px;
-
             margin-top: 20px;
 
             border-top:
                 1px solid #e5e7eb;
 
             padding-top: 20px;
-
         }
 
 
         .message-form textarea {
-
             flex: 1;
 
             min-height: 55px;
@@ -170,19 +130,17 @@
 
             padding: 12px;
 
-            border: 1px solid #d1d5db;
+            border:
+                1px solid #d1d5db;
 
             border-radius: 10px;
 
             font-family: inherit;
-
         }
 
 
         .message-form button {
-
             border: none;
-
             border-radius: 10px;
 
             padding: 0 22px;
@@ -190,34 +148,25 @@
             cursor: pointer;
 
             background: #2563eb;
-
             color: white;
 
             font-weight: 600;
-
         }
 
 
         .message-form button:hover {
-
             opacity: 0.9;
-
         }
 
 
         .empty-messages {
-
             text-align: center;
-
             padding: 80px 20px;
-
             color: #777;
-
         }
 
 
         .back-btn {
-
             display: inline-block;
 
             margin-bottom: 20px;
@@ -227,39 +176,52 @@
             color: #2563eb;
 
             font-weight: 600;
-
         }
 
+
+        /* =====================================================
+           NAVBAR USER
+        ===================================================== */
+
+        .user-welcome {
+            font-size: 15px;
+            font-weight: 600;
+
+            color: #1e3a8a;
+
+            white-space: nowrap;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
 
         @media (max-width: 600px) {
 
             .messages-section {
-
                 margin: 20px auto;
-
                 padding: 10px;
-
             }
 
 
             .message {
-
                 max-width: 85%;
-
             }
 
 
             .message-form {
-
                 flex-direction: column;
-
             }
 
 
             .message-form button {
-
                 padding: 12px;
+            }
 
+
+            .user-welcome {
+                font-size: 14px;
             }
 
         }
@@ -272,9 +234,9 @@
 <body>
 
 
-    <!-- ================================================= -->
-    <!-- NAVBAR -->
-    <!-- ================================================= -->
+    <!-- =====================================================
+         NAVBAR
+    ===================================================== -->
 
     <nav class="navbar">
 
@@ -306,16 +268,48 @@
 
         <div class="nav-buttons">
 
+            <!-- Logged-in user -->
+            <span
+                class="user-welcome"
+                id="userWelcome"
+            ></span>
+
+
+            <!-- My Reports -->
+            <a
+                href="my-reports.html"
+                class="login-btn"
+                id="myReportsBtn"
+            >
+                My Reports
+            </a>
+
+
+            <!-- Logout -->
+            <a
+                href="#"
+                class="signup-btn"
+                id="logoutBtn"
+            >
+                Logout
+            </a>
+
+
+            <!-- Login -->
             <a
                 href="login.html"
                 class="login-btn"
+                id="loginBtn"
             >
                 Login
             </a>
 
+
+            <!-- Sign Up -->
             <a
                 href="signup.html"
                 class="signup-btn"
+                id="signupBtn"
             >
                 Sign Up
             </a>
@@ -325,11 +319,12 @@
     </nav>
 
 
-    <!-- ================================================= -->
-    <!-- MESSAGES -->
-    <!-- ================================================= -->
+    <!-- =====================================================
+         MESSAGES
+    ===================================================== -->
 
     <section class="messages-section">
+
 
         <a
             href="javascript:history.back()"
@@ -341,6 +336,10 @@
 
         <div class="message-container">
 
+
+            <!-- =================================================
+                 HEADER
+            ================================================= -->
 
             <div class="message-header">
 
@@ -355,6 +354,10 @@
             </div>
 
 
+            <!-- =================================================
+                 CONVERSATION
+            ================================================= -->
+
             <div id="conversation">
 
                 <div class="empty-messages">
@@ -363,6 +366,10 @@
 
             </div>
 
+
+            <!-- =================================================
+                 MESSAGE FORM
+            ================================================= -->
 
             <form
                 id="messageForm"
@@ -388,106 +395,229 @@
     </section>
 
 
+    <!-- =====================================================
+         SCRIPTS
+    ===================================================== -->
+
     <script src="config.js"></script>
 
     <script src="script.js"></script>
 
     <script src="messages.js"></script>
 
-<script>
 
-    const navButtons =
-        document.querySelector(".nav-buttons");
+    <!-- =====================================================
+         NAVBAR AUTH
+    ===================================================== -->
 
-    const storedUser =
-        localStorage.getItem("user");
+    <script>
 
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
 
-    if (
-        storedUser &&
-        navButtons
-    ) {
-
-        try {
-
-            const user =
-                JSON.parse(storedUser);
+                const storedUser =
+                    localStorage.getItem("user");
 
 
-            if (
-                user &&
-                user.id
-            ) {
-
-                navButtons.innerHTML = `
-
-                    <span class="user-welcome">
-
-                        Hi, ${user.name} 👋
-
-                    </span>
-
-
-                    <a
-                        href="my-reports.html"
-                        class="login-btn"
-                    >
-
-                        My Reports
-
-                    </a>
-
-
-                    <a
-                        href="#"
-                        class="signup-btn"
-                        id="logoutBtn"
-                    >
-
-                        Logout
-
-                    </a>
-
-                `;
-
-
-                document
-                    .getElementById("logoutBtn")
-                    .addEventListener(
-                        "click",
-                        function(event) {
-
-                            event.preventDefault();
-
-                            localStorage.removeItem(
-                                "user"
-                            );
-
-                            window.location.href =
-                                "index.html";
-
-                        }
+                const userWelcome =
+                    document.getElementById(
+                        "userWelcome"
                     );
 
+                const myReportsBtn =
+                    document.getElementById(
+                        "myReportsBtn"
+                    );
+
+                const logoutBtn =
+                    document.getElementById(
+                        "logoutBtn"
+                    );
+
+                const loginBtn =
+                    document.getElementById(
+                        "loginBtn"
+                    );
+
+                const signupBtn =
+                    document.getElementById(
+                        "signupBtn"
+                    );
+
+
+                // =================================================
+                // LOGGED-IN USER
+                // =================================================
+
+                if (storedUser) {
+
+                    try {
+
+                        const user =
+                            JSON.parse(
+                                storedUser
+                            );
+
+
+                        if (
+                            user &&
+                            user.id
+                        ) {
+
+                            /*
+                             * Show username
+                             */
+
+                            if (userWelcome) {
+
+                                userWelcome.textContent =
+                                    `Hi, ${user.name || "User"} 👋`;
+
+                                userWelcome.style.display =
+                                    "inline-block";
+                            }
+
+
+                            /*
+                             * Show My Reports
+                             */
+
+                            if (myReportsBtn) {
+
+                                myReportsBtn.style.display =
+                                    "inline-block";
+                            }
+
+
+                            /*
+                             * Show Logout
+                             */
+
+                            if (logoutBtn) {
+
+                                logoutBtn.style.display =
+                                    "inline-block";
+                            }
+
+
+                            /*
+                             * Hide Login
+                             */
+
+                            if (loginBtn) {
+
+                                loginBtn.style.display =
+                                    "none";
+                            }
+
+
+                            /*
+                             * Hide Sign Up
+                             */
+
+                            if (signupBtn) {
+
+                                signupBtn.style.display =
+                                    "none";
+                            }
+
+
+                            /*
+                             * Logout
+                             */
+
+                            if (logoutBtn) {
+
+                                logoutBtn.addEventListener(
+                                    "click",
+                                    function (event) {
+
+                                        event.preventDefault();
+
+
+                                        localStorage.removeItem(
+                                            "user"
+                                        );
+
+
+                                        window.location.href =
+                                            "index.html";
+
+                                    }
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+                    catch (error) {
+
+                        console.error(
+                            "Invalid user data:",
+                            error
+                        );
+
+
+                        localStorage.removeItem(
+                            "user"
+                        );
+
+                    }
+
+                }
+
+
+                // =================================================
+                // NOT LOGGED IN
+                // =================================================
+
+                else {
+
+                    if (userWelcome) {
+
+                        userWelcome.style.display =
+                            "none";
+                    }
+
+
+                    if (myReportsBtn) {
+
+                        myReportsBtn.style.display =
+                            "none";
+                    }
+
+
+                    if (logoutBtn) {
+
+                        logoutBtn.style.display =
+                            "none";
+                    }
+
+
+                    if (loginBtn) {
+
+                        loginBtn.style.display =
+                            "inline-block";
+                    }
+
+
+                    if (signupBtn) {
+
+                        signupBtn.style.display =
+                            "inline-block";
+                    }
+
+                }
+
             }
+        );
 
-        }
-        catch (error) {
+    </script>
 
-            console.error(
-                "Invalid user data:",
-                error
-            );
 
-            localStorage.removeItem(
-                "user"
-            );
-
-        }
-
-    }
-
-</script>
 </body>
 
 </html>

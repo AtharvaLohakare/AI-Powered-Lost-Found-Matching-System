@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -15,7 +14,6 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-
         .reports-page {
             padding: 120px 8% 60px;
             min-height: 100vh;
@@ -49,12 +47,15 @@
         .reports-grid {
             max-width: 1100px;
             margin: auto;
+
             display: grid;
+
             grid-template-columns:
                 repeat(
                     auto-fit,
                     minmax(320px, 1fr)
                 );
+
             gap: 25px;
         }
 
@@ -62,16 +63,21 @@
             background: #ffffff;
             border-radius: 18px;
             overflow: hidden;
+
             box-shadow:
                 0 8px 30px
                 rgba(0, 0, 0, 0.08);
+
             border: 1px solid #eeeeee;
+
             transition: 0.25s ease;
+
             cursor: pointer;
         }
 
         .report-card:hover {
             transform: translateY(-5px);
+
             box-shadow:
                 0 14px 35px
                 rgba(0, 0, 0, 0.12);
@@ -80,7 +86,9 @@
         .report-image-container {
             width: 100%;
             height: 220px;
+
             background: #f4f4f4;
+
             display: flex;
             align-items: center;
             justify-content: center;
@@ -89,19 +97,26 @@
         .report-image {
             width: 100%;
             height: 220px;
+
             object-fit: cover;
+
             display: block;
         }
 
         .image-placeholder {
             width: 100%;
             height: 220px;
+
             display: flex;
             flex-direction: column;
+
             align-items: center;
             justify-content: center;
+
             gap: 8px;
+
             font-size: 50px;
+
             background: #f5f6f8;
             color: #777;
         }
@@ -116,9 +131,12 @@
 
         .report-top {
             display: flex;
+
             justify-content: space-between;
             align-items: center;
+
             gap: 10px;
+
             margin-bottom: 12px;
         }
 
@@ -129,9 +147,12 @@
 
         .status-badge {
             padding: 6px 12px;
+
             border-radius: 20px;
+
             font-size: 12px;
             font-weight: 700;
+
             text-transform: uppercase;
         }
 
@@ -147,53 +168,77 @@
 
         .report-description {
             color: #666;
+
             line-height: 1.6;
+
             margin: 12px 0 18px;
         }
 
         .report-info {
             display: grid;
+
             grid-template-columns: 1fr 1fr;
+
             gap: 12px;
+
             margin-top: 15px;
         }
 
         .info-box {
             background: #f8f9fb;
+
             padding: 12px;
+
             border-radius: 10px;
         }
 
         .info-label {
             display: block;
+
             font-size: 12px;
+
             color: #888;
+
             margin-bottom: 4px;
         }
 
         .info-value {
             font-size: 14px;
+
             font-weight: 600;
+
             color: #333;
         }
 
         .click-hint {
             margin-top: 18px;
+
             padding-top: 14px;
+
             border-top: 1px solid #eeeeee;
+
             color: #3157d5;
+
             font-size: 13px;
+
             font-weight: 600;
+
             text-align: center;
         }
 
         .empty-state {
             max-width: 600px;
+
             margin: 60px auto;
+
             text-align: center;
+
             background: white;
+
             padding: 50px 30px;
+
             border-radius: 20px;
+
             box-shadow:
                 0 8px 30px
                 rgba(0, 0, 0, 0.07);
@@ -215,18 +260,30 @@
 
         .report-button {
             display: inline-block;
+
             padding: 12px 22px;
+
             border-radius: 10px;
+
             text-decoration: none;
+
             background: #3157d5;
             color: white;
+
             font-weight: 600;
+
+            border: none;
+
+            cursor: pointer;
         }
 
         .loading-state {
             max-width: 600px;
+
             margin: 60px auto;
+
             text-align: center;
+
             padding: 40px;
         }
 
@@ -236,6 +293,24 @@
 
         .loading-state p {
             color: #777;
+        }
+
+        /* =====================================================
+           NAVBAR USER
+        ===================================================== */
+
+        .user-welcome {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e3a8a;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 900px) {
+
+            .user-welcome {
+                font-size: 14px;
+            }
         }
 
         @media (max-width: 600px) {
@@ -257,15 +332,19 @@
                 flex-direction: column;
             }
 
+            .user-welcome {
+                font-size: 14px;
+            }
         }
-
     </style>
-
 </head>
 
 
 <body>
 
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
 
 <nav class="navbar">
 
@@ -324,6 +403,10 @@
 </nav>
 
 
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
 <main class="reports-page">
 
 
@@ -366,9 +449,12 @@
 
     </div>
 
-
 </main>
 
+
+<!-- =====================================================
+     CONFIG
+===================================================== -->
 
 <script src="config.js"></script>
 
@@ -395,7 +481,6 @@
             String(value);
 
         return div.innerHTML;
-
     }
 
 
@@ -409,7 +494,22 @@
             item &&
             item.image_url
         ) {
-            return item.image_url;
+
+            let url = item.image_url;
+
+            /*
+             * If backend returns a relative URL,
+             * convert it to the Render backend URL.
+             */
+
+            if (
+                url.startsWith("/")
+            ) {
+
+                return `${API_URL}${url}`;
+            }
+
+            return url;
         }
 
 
@@ -417,6 +517,7 @@
             !item ||
             !item.image_name
         ) {
+
             return "";
         }
 
@@ -424,7 +525,6 @@
         return `${API_URL}/uploads/${encodeURIComponent(
             item.image_name
         )}`;
-
     }
 
 
@@ -445,37 +545,55 @@
 
         container.innerHTML = `
             <div class="image-placeholder">
+
                 📦
-                <span>Image unavailable</span>
+
+                <span>
+                    Image unavailable
+                </span>
+
             </div>
         `;
-
     }
 
 
     // =====================================================
-    // USER
+    // GET LOGGED-IN USER
     // =====================================================
 
-    const storedUser =
-        localStorage.getItem("user");
+    function getLoggedInUser() {
+
+        const storedUser =
+            localStorage.getItem("user");
 
 
-    if (!storedUser) {
+        if (!storedUser) {
 
-        window.location.href =
-            "login.html";
+            window.location.href =
+                "login.html";
 
-    }
-    else {
-
-        let user = null;
+            return null;
+        }
 
 
         try {
 
-            user =
+            const user =
                 JSON.parse(storedUser);
+
+
+            if (
+                !user ||
+                !user.id
+            ) {
+
+                throw new Error(
+                    "Invalid user information."
+                );
+            }
+
+
+            return user;
 
         }
         catch (error) {
@@ -492,470 +610,507 @@
             window.location.href =
                 "login.html";
 
+            return null;
+        }
+    }
+
+
+    // =====================================================
+    // SET USER NAVBAR
+    // =====================================================
+
+    function setupNavbar(user) {
+
+        const userWelcome =
+            document.getElementById(
+                "userWelcome"
+            );
+
+        const logoutBtn =
+            document.getElementById(
+                "logoutBtn"
+            );
+
+
+        if (userWelcome) {
+
+            userWelcome.textContent =
+                `Hi, ${user.name || "User"} 👋`;
         }
 
 
-        if (
-            user &&
-            user.id
-        ) {
+        if (logoutBtn) {
 
+            logoutBtn.addEventListener(
+                "click",
+                function(event) {
+
+                    event.preventDefault();
+
+
+                    localStorage.removeItem(
+                        "user"
+                    );
+
+
+                    window.location.href =
+                        "index.html";
+                }
+            );
+        }
+    }
+
+
+    // =====================================================
+    // LOAD MY REPORTS
+    // =====================================================
+
+    async function loadMyReports(user) {
+
+        const container =
             document.getElementById(
-                "userWelcome"
-            ).textContent =
-                `Hi, ${user.name || "User"} 👋`;
+                "reports-container"
+            );
+
+
+        const count =
+            document.getElementById(
+                "reportsCount"
+            );
+
+
+        try {
+
+            const url =
+                `${API_URL}/my-items/${encodeURIComponent(
+                    user.id
+                )}`;
+
+
+            console.log(
+                "Fetching:",
+                url
+            );
+
+
+            const response =
+                await fetch(url);
+
+
+            let items = null;
+
+
+            try {
+
+                items =
+                    await response.json();
+
+            }
+            catch {
+
+                items = null;
+            }
+
+
+            console.log(
+                "Reports received:",
+                items
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    items?.detail ||
+                    items?.message ||
+                    "Could not load reports."
+                );
+            }
+
+
+            if (
+                !Array.isArray(items)
+            ) {
+
+                throw new Error(
+                    "Invalid reports data received from server."
+                );
+            }
+
+
+            count.textContent =
+                `${items.length} Report${
+                    items.length === 1
+                        ? ""
+                        : "s"
+                }`;
 
 
             // =================================================
-            // LOGOUT
+            // EMPTY
             // =================================================
 
-            document
-                .getElementById("logoutBtn")
-                .addEventListener(
+            if (
+                items.length === 0
+            ) {
+
+                container.innerHTML = `
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            📦
+                        </div>
+
+                        <h2>
+                            No Reports Yet
+                        </h2>
+
+                        <p>
+                            You haven't reported
+                            any lost or found items yet.
+                        </p>
+
+                        <a
+                            href="report-lost.html"
+                            class="report-button"
+                        >
+                            Report an Item
+                        </a>
+
+                    </div>
+
+                `;
+
+                return;
+            }
+
+
+            container.innerHTML = "";
+
+
+            // =================================================
+            // CREATE REPORT CARDS
+            // =================================================
+
+            items.forEach(function(item) {
+
+                const card =
+                    document.createElement(
+                        "article"
+                    );
+
+
+                card.className =
+                    "report-card";
+
+
+                card.addEventListener(
                     "click",
-                    function(event) {
-
-                        event.preventDefault();
-
-                        localStorage.removeItem(
-                            "user"
-                        );
+                    function() {
 
                         window.location.href =
-                            "index.html";
-
+                            `item-detail.html?id=${encodeURIComponent(
+                                item.id
+                            )}`;
                     }
                 );
 
 
-            // =================================================
-            // LOAD MY REPORTS
-            // =================================================
+                const isLost =
+                    String(
+                        item.item_type || ""
+                    ).toLowerCase() === "lost";
 
-            async function loadMyReports() {
 
-                const container =
-                    document.getElementById(
-                        "reports-container"
-                    );
+                const status =
+                    isLost
+                        ? "Lost"
+                        : "Found";
 
-                const count =
-                    document.getElementById(
-                        "reportsCount"
-                    );
 
+                const statusClass =
+                    isLost
+                        ? "status-lost"
+                        : "status-found";
 
-                try {
 
-                    const url =
-                        `${API_URL}/my-items/${encodeURIComponent(
-                            user.id
-                        )}`;
+                // =================================================
+                // IMAGE
+                // =================================================
 
+                const imageUrl =
+                    getImageUrl(item);
 
-                    console.log(
-                        "Fetching:",
-                        url
-                    );
 
+                let imageHTML;
 
-                    const response =
-                        await fetch(url);
 
+                if (imageUrl) {
 
-                    let items = null;
+                    imageHTML = `
 
+                        <div
+                            class="report-image-container"
+                        >
 
-                    try {
-
-                        items =
-                            await response.json();
-
-                    }
-                    catch {
-
-                        items = null;
-
-                    }
-
-
-                    console.log(
-                        "Reports received:",
-                        items
-                    );
-
-
-                    if (!response.ok) {
-
-                        throw new Error(
-                            items?.detail ||
-                            items?.message ||
-                            "Could not load reports."
-                        );
-
-                    }
-
-
-                    if (
-                        !Array.isArray(items)
-                    ) {
-
-                        throw new Error(
-                            "Invalid reports data received from server."
-                        );
-
-                    }
-
-
-                    count.textContent =
-                        `${items.length} Report${
-                            items.length === 1
-                                ? ""
-                                : "s"
-                        }`;
-
-
-                    // =================================================
-                    // EMPTY
-                    // =================================================
-
-                    if (
-                        items.length === 0
-                    ) {
-
-                        container.innerHTML = `
-
-                            <div class="empty-state">
-
-                                <div class="empty-icon">
-                                    📦
-                                </div>
-
-                                <h2>
-                                    No Reports Yet
-                                </h2>
-
-                                <p>
-                                    You haven't reported
-                                    any lost or found items yet.
-                                </p>
-
-                                <a
-                                    href="report-lost.html"
-                                    class="report-button"
-                                >
-                                    Report an Item
-                                </a>
-
-                            </div>
-
-                        `;
-
-                        return;
-
-                    }
-
-
-                    container.innerHTML = "";
-
-
-                    // =================================================
-                    // CREATE CARDS
-                    // =================================================
-
-                    items.forEach(
-                        item => {
-
-                            const card =
-                                document.createElement(
-                                    "article"
-                                );
-
-
-                            card.className =
-                                "report-card";
-
-
-                            card.addEventListener(
-                                "click",
-                                function() {
-
-                                    window.location.href =
-                                        `item-detail.html?id=${encodeURIComponent(
-                                            item.id
-                                        )}`;
-
-                                }
-                            );
-
-
-                            const status =
-                                String(
-                                    item.item_type || ""
-                                ).toLowerCase() === "lost"
-                                    ? "Lost"
-                                    : "Found";
-
-
-                            const statusClass =
-                                String(
-                                    item.item_type || ""
-                                ).toLowerCase() === "lost"
-                                    ? "status-lost"
-                                    : "status-found";
-
-
-                            const imageUrl =
-                                getImageUrl(item);
-
-
-                            let imageHTML;
-
-
-                            if (imageUrl) {
-
-                                imageHTML = `
-
-                                    <div class="report-image-container">
-
-                                        <img
-                                            class="report-image"
-                                            src="${escapeHtml(
-                                                imageUrl
-                                            )}"
-                                            alt="${escapeHtml(
-                                                item.item_name
-                                            )}"
-                                            onerror="handleImageError(this)"
-                                        >
-
-                                    </div>
-
-                                `;
-
-                            }
-                            else {
-
-                                imageHTML = `
-
-                                    <div class="report-image-container">
-
-                                        <div class="image-placeholder">
-
-                                            📦
-
-                                            <span>
-                                                No image available
-                                            </span>
-
-                                        </div>
-
-                                    </div>
-
-                                `;
-
-                            }
-
-
-                            card.innerHTML = `
-
-                                ${imageHTML}
-
-
-                                <div class="report-content">
-
-
-                                    <div class="report-top">
-
-                                        <h2 class="report-title">
-
-                                            ${escapeHtml(
-                                                item.item_name ||
-                                                "Unnamed Item"
-                                            )}
-
-                                        </h2>
-
-
-                                        <span
-                                            class="status-badge ${statusClass}"
-                                        >
-
-                                            ${status}
-
-                                        </span>
-
-                                    </div>
-
-
-                                    <p class="report-description">
-
-                                        ${escapeHtml(
-                                            item.description ||
-                                            "No description"
-                                        )}
-
-                                    </p>
-
-
-                                    <div class="report-info">
-
-
-                                        <div class="info-box">
-
-                                            <span class="info-label">
-                                                📍 Location
-                                            </span>
-
-                                            <span class="info-value">
-
-                                                ${escapeHtml(
-                                                    item.location ||
-                                                    "Not specified"
-                                                )}
-
-                                            </span>
-
-                                        </div>
-
-
-                                        <div class="info-box">
-
-                                            <span class="info-label">
-                                                📅 Date
-                                            </span>
-
-                                            <span class="info-value">
-
-                                                ${escapeHtml(
-                                                    item.item_date ||
-                                                    "Not specified"
-                                                )}
-
-                                            </span>
-
-                                        </div>
-
-
-                                        <div class="info-box">
-
-                                            <span class="info-label">
-                                                🎨 Color
-                                            </span>
-
-                                            <span class="info-value">
-
-                                                ${escapeHtml(
-                                                    item.color ||
-                                                    "Not specified"
-                                                )}
-
-                                            </span>
-
-                                        </div>
-
-
-                                        <div class="info-box">
-
-                                            <span class="info-label">
-                                                🏷️ Brand
-                                            </span>
-
-                                            <span class="info-value">
-
-                                                ${escapeHtml(
-                                                    item.brand ||
-                                                    "Not specified"
-                                                )}
-
-                                            </span>
-
-                                        </div>
-
-
-                                    </div>
-
-
-                                    <div class="click-hint">
-
-                                        Click to view full details →
-
-                                    </div>
-
-
-                                </div>
-
-                            `;
-
-
-                            container.appendChild(
-                                card
-                            );
-
-                        }
-                    );
-
-                }
-
-
-                catch (error) {
-
-                    console.error(
-                        "My Reports Error:",
-                        error
-                    );
-
-
-                    count.textContent =
-                        "Error";
-
-
-                    container.innerHTML = `
-
-                        <div class="empty-state">
-
-                            <div class="empty-icon">
-                                ⚠️
-                            </div>
-
-                            <h2>
-                                Could Not Load Reports
-                            </h2>
-
-                            <p>
-
-                                ${escapeHtml(
-                                    error.message ||
-                                    "Something went wrong while loading your reports."
-                                )}
-
-                            </p>
-
-                            <button
-                                class="report-button"
-                                onclick="location.reload()"
+                            <img
+                                class="report-image"
+                                src="${escapeHtml(
+                                    imageUrl
+                                )}"
+                                alt="${escapeHtml(
+                                    item.item_name
+                                )}"
+                                onerror="handleImageError(this)"
                             >
-                                Try Again
-                            </button>
 
                         </div>
 
                     `;
 
                 }
+                else {
 
-            }
+                    imageHTML = `
+
+                        <div
+                            class="report-image-container"
+                        >
+
+                            <div
+                                class="image-placeholder"
+                            >
+
+                                📦
+
+                                <span>
+                                    No image available
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    `;
+                }
 
 
-            loadMyReports();
+                // =================================================
+                // CARD
+                // =================================================
+
+                card.innerHTML = `
+
+                    ${imageHTML}
+
+
+                    <div class="report-content">
+
+
+                        <div class="report-top">
+
+                            <h2 class="report-title">
+
+                                ${escapeHtml(
+                                    item.item_name ||
+                                    "Unnamed Item"
+                                )}
+
+                            </h2>
+
+
+                            <span
+                                class="status-badge ${statusClass}"
+                            >
+
+                                ${status}
+
+                            </span>
+
+                        </div>
+
+
+                        <p class="report-description">
+
+                            ${escapeHtml(
+                                item.description ||
+                                "No description"
+                            )}
+
+                        </p>
+
+
+                        <div class="report-info">
+
+
+                            <div class="info-box">
+
+                                <span class="info-label">
+                                    📍 Location
+                                </span>
+
+                                <span class="info-value">
+
+                                    ${escapeHtml(
+                                        item.location ||
+                                        "Not specified"
+                                    )}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="info-box">
+
+                                <span class="info-label">
+                                    📅 Date
+                                </span>
+
+                                <span class="info-value">
+
+                                    ${escapeHtml(
+                                        item.item_date ||
+                                        "Not specified"
+                                    )}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="info-box">
+
+                                <span class="info-label">
+                                    🎨 Color
+                                </span>
+
+                                <span class="info-value">
+
+                                    ${escapeHtml(
+                                        item.color ||
+                                        "Not specified"
+                                    )}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="info-box">
+
+                                <span class="info-label">
+                                    🏷️ Brand
+                                </span>
+
+                                <span class="info-value">
+
+                                    ${escapeHtml(
+                                        item.brand ||
+                                        "Not specified"
+                                    )}
+
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="click-hint">
+
+                            Click to view full details →
+
+                        </div>
+
+
+                    </div>
+
+                `;
+
+
+                container.appendChild(
+                    card
+                );
+
+            });
 
         }
 
+
+        catch (error) {
+
+            console.error(
+                "My Reports Error:",
+                error
+            );
+
+
+            count.textContent =
+                "Error";
+
+
+            container.innerHTML = `
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ⚠️
+                    </div>
+
+                    <h2>
+                        Could Not Load Reports
+                    </h2>
+
+                    <p>
+                        ${escapeHtml(
+                            error.message ||
+                            "Something went wrong while loading your reports."
+                        )}
+                    </p>
+
+                    <button
+                        class="report-button"
+                        onclick="location.reload()"
+                    >
+                        Try Again
+                    </button>
+
+                </div>
+
+            `;
+        }
     }
 
-</script>
 
+    // =====================================================
+    // PAGE START
+    // =====================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            const user =
+                getLoggedInUser();
+
+
+            if (!user) {
+                return;
+            }
+
+
+            setupNavbar(user);
+
+
+            loadMyReports(user);
+
+        }
+    );
+
+</script>
 
 </body>
 

@@ -607,6 +607,76 @@ textarea {
 }
 
 
+
+/* =========================================================
+   MATCH ACTION BUTTONS
+========================================================= */
+
+.match-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.view-match-btn,
+.contact-btn {
+    padding: 11px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+/* View Possible Match */
+
+.view-match-btn {
+    background-color: #2563eb;
+    color: white;
+}
+
+.view-match-btn:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.20);
+}
+
+/* Contact Reporter */
+
+.contact-btn {
+    background-color: #16a34a;
+    color: white;
+}
+
+.contact-btn:hover {
+    background-color: #15803d;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(22, 163, 74, 0.20);
+}
+
+.contact-btn:active,
+.view-match-btn:active {
+    transform: translateY(0);
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .match-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .view-match-btn,
+    .contact-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
 /* =========================================================
    LOADING / STATUS
 ========================================================= */

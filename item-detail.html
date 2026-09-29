@@ -8,9 +8,34 @@
     <title>Item Details | Lost & Found AI</title>
 
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* =====================================================
+           LOGGED-IN USER
+        ===================================================== */
+
+        .user-welcome {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e3a8a;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 700px) {
+
+            .user-welcome {
+                font-size: 14px;
+            }
+
+        }
+    </style>
 </head>
 
 <body>
+
+    <!-- =====================================================
+         NAVBAR
+    ===================================================== -->
 
     <nav class="navbar">
 
@@ -18,35 +43,295 @@
             Lost & Found AI
         </div>
 
+
         <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="items.html">Items</a>
-            <a href="report-lost.html">Report Lost</a>
-            <a href="report-found.html">Report Found</a>
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="items.html">
+                Items
+            </a>
+
+            <a href="report-lost.html">
+                Report Lost
+            </a>
+
+            <a href="report-found.html">
+                Report Found
+            </a>
+
         </div>
 
+
         <div class="nav-buttons">
-            <a href="login.html" class="login-btn">Login</a>
-            <a href="signup.html" class="signup-btn">Sign Up</a>
+
+            <!-- Logged-in user name -->
+            <span
+                class="user-welcome"
+                id="userWelcome"
+            ></span>
+
+
+            <!-- My Reports -->
+            <a
+                href="my-reports.html"
+                class="login-btn"
+                id="myReportsBtn"
+            >
+                My Reports
+            </a>
+
+
+            <!-- Logout -->
+            <a
+                href="#"
+                class="signup-btn"
+                id="logoutBtn"
+            >
+                Logout
+            </a>
+
+
+            <!-- Login -->
+            <a
+                href="login.html"
+                class="login-btn"
+                id="loginBtn"
+            >
+                Login
+            </a>
+
+
+            <!-- Sign Up -->
+            <a
+                href="signup.html"
+                class="signup-btn"
+                id="signupBtn"
+            >
+                Sign Up
+            </a>
+
         </div>
 
     </nav>
 
 
+    <!-- =====================================================
+         ITEM DETAILS
+    ===================================================== -->
+
     <section class="detail-section">
 
         <div id="item-detail">
 
-            <p>Loading item...</p>
+            <p>
+                Loading item...
+            </p>
 
         </div>
 
     </section>
 
 
+    <!-- =====================================================
+         SCRIPTS
+    ===================================================== -->
+
     <script src="config.js"></script>
+
     <script src="script.js"></script>
+
     <script src="item-detail.js"></script>
+
+
+    <!-- =====================================================
+         NAVBAR AUTH
+    ===================================================== -->
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const storedUser =
+                    localStorage.getItem("user");
+
+
+                const userWelcome =
+                    document.getElementById(
+                        "userWelcome"
+                    );
+
+                const myReportsBtn =
+                    document.getElementById(
+                        "myReportsBtn"
+                    );
+
+                const logoutBtn =
+                    document.getElementById(
+                        "logoutBtn"
+                    );
+
+                const loginBtn =
+                    document.getElementById(
+                        "loginBtn"
+                    );
+
+                const signupBtn =
+                    document.getElementById(
+                        "signupBtn"
+                    );
+
+
+                // =================================================
+                // USER IS LOGGED IN
+                // =================================================
+
+                if (storedUser) {
+
+                    try {
+
+                        const user =
+                            JSON.parse(
+                                storedUser
+                            );
+
+
+                        if (
+                            user &&
+                            user.id
+                        ) {
+
+                            // Show user name
+                            if (userWelcome) {
+
+                                userWelcome.textContent =
+                                    `Hi, ${user.name || "User"} 👋`;
+
+                                userWelcome.style.display =
+                                    "inline-block";
+                            }
+
+
+                            // Show My Reports
+                            if (myReportsBtn) {
+
+                                myReportsBtn.style.display =
+                                    "inline-block";
+                            }
+
+
+                            // Show Logout
+                            if (logoutBtn) {
+
+                                logoutBtn.style.display =
+                                    "inline-block";
+                            }
+
+
+                            // Hide Login
+                            if (loginBtn) {
+
+                                loginBtn.style.display =
+                                    "none";
+                            }
+
+
+                            // Hide Sign Up
+                            if (signupBtn) {
+
+                                signupBtn.style.display =
+                                    "none";
+                            }
+
+
+                            // =================================================
+                            // LOGOUT
+                            // =================================================
+
+                            if (logoutBtn) {
+
+                                logoutBtn.onclick =
+                                    function (event) {
+
+                                        event.preventDefault();
+
+                                        localStorage.removeItem(
+                                            "user"
+                                        );
+
+                                        window.location.href =
+                                            "index.html";
+                                    };
+                            }
+
+                        }
+
+                    }
+                    catch (error) {
+
+                        console.error(
+                            "Invalid user data:",
+                            error
+                        );
+
+                        localStorage.removeItem(
+                            "user"
+                        );
+
+                    }
+
+                }
+
+                // =================================================
+                // USER IS NOT LOGGED IN
+                // =================================================
+
+                else {
+
+                    if (userWelcome) {
+
+                        userWelcome.style.display =
+                            "none";
+                    }
+
+
+                    if (myReportsBtn) {
+
+                        myReportsBtn.style.display =
+                            "none";
+                    }
+
+
+                    if (logoutBtn) {
+
+                        logoutBtn.style.display =
+                            "none";
+                    }
+
+
+                    if (loginBtn) {
+
+                        loginBtn.style.display =
+                            "inline-block";
+                    }
+
+
+                    if (signupBtn) {
+
+                        signupBtn.style.display =
+                            "inline-block";
+                    }
+
+                }
+
+            }
+        );
+
+    </script>
 
 </body>
 
