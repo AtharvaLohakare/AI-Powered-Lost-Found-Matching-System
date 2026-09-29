@@ -803,40 +803,26 @@ function viewItem(id) {
 
 async function contactReporter(id) {
 
-    const storedUser =
-        localStorage.getItem("user");
-
+    const storedUser = localStorage.getItem("user");
 
     // -----------------------------------------------------
     // CHECK LOGIN
     // -----------------------------------------------------
 
     if (!storedUser) {
-
         showToast(
             "Please login before contacting the reporter.",
             "warning"
         );
-
         return;
     }
 
-
     let user;
 
-
     try {
-
-        user =
-            JSON.parse(storedUser);
-
-    }
-    catch (error) {
-
-        console.error(
-            "Invalid user:",
-            error
-        );
+        user = JSON.parse(storedUser);
+    } catch (error) {
+        console.error("Invalid user:", error);
 
         localStorage.removeItem("user");
 
@@ -848,57 +834,41 @@ async function contactReporter(id) {
         return;
     }
 
-
     if (!user || !user.id) {
-
         showToast(
             "User information not found. Please login again.",
             "error"
         );
-
         return;
     }
-
 
     try {
 
         // -------------------------------------------------
-        // GET MATCHED ITEM
+        // GET ITEM INFORMATION
         // -------------------------------------------------
 
-        const response =
-            await fetch(
-                `${API_URL}/items/${encodeURIComponent(id)}`
-            );
-
+        const response = await fetch(
+            `${API_URL}/items/${encodeURIComponent(id)}`
+        );
 
         let item = null;
 
-
         try {
             item = await response.json();
-        }
-        catch {
+        } catch {
             item = null;
         }
 
-
         if (!response.ok) {
-
             throw new Error(
                 item?.detail ||
                 item?.message ||
                 "Unable to get item information."
             );
-
         }
 
-
-        console.log(
-            "Matched item:",
-            item
-        );
-
+        console.log("Matched item:", item);
 
         // -------------------------------------------------
         // CHECK REPORTER
@@ -909,9 +879,8 @@ async function contactReporter(id) {
             item.user_id === undefined ||
             item.user_id === ""
         ) {
-
             showToast(
-                "Reporter information is unavailable. Backend must return user_id for this item.",
+                "Reporter information is unavailable.",
                 "error"
             );
 
@@ -923,15 +892,11 @@ async function contactReporter(id) {
             return;
         }
 
-
         // -------------------------------------------------
         // PREVENT CONTACTING YOURSELF
         // -------------------------------------------------
 
-        if (
-            Number(item.user_id) ===
-            Number(user.id)
-        ) {
+        if (Number(item.user_id) === Number(user.id)) {
 
             showToast(
                 "This is your own reported item.",
@@ -941,33 +906,36 @@ async function contactReporter(id) {
             return;
         }
 
+        // -------------------------------------------------
+        // OPEN MESSAGES PAGE
+        // -------------------------------------------------
 
-        // -------------------------------------------------
-        // OPEN MESSAGES
-        // -------------------------------------------------
+        const messagesUrl = new URL(
+            "messages.html",
+            window.location.href
+        );
+
+        messagesUrl.searchParams.set(
+            "item_id",
+            id
+        );
 
         window.location.href =
-            `messages.html?item_id=${encodeURIComponent(id)}`;
+            messagesUrl.toString();
 
-    }
-
-
-    catch (error) {
+    } catch (error) {
 
         console.error(
             "Contact Reporter Error:",
             error
         );
 
-
         showToast(
             error.message ||
             "Unable to contact reporter.",
             "error"
         );
-
     }
-
 }
 
 
