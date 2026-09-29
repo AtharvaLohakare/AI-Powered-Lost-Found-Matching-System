@@ -2,14 +2,13 @@ from fastapi import FastAPI, Form, UploadFile, File, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+
 import os
 import shutil
 import bcrypt
 
-from .models import Item, User
-
 from .database import SessionLocal
-from .models import Item, User
+from .models import Item, User, Message
 
 from .text_matcher import calculate_text_similarity
 from .image_matcher import calculate_image_similarity
@@ -20,7 +19,6 @@ from .image_matcher import calculate_image_similarity
 # =========================================================
 
 app = FastAPI()
-
 
 
 # =========================================================
@@ -46,7 +44,6 @@ os.makedirs(
     UPLOAD_DIR,
     exist_ok=True
 )
-
 
 app.mount(
     "/uploads",
@@ -82,15 +79,21 @@ def home():
         "message": "FastAPI connected to MySQL!"
     }
 
-# =======================================
+
+# =========================================================
+# SIGNUP
+# =========================================================
 
 @app.post("/signup")
 def signup(
+
     name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db)
+
 ):
+
     existing_user = (
         db.query(User)
         .filter(User.email == email)
@@ -98,6 +101,7 @@ def signup(
     )
 
     if existing_user:
+
         raise HTTPException(
             status_code=400,
             detail="Email already registered"
@@ -119,20 +123,29 @@ def signup(
     db.refresh(new_user)
 
     return {
+
         "status": "success",
         "message": "Account created successfully!",
         "user_id": new_user.id,
         "name": new_user.name,
         "email": new_user.email
+
     }
 
 
+# =========================================================
+# LOGIN
+# =========================================================
+
 @app.post("/login")
 def login(
+
     email: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db)
+
 ):
+
     user = (
         db.query(User)
         .filter(User.email == email)
@@ -140,6 +153,7 @@ def login(
     )
 
     if not user:
+
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password"
@@ -151,23 +165,26 @@ def login(
     )
 
     if not password_match:
+
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password"
         )
 
     return {
+
         "status": "success",
         "message": "Login successful!",
         "user_id": user.id,
         "name": user.name,
         "email": user.email
+
     }
+
+
 # =========================================================
 # REPORT LOST / FOUND ITEM
 # =========================================================
-
-
 
 @app.post("/report-item")
 async def report_item(
@@ -241,7 +258,6 @@ async def report_item(
 
     )
 
-
     db.add(new_item)
 
     db.commit()
@@ -269,7 +285,9 @@ async def report_item(
 
 @app.get("/items")
 def get_items(
+
     db: Session = Depends(get_db)
+
 ):
 
     items = db.query(Item).all()
@@ -306,16 +324,33 @@ def get_items(
     ]
 
 
+# =========================================================
+# GET MY ITEMS
+# =========================================================
+
 @app.get("/my-items/{user_id}")
 def get_my_items(
+
     user_id: int,
+
     db: Session = Depends(get_db)
+
 ):
+
     items = (
+
         db.query(Item)
-        .filter(Item.user_id == user_id)
-        .order_by(Item.id.desc())
+
+        .filter(
+            Item.user_id == user_id
+        )
+
+        .order_by(
+            Item.id.desc()
+        )
+
         .all()
+
     )
 
     return items
@@ -361,6 +396,8 @@ def get_item(
     return {
 
         "id": item.id,
+
+        "user_id": item.user_id,
 
         "item_type": item.item_type,
 
@@ -474,6 +511,7 @@ def match_item(
         lost_text = (
 
             f"{lost_item.item_name}. "
+
             f"{lost_item.description}"
 
         )
@@ -482,6 +520,7 @@ def match_item(
         found_text = (
 
             f"{found_item.item_name}. "
+
             f"{found_item.description}"
 
         )
@@ -490,16 +529,22 @@ def match_item(
         text_similarity = (
 
             calculate_text_similarity(
+
                 lost_text,
+
                 found_text
+
             )
 
         )
 
 
         text_score = round(
+
             text_similarity * 100,
+
             2
+
         )
 
 
@@ -584,8 +629,11 @@ def match_item(
             and found_item.category
 
             and
+
             lost_item.category.lower()
+
             ==
+
             found_item.category.lower()
 
         ):
@@ -606,8 +654,11 @@ def match_item(
             and found_item.color
 
             and
+
             lost_item.color.lower()
+
             ==
+
             found_item.color.lower()
 
         ):
@@ -628,8 +679,11 @@ def match_item(
             and found_item.brand
 
             and
+
             lost_item.brand.lower()
+
             ==
+
             found_item.brand.lower()
 
         ):
@@ -650,8 +704,11 @@ def match_item(
             and found_item.location
 
             and
+
             lost_item.location.lower()
+
             ==
+
             found_item.location.lower()
 
         ):
@@ -672,8 +729,11 @@ def match_item(
             and found_item.item_name
 
             and
+
             lost_item.item_name.lower()
+
             ==
+
             found_item.item_name.lower()
 
         ):
@@ -705,8 +765,11 @@ def match_item(
 
 
         final_score = round(
+
             final_score,
+
             2
+
         )
 
 
@@ -879,5 +942,332 @@ def match_item(
 
         "matches":
             strong_matches
+
+    }
+
+
+# =========================================================
+# MESSAGES / COMMUNICATION
+# =========================================================
+
+@app.post("/messages/send")
+def send_message(
+
+    sender_id: int = Form(...),
+
+    item_id: int = Form(...),
+
+    message: str = Form(...),
+
+    db: Session = Depends(get_db)
+
+):
+
+    # -----------------------------------------------------
+    # VALIDATE MESSAGE
+    # -----------------------------------------------------
+
+    message = message.strip()
+
+
+    if not message:
+
+        raise HTTPException(
+
+            status_code=400,
+
+            detail="Message cannot be empty."
+
+        )
+
+
+    # -----------------------------------------------------
+    # FIND ITEM
+    # -----------------------------------------------------
+
+    item = (
+
+        db.query(Item)
+
+        .filter(
+            Item.id == item_id
+        )
+
+        .first()
+
+    )
+
+
+    if not item:
+
+        raise HTTPException(
+
+            status_code=404,
+
+            detail="Item not found."
+
+        )
+
+
+    # -----------------------------------------------------
+    # FIND REPORTER
+    # -----------------------------------------------------
+
+    receiver_id = item.user_id
+
+
+    if not receiver_id:
+
+        raise HTTPException(
+
+            status_code=400,
+
+            detail="Reporter information is not available."
+
+        )
+
+
+    # -----------------------------------------------------
+    # PREVENT SELF MESSAGE
+    # -----------------------------------------------------
+
+    if sender_id == receiver_id:
+
+        raise HTTPException(
+
+            status_code=400,
+
+            detail="You cannot message yourself."
+
+        )
+
+
+    # -----------------------------------------------------
+    # CHECK SENDER
+    # -----------------------------------------------------
+
+    sender = (
+
+        db.query(User)
+
+        .filter(
+            User.id == sender_id
+        )
+
+        .first()
+
+    )
+
+
+    if not sender:
+
+        raise HTTPException(
+
+            status_code=404,
+
+            detail="Sender account not found."
+
+        )
+
+
+    # -----------------------------------------------------
+    # CHECK RECEIVER
+    # -----------------------------------------------------
+
+    receiver = (
+
+        db.query(User)
+
+        .filter(
+            User.id == receiver_id
+        )
+
+        .first()
+
+    )
+
+
+    if not receiver:
+
+        raise HTTPException(
+
+            status_code=404,
+
+            detail="Reporter account not found."
+
+        )
+
+
+    # -----------------------------------------------------
+    # CREATE MESSAGE
+    # -----------------------------------------------------
+
+    new_message = Message(
+
+        sender_id=sender_id,
+
+        receiver_id=receiver_id,
+
+        item_id=item_id,
+
+        message=message
+
+    )
+
+
+    db.add(new_message)
+
+    db.commit()
+
+    db.refresh(new_message)
+
+
+    # -----------------------------------------------------
+    # RESPONSE
+    # -----------------------------------------------------
+
+    return {
+
+        "status": "success",
+
+        "message":
+            "Message sent successfully.",
+
+        "message_id":
+            new_message.id,
+
+        "item_id":
+            item_id,
+
+        "sender_id":
+            sender_id,
+
+        "receiver_id":
+            receiver_id,
+
+        "created_at":
+            str(
+                new_message.created_at
+            )
+
+    }
+
+
+# =========================================================
+# GET MESSAGES FOR A USER + ITEM
+# =========================================================
+
+@app.get("/messages/{user_id}/{item_id}")
+def get_messages(
+
+    user_id: int,
+
+    item_id: int,
+
+    db: Session = Depends(get_db)
+
+):
+
+    messages = (
+
+        db.query(Message)
+
+        .filter(
+
+            Message.item_id == item_id,
+
+            (
+
+                (Message.sender_id == user_id)
+
+                |
+
+                (Message.receiver_id == user_id)
+
+            )
+
+        )
+
+        .order_by(
+            Message.id.asc()
+        )
+
+        .all()
+
+    )
+
+
+    result = []
+
+
+    for msg in messages:
+
+        sender = (
+
+            db.query(User)
+
+            .filter(
+                User.id == msg.sender_id
+            )
+
+            .first()
+
+        )
+
+
+        receiver = (
+
+            db.query(User)
+
+            .filter(
+                User.id == msg.receiver_id
+            )
+
+            .first()
+
+        )
+
+
+        result.append({
+
+            "id":
+                msg.id,
+
+            "sender_id":
+                msg.sender_id,
+
+            "sender_name":
+                sender.name
+                if sender
+                else "Unknown User",
+
+            "receiver_id":
+                msg.receiver_id,
+
+            "receiver_name":
+                receiver.name
+                if receiver
+                else "Unknown User",
+
+            "item_id":
+                msg.item_id,
+
+            "message":
+                msg.message,
+
+            "created_at":
+                str(
+                    msg.created_at
+                )
+
+        })
+
+
+    return {
+
+        "status": "success",
+
+        "messages":
+            result
 
     }
