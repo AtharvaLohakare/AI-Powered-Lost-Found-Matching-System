@@ -636,6 +636,10 @@ def get_item(
 # AI MATCHING
 # =========================================================
 
+# =========================================================
+# AI MATCHING
+# =========================================================
+
 @app.get("/match/{item_id}")
 def match_item(
     item_id: int,
@@ -643,10 +647,10 @@ def match_item(
 ):
 
     # -----------------------------------------------------
-    # FIND LOST ITEM
+    # GET CURRENT ITEM
     # -----------------------------------------------------
 
-    lost_item = (
+    current_item = (
         db.query(Item)
         .filter(
             Item.id == item_id
@@ -654,7 +658,7 @@ def match_item(
         .first()
     )
 
-    if not lost_item:
+    if not current_item:
 
         raise HTTPException(
             status_code=404,
@@ -662,29 +666,36 @@ def match_item(
         )
 
     # -----------------------------------------------------
-    # ONLY LOST ITEMS CAN START MATCHING
+    # DETERMINE OPPOSITE ITEM TYPE
     # -----------------------------------------------------
 
-    if normalize_text(
-        lost_item.item_type
-    ) != "lost":
+    current_type = normalize_text(
+        current_item.item_type
+    )
+
+    if current_type == "lost":
+
+        target_type = "found"
+
+    elif current_type == "found":
+
+        target_type = "lost"
+
+    else:
 
         raise HTTPException(
             status_code=400,
-            detail=(
-                "Matching should be started "
-                "from a lost item."
-            )
+            detail="Item type must be lost or found."
         )
 
     # -----------------------------------------------------
-    # GET FOUND ITEMS
+    # GET OPPOSITE TYPE ITEMS
     # -----------------------------------------------------
 
-    found_items = (
+    candidate_items = (
         db.query(Item)
         .filter(
-            Item.item_type == "found"
+            Item.item_type == target_type
         )
         .all()
     )
@@ -692,39 +703,39 @@ def match_item(
     matches = []
 
     # -----------------------------------------------------
-    # LOST TEXT
+    # CURRENT ITEM TEXT
     # -----------------------------------------------------
 
-    lost_text = " ".join([
-        lost_item.item_name or "",
-        lost_item.description or "",
-        lost_item.color or "",
-        lost_item.brand or ""
+    current_text = " ".join([
+        current_item.item_name or "",
+        current_item.description or "",
+        current_item.color or "",
+        current_item.brand or ""
     ])
 
     # =====================================================
-    # COMPARE FOUND ITEMS
+    # COMPARE CANDIDATE ITEMS
     # =====================================================
 
-    for found_item in found_items:
+    for candidate_item in candidate_items:
 
         # -------------------------------------------------
         # 1. TEXT SIMILARITY
         # -------------------------------------------------
 
-        found_text = " ".join([
-            found_item.item_name or "",
-            found_item.description or "",
-            found_item.color or "",
-            found_item.brand or ""
+        candidate_text = " ".join([
+            candidate_item.item_name or "",
+            candidate_item.description or "",
+            candidate_item.color or "",
+            candidate_item.brand or ""
         ])
 
         try:
 
             text_similarity = (
                 calculate_text_similarity(
-                    lost_text,
-                    found_text
+                    current_text,
+                    candidate_text
                 )
             )
 
@@ -749,32 +760,32 @@ def match_item(
 
         image_score = 0.0
 
-        lost_image_path = None
-        found_image_path = None
+        current_image_path = None
+        candidate_image_path = None
 
-        if lost_item.image_name:
+        if current_item.image_name:
 
-            lost_image_path = os.path.join(
+            current_image_path = os.path.join(
                 UPLOAD_DIR,
-                lost_item.image_name
+                current_item.image_name
             )
 
-        if found_item.image_name:
+        if candidate_item.image_name:
 
-            found_image_path = os.path.join(
+            candidate_image_path = os.path.join(
                 UPLOAD_DIR,
-                found_item.image_name
+                candidate_item.image_name
             )
 
         image_available = (
             bool(
-                lost_image_path
-                and found_image_path
+                current_image_path
+                and candidate_image_path
                 and os.path.isfile(
-                    lost_image_path
+                    current_image_path
                 )
                 and os.path.isfile(
-                    found_image_path
+                    candidate_image_path
                 )
             )
         )
@@ -785,8 +796,8 @@ def match_item(
 
                 image_similarity = (
                     calculate_image_similarity(
-                        lost_image_path,
-                        found_image_path
+                        current_image_path,
+                        candidate_image_path
                     )
                 )
 
@@ -816,15 +827,15 @@ def match_item(
         # Category = 25
         if (
             normalize_text(
-                lost_item.category
+                current_item.category
             )
             and
             normalize_text(
-                lost_item.category
+                current_item.category
             )
             ==
             normalize_text(
-                found_item.category
+                candidate_item.category
             )
         ):
 
@@ -837,15 +848,15 @@ def match_item(
         # Color = 20
         if (
             normalize_text(
-                lost_item.color
+                current_item.color
             )
             and
             normalize_text(
-                lost_item.color
+                current_item.color
             )
             ==
             normalize_text(
-                found_item.color
+                candidate_item.color
             )
         ):
 
@@ -858,15 +869,15 @@ def match_item(
         # Brand = 20
         if (
             normalize_text(
-                lost_item.brand
+                current_item.brand
             )
             and
             normalize_text(
-                lost_item.brand
+                current_item.brand
             )
             ==
             normalize_text(
-                found_item.brand
+                candidate_item.brand
             )
         ):
 
@@ -879,15 +890,15 @@ def match_item(
         # Location = 20
         if (
             normalize_text(
-                lost_item.location
+                current_item.location
             )
             and
             normalize_text(
-                lost_item.location
+                current_item.location
             )
             ==
             normalize_text(
-                found_item.location
+                candidate_item.location
             )
         ):
 
@@ -900,15 +911,15 @@ def match_item(
         # Item name = 15
         if (
             normalize_text(
-                lost_item.item_name
+                current_item.item_name
             )
             and
             normalize_text(
-                lost_item.item_name
+                current_item.item_name
             )
             ==
             normalize_text(
-                found_item.item_name
+                candidate_item.item_name
             )
         ):
 
@@ -1037,45 +1048,45 @@ def match_item(
         matches.append({
 
             "item_id":
-                found_item.id,
+                candidate_item.id,
 
             "user_id":
-                found_item.user_id,
+                candidate_item.user_id,
 
             "item_name":
-                found_item.item_name,
+                candidate_item.item_name,
 
             "item_type":
-                found_item.item_type,
+                candidate_item.item_type,
 
             "category":
-                found_item.category,
+                candidate_item.category,
 
             "description":
-                found_item.description,
+                candidate_item.description,
 
             "color":
-                found_item.color,
+                candidate_item.color,
 
             "brand":
-                found_item.brand,
+                candidate_item.brand,
 
             "location":
-                found_item.location,
+                candidate_item.location,
 
             "item_date":
                 (
-                    str(found_item.item_date)
-                    if found_item.item_date
+                    str(candidate_item.item_date)
+                    if candidate_item.item_date
                     else None
                 ),
 
             "image_name":
-                found_item.image_name,
+                candidate_item.image_name,
 
             "image_url":
                 image_url(
-                    found_item.image_name
+                    candidate_item.image_name
                 ),
 
             "image_similarity":
@@ -1098,7 +1109,7 @@ def match_item(
         })
 
     # =====================================================
-    # SORT
+    # SORT MATCHES
     # =====================================================
 
     matches.sort(
@@ -1107,7 +1118,7 @@ def match_item(
     )
 
     # =====================================================
-    # FILTER
+    # FILTER STRONG MATCHES
     # =====================================================
 
     strong_matches = [
@@ -1124,22 +1135,43 @@ def match_item(
 
         return {
             "status": "success",
-            "lost_item_id": lost_item.id,
+
+            "item_id":
+                current_item.id,
+
+            "item_type":
+                current_item.item_type,
+
+            "searching_for":
+                target_type,
+
             "matches": [],
-            "message": "No strong match found."
+
+            "message":
+                f"No strong {target_type} match found."
         }
 
     # =====================================================
-    # RETURN
+    # RETURN MATCHES
     # =====================================================
 
     return {
-        "status": "success",
-        "lost_item_id": lost_item.id,
-        "matches": strong_matches
+
+        "status":
+            "success",
+
+        "item_id":
+            current_item.id,
+
+        "item_type":
+            current_item.item_type,
+
+        "searching_for":
+            target_type,
+
+        "matches":
+            strong_matches
     }
-
-
 # =========================================================
 # SEND MESSAGE
 # =========================================================

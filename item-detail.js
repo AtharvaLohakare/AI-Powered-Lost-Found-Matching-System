@@ -212,22 +212,17 @@ async function loadItem() {
                     </p>
 
 
-                    ${
-                        String(item.item_type).toLowerCase() === "lost"
-
+                    ${item.item_type === "lost" || item.item_type === "found"
                         ?
-
                         `
                             <button
                                 class="match-btn"
-                                onclick="findMatches(${Number(item.id)})"
+                                onclick="findMatches(${item.id})"
                             >
                                 🤖 Find AI Matches
                             </button>
                         `
-
                         :
-
                         ""
                     }
 
