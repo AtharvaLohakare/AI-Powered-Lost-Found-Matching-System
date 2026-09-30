@@ -15,6 +15,7 @@ import os
 import shutil
 import uuid
 from datetime import datetime
+from math import radians, sin, cos, sqrt, atan2
 
 import bcrypt
 
@@ -22,7 +23,7 @@ from .database import SessionLocal
 from .models import Item, User, Message
 from .text_matcher import calculate_text_similarity
 from .image_matcher import calculate_image_similarity
-
+from math import radians, sin, cos, sqrt, atan2
 
 # =========================================================
 # FASTAPI APP
@@ -134,6 +135,8 @@ def serialize_item(item):
         "color": item.color,
         "brand": item.brand,
         "location": item.location,
+        "latitude": item.latitude,
+        "longitude": item.longitude,
 
         "item_date": (
             str(item.item_date)
@@ -165,7 +168,51 @@ def normalize_text(value):
         value.strip().lower().split()
     )
 
+def calculate_distance_km(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+):
+    """
+    Calculate distance between two GPS coordinates
+    using the Haversine formula.
+    """
 
+    if (
+        lat1 is None
+        or lon1 is None
+        or lat2 is None
+        or lon2 is None
+    ):
+        return None
+
+
+    R = 6371.0
+
+    lat1 = radians(lat1)
+    lat2 = radians(lat2)
+
+    dlat = lat2 - lat1
+    dlon = radians(lon2 - lon1)
+
+
+    a = (
+        sin(dlat / 2) ** 2
+        +
+        cos(lat1)
+        * cos(lat2)
+        * sin(dlon / 2) ** 2
+    )
+
+
+    c = 2 * atan2(
+        sqrt(a),
+        sqrt(1 - a)
+    )
+
+
+    return R * c
 # =========================================================
 # HOME
 # =========================================================
@@ -338,6 +385,8 @@ async def report_item(
     color: str = Form(""),
     brand: str = Form(""),
     location: str = Form(...),
+    latitude: float | None = Form(None),
+    longitude: float | None = Form(None),
     date: str = Form(...),
     image: UploadFile = File(...),
     db: Session = Depends(get_db)
@@ -516,6 +565,10 @@ async def report_item(
         color=color,
         brand=brand,
         location=location,
+
+        latitude=latitude,
+        longitude=longitude,
+
         item_date=item_date,
         image_name=unique_filename
     )
@@ -934,6 +987,39 @@ def match_item(
             100
         )
 
+
+# -------------------------------------------------
+# LOCATION DISTANCE
+# -------------------------------------------------
+
+    distance_km = calculate_distance_km(
+        current_item.latitude,
+        current_item.longitude,
+        candidate_item.latitude,
+        candidate_item.longitude
+    )
+
+
+    location_bonus = 0.0
+
+
+    if distance_km is not None:
+
+        if distance_km <= 0.5:
+
+            location_bonus = 5.0
+
+        elif distance_km <= 1.0:
+
+            location_bonus = 3.0
+
+        elif distance_km <= 3.0:
+
+            location_bonus = 1.0
+
+        reasons.append(
+            f"📍 {round(distance_km, 2)} km away"
+        )
         # -------------------------------------------------
         # 4. IMAGE REASON
         # -------------------------------------------------
@@ -1036,11 +1122,12 @@ def match_item(
             (metadata_score * 0.30)
         )
 
+        final_score = min(100.0, final_score)
+
         final_score = round(
             final_score,
             2
         )
-
         # -------------------------------------------------
         # 8. STORE MATCH
         # -------------------------------------------------
@@ -1073,6 +1160,19 @@ def match_item(
 
             "location":
                 candidate_item.location,
+
+            "latitude":
+                candidate_item.latitude,
+
+            "longitude":
+                candidate_item.longitude,
+
+            "distance_km":
+                (
+                    round(distance_km, 2)
+                    if distance_km is not None
+                    else None
+                ),
 
             "item_date":
                 (

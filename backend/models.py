@@ -4,25 +4,28 @@ from sqlalchemy import (
     String,
     Text,
     Date,
-    TIMESTAMP
+    TIMESTAMP,
+    Float
 )
 
 from .database import Base
 
 
 # =========================================================
-# ITEM
+# ITEM MODEL
 # =========================================================
 
 class Item(Base):
 
     __tablename__ = "items"
 
+
     id = Column(
         Integer,
         primary_key=True,
         index=True
     )
+
 
     user_id = Column(
         Integer,
@@ -30,50 +33,76 @@ class Item(Base):
         index=True
     )
 
+
     item_type = Column(
         String(20),
         nullable=False
     )
+
 
     item_name = Column(
         String(100),
         nullable=False
     )
 
+
     category = Column(
         String(50),
         nullable=False
     )
+
 
     description = Column(
         Text,
         nullable=False
     )
 
+
     color = Column(
         String(50),
         nullable=True
     )
+
 
     brand = Column(
         String(100),
         nullable=True
     )
 
+
     location = Column(
         String(200),
         nullable=False
     )
+
+
+    # =====================================================
+    # GPS LOCATION
+    # =====================================================
+
+    latitude = Column(
+        Float,
+        nullable=True
+    )
+
+
+    longitude = Column(
+        Float,
+        nullable=True
+    )
+
 
     item_date = Column(
         Date,
         nullable=False
     )
 
+
     image_name = Column(
         String(255),
         nullable=True
     )
+
 
     created_at = Column(
         TIMESTAMP
@@ -81,12 +110,13 @@ class Item(Base):
 
 
 # =========================================================
-# USER
+# USER MODEL
 # =========================================================
 
 class User(Base):
 
     __tablename__ = "users"
+
 
     id = Column(
         Integer,
@@ -94,10 +124,12 @@ class User(Base):
         index=True
     )
 
+
     name = Column(
         String(100),
         nullable=False
     )
+
 
     email = Column(
         String(150),
@@ -106,10 +138,12 @@ class User(Base):
         index=True
     )
 
+
     password_hash = Column(
         String(255),
         nullable=False
     )
+
 
     created_at = Column(
         TIMESTAMP
@@ -117,12 +151,13 @@ class User(Base):
 
 
 # =========================================================
-# MESSAGE
+# MESSAGE MODEL
 # =========================================================
 
 class Message(Base):
 
     __tablename__ = "messages"
+
 
     id = Column(
         Integer,
@@ -130,11 +165,13 @@ class Message(Base):
         index=True
     )
 
+
     sender_id = Column(
         Integer,
         nullable=False,
         index=True
     )
+
 
     receiver_id = Column(
         Integer,
@@ -142,16 +179,19 @@ class Message(Base):
         index=True
     )
 
+
     item_id = Column(
         Integer,
         nullable=False,
         index=True
     )
 
+
     message = Column(
         Text,
         nullable=False
     )
+
 
     created_at = Column(
         TIMESTAMP

@@ -1,12 +1,19 @@
+
 // =========================================================
 // LOST & FOUND AI
-// ITEM DETAIL + AI MATCHING
+// ITEM DETAIL + AI MATCHING + LOCATION MAP
 // =========================================================
 
 const itemDetail = document.getElementById("item-detail");
 
 const params = new URLSearchParams(window.location.search);
 const itemId = params.get("id");
+
+// Store current item for map
+let currentItem = null;
+
+// Store Leaflet map
+let matchMap = null;
 
 
 // =========================================================
@@ -20,6 +27,7 @@ function escapeHtml(value) {
 
     const div = document.createElement("div");
     div.textContent = String(value);
+
     return div.innerHTML;
 }
 
@@ -34,12 +42,10 @@ function getImageUrl(item) {
         return "";
     }
 
-    // If backend gives complete image URL
     if (item.image_url) {
         return item.image_url;
     }
 
-    // If there is no image
     if (!item.image_name) {
         return "";
     }
@@ -55,10 +61,10 @@ function getImageUrl(item) {
 function imageErrorHandler(img) {
 
     img.onerror = null;
-
     img.style.display = "none";
 
     if (img.parentElement) {
+
         img.parentElement.classList.add("image-failed");
 
         img.parentElement.innerHTML = `
@@ -67,6 +73,318 @@ function imageErrorHandler(img) {
                 <span>Image unavailable</span>
             </div>
         `;
+    }
+}
+
+
+// =========================================================
+// LOAD LEAFLET CSS + JS
+// =========================================================
+
+function loadLeaflet() {
+
+    return new Promise((resolve, reject) => {
+
+        // Already loaded
+        if (window.L) {
+            resolve();
+            return;
+        }
+
+        // -------------------------------
+        // Leaflet CSS
+        // -------------------------------
+
+        if (!document.getElementById("leaflet-css")) {
+
+            const css = document.createElement("link");
+
+            css.id = "leaflet-css";
+            css.rel = "stylesheet";
+            css.href =
+                "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+
+            document.head.appendChild(css);
+        }
+
+
+        // -------------------------------
+        // Leaflet JS
+        // -------------------------------
+
+        const script = document.createElement("script");
+
+        script.src =
+            "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+
+        script.onload = () => resolve();
+
+        script.onerror = () => {
+            reject(
+                new Error("Unable to load map library.")
+            );
+        };
+
+        document.head.appendChild(script);
+    });
+}
+
+
+// =========================================================
+// CHECK GPS COORDINATES
+// =========================================================
+
+function hasCoordinates(item) {
+
+    if (!item) {
+        return false;
+    }
+
+    const lat = Number(item.latitude);
+    const lon = Number(item.longitude);
+
+    return (
+        Number.isFinite(lat) &&
+        Number.isFinite(lon) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lon >= -180 &&
+        lon <= 180
+    );
+}
+
+
+// =========================================================
+// CREATE LOCATION MAP
+// =========================================================
+
+async function createMatchMap(item, matches) {
+
+    const mapContainer =
+        document.getElementById("match-map");
+
+    const mapStatus =
+        document.getElementById("map-status");
+
+    if (!mapContainer) {
+        return;
+    }
+
+
+    // -----------------------------------------
+    // Check current item GPS
+    // -----------------------------------------
+
+    const currentHasGPS = hasCoordinates(item);
+
+
+    // -----------------------------------------
+    // Find matches having GPS
+    // -----------------------------------------
+
+    const matchesWithGPS = matches.filter(
+        match => hasCoordinates(match)
+    );
+
+
+    // -----------------------------------------
+    // If nothing has GPS
+    // -----------------------------------------
+
+    if (!currentHasGPS && matchesWithGPS.length === 0) {
+
+        if (mapStatus) {
+
+            mapStatus.innerHTML = `
+                📍 Location data is not available
+                for these items.
+            `;
+        }
+
+        mapContainer.style.display = "none";
+
+        return;
+    }
+
+
+    try {
+
+        await loadLeaflet();
+
+        mapContainer.style.display = "block";
+
+        if (mapStatus) {
+            mapStatus.innerHTML =
+                "📍 Showing reported item locations";
+        }
+
+
+        // -----------------------------------------
+        // Remove old map
+        // -----------------------------------------
+
+        if (matchMap) {
+
+            matchMap.remove();
+
+            matchMap = null;
+        }
+
+
+        // -----------------------------------------
+        // Create map
+        // -----------------------------------------
+
+        matchMap = L.map("match-map");
+
+
+        // -----------------------------------------
+        // OpenStreetMap tiles
+        // -----------------------------------------
+
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                maxZoom: 19,
+                attribution:
+                    '&copy; OpenStreetMap contributors'
+            }
+        ).addTo(matchMap);
+
+
+        // -----------------------------------------
+        // Markers
+        // -----------------------------------------
+
+        const mapPoints = [];
+
+
+        // -----------------------------------------
+        // Current item marker
+        // -----------------------------------------
+
+        if (currentHasGPS) {
+
+            const lat =
+                Number(item.latitude);
+
+            const lon =
+                Number(item.longitude);
+
+            const marker =
+                L.marker([lat, lon])
+                    .addTo(matchMap);
+
+            marker.bindPopup(`
+                <strong>Current Item</strong><br>
+                ${escapeHtml(
+                    item.item_name || "Reported Item"
+                )}<br>
+                ${escapeHtml(
+                    item.location || "Location unavailable"
+                )}
+            `);
+
+            mapPoints.push([lat, lon]);
+        }
+
+
+        // -----------------------------------------
+        // Match markers
+        // -----------------------------------------
+
+        matchesWithGPS.forEach((match, index) => {
+
+            const lat =
+                Number(match.latitude);
+
+            const lon =
+                Number(match.longitude);
+
+            const marker =
+                L.marker([lat, lon])
+                    .addTo(matchMap);
+
+            const score =
+                Number(match.match_score || 0);
+
+            marker.bindPopup(`
+                <strong>Possible Match #${index + 1}</strong><br>
+                ${escapeHtml(
+                    match.item_name || "Possible Match"
+                )}<br>
+                Match: ${score.toFixed(1)}%<br>
+                ${escapeHtml(
+                    match.location || "Location unavailable"
+                )}
+            `);
+
+            mapPoints.push([lat, lon]);
+        });
+
+
+        // -----------------------------------------
+        // Fit map to all markers
+        // -----------------------------------------
+
+        if (mapPoints.length === 1) {
+
+            matchMap.setView(
+                mapPoints[0],
+                14
+            );
+
+        }
+        else if (mapPoints.length > 1) {
+
+            const bounds =
+                L.latLngBounds(mapPoints);
+
+            matchMap.fitBounds(
+                bounds,
+                {
+                    padding: [50, 50]
+                }
+            );
+
+        }
+        else {
+
+            matchMap.setView(
+                [20.5937, 78.9629],
+                5
+            );
+        }
+
+
+        // -----------------------------------------
+        // Fix Leaflet rendering
+        // -----------------------------------------
+
+        setTimeout(() => {
+
+            if (matchMap) {
+                matchMap.invalidateSize();
+            }
+
+        }, 300);
+
+
+    }
+    catch (error) {
+
+        console.error(
+            "Map Error:",
+            error
+        );
+
+        mapContainer.style.display = "none";
+
+        if (mapStatus) {
+
+            mapStatus.innerHTML =
+                "Unable to load location map.";
+        }
     }
 }
 
@@ -89,20 +407,26 @@ async function loadItem() {
         return;
     }
 
+
     try {
 
         const response = await fetch(
             `${API_URL}/items/${encodeURIComponent(itemId)}`
         );
 
+
         let data = null;
 
         try {
+
             data = await response.json();
+
         }
         catch {
+
             data = null;
         }
+
 
         if (!response.ok) {
 
@@ -113,11 +437,19 @@ async function loadItem() {
             );
         }
 
+
         const item = data;
 
-        const imageUrl = getImageUrl(item);
+        // Store globally for map
+        currentItem = item;
+
+
+        const imageUrl =
+            getImageUrl(item);
+
 
         const imageHTML = imageUrl
+
             ? `
                 <img
                     src="${escapeHtml(imageUrl)}"
@@ -125,6 +457,7 @@ async function loadItem() {
                     onerror="imageErrorHandler(this)"
                 >
               `
+
             : `
                 <div class="image-placeholder">
                     📦
@@ -138,9 +471,7 @@ async function loadItem() {
             <div class="detail-card">
 
                 <div class="detail-image">
-
                     ${imageHTML}
-
                 </div>
 
 
@@ -149,7 +480,9 @@ async function loadItem() {
                     <span class="item-type">
 
                         ${escapeHtml(
-                            String(item.item_type || "").toUpperCase()
+                            String(
+                                item.item_type || ""
+                            ).toUpperCase()
                         )}
 
                     </span>
@@ -158,62 +491,91 @@ async function loadItem() {
                     <h1>
 
                         ${escapeHtml(
-                            item.item_name || "Unnamed Item"
+                            item.item_name ||
+                            "Unnamed Item"
                         )}
 
                     </h1>
 
 
                     <p>
+
                         <strong>Category:</strong>
+
                         ${escapeHtml(
-                            item.category || "Not specified"
+                            item.category ||
+                            "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Description:</strong>
+
                         ${escapeHtml(
-                            item.description || "Not specified"
+                            item.description ||
+                            "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Color:</strong>
+
                         ${escapeHtml(
-                            item.color || "Not specified"
+                            item.color ||
+                            "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Brand:</strong>
+
                         ${escapeHtml(
-                            item.brand || "Not specified"
+                            item.brand ||
+                            "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Location:</strong>
+
                         ${escapeHtml(
-                            item.location || "Not specified"
+                            item.location ||
+                            "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Date:</strong>
+
                         ${escapeHtml(
-                            item.item_date || "Not specified"
+                            item.item_date ||
+                            "Not specified"
                         )}
+
                     </p>
 
 
-                    ${item.item_type === "lost" || item.item_type === "found"
+                    ${
+                        item.item_type === "lost" ||
+                        item.item_type === "found"
+
                         ?
+
                         `
                             <button
                                 class="match-btn"
@@ -222,7 +584,9 @@ async function loadItem() {
                                 🤖 Find AI Matches
                             </button>
                         `
+
                         :
+
                         ""
                     }
 
@@ -234,8 +598,8 @@ async function loadItem() {
             <div id="match-results"></div>
 
         `;
-
     }
+
 
     catch (error) {
 
@@ -243,6 +607,7 @@ async function loadItem() {
             "Error loading item:",
             error
         );
+
 
         itemDetail.innerHTML = `
 
@@ -253,10 +618,12 @@ async function loadItem() {
                 </h2>
 
                 <p>
+
                     ${escapeHtml(
                         error.message ||
                         "Something went wrong while loading the item."
                     )}
+
                 </p>
 
             </div>
@@ -307,7 +674,6 @@ async function findMatches(id) {
             "🤖 AI matching started...",
             "success"
         );
-
     }
 
 
@@ -321,9 +687,12 @@ async function findMatches(id) {
         let data = null;
 
         try {
+
             data = await response.json();
+
         }
         catch {
+
             data = null;
         }
 
@@ -335,7 +704,6 @@ async function findMatches(id) {
                 data?.message ||
                 "Matching failed"
             );
-
         }
 
 
@@ -379,8 +747,8 @@ async function findMatches(id) {
                     "No strong match found.",
                     "warning"
                 );
-
             }
+
 
             return;
         }
@@ -418,11 +786,9 @@ async function findMatches(id) {
                         </strong>
 
                         possible match${
-
                             data.matches.length === 1
                                 ? ""
                                 : "es"
-
                         }
 
                         for this lost item.
@@ -467,25 +833,53 @@ async function findMatches(id) {
 
 
                 ${
-
                     topMatches.map(match => {
 
                         const score =
-                            Number(match.match_score || 0);
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.match_score || 0
+                                    )
+                                )
+                            );
+
 
                         const imageScore =
-                            Number(
-                                match.image_similarity || 0
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.image_similarity || 0
+                                    )
+                                )
                             );
+
 
                         const textScore =
-                            Number(
-                                match.text_similarity || 0
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.text_similarity || 0
+                                    )
+                                )
                             );
 
+
                         const metadataScore =
-                            Number(
-                                match.metadata_score || 0
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.metadata_score || 0
+                                    )
+                                )
                             );
 
 
@@ -509,7 +903,6 @@ async function findMatches(id) {
 
                             confidence =
                                 "Possible Match";
-
                         }
 
 
@@ -525,7 +918,8 @@ async function findMatches(id) {
                                 <img
                                     src="${escapeHtml(imageUrl)}"
                                     alt="${escapeHtml(
-                                        match.item_name || "Possible match"
+                                        match.item_name ||
+                                        "Possible match"
                                     )}"
                                     onerror="imageErrorHandler(this)"
                                 >
@@ -535,8 +929,13 @@ async function findMatches(id) {
 
                             `
                                 <div class="image-placeholder">
+
                                     📦
-                                    <span>No image</span>
+
+                                    <span>
+                                        No image
+                                    </span>
+
                                 </div>
                             `;
 
@@ -635,7 +1034,11 @@ async function findMatches(id) {
                                                 reasons
                                                     .map(
                                                         reason =>
-                                                            `<li>${escapeHtml(reason)}</li>`
+                                                            `
+                                                            <li>
+                                                                ${escapeHtml(reason)}
+                                                            </li>
+                                                            `
                                                     )
                                                     .join("")
 
@@ -658,7 +1061,9 @@ async function findMatches(id) {
                                             class="view-match-btn"
                                             onclick="viewItem(${Number(match.item_id)})"
                                         >
+
                                             View Possible Match
+
                                         </button>
 
 
@@ -666,7 +1071,9 @@ async function findMatches(id) {
                                             class="contact-btn"
                                             onclick="contactReporter(${Number(match.item_id)})"
                                         >
+
                                             📩 Contact Reporter
+
                                         </button>
 
 
@@ -678,14 +1085,49 @@ async function findMatches(id) {
                             </div>
 
                         `;
-
                     }).join("")
-
                 }
+
+
+                <!-- MAP -->
+
+                <div class="location-map-section">
+
+                    <h2>
+                        📍 Item Locations
+                    </h2>
+
+                    <p id="map-status">
+                        Loading location map...
+                    </p>
+
+                    <div
+                        id="match-map"
+                        style="
+                            width: 100%;
+                            height: 450px;
+                            border-radius: 15px;
+                            overflow: hidden;
+                            margin-top: 15px;
+                        "
+                    ></div>
+
+                </div>
+
 
             </div>
 
         `;
+
+
+        // =================================================
+        // CREATE MAP AFTER RESULTS ARE DISPLAYED
+        // =================================================
+
+        await createMatchMap(
+            currentItem,
+            topMatches
+        );
 
 
         // =================================================
@@ -697,8 +1139,17 @@ async function findMatches(id) {
             const topMatch =
                 data.matches[0];
 
+
             const score =
-                Number(topMatch.match_score || 0);
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        Number(
+                            topMatch.match_score || 0
+                        )
+                    )
+                );
 
 
             let alertMessage;
@@ -710,17 +1161,18 @@ async function findMatches(id) {
                     `🔔 Very High Match Found! ${score.toFixed(1)}%`;
 
             }
+
             else if (score >= 75) {
 
                 alertMessage =
                     `🔔 High Match Found! ${score.toFixed(1)}%`;
 
             }
+
             else {
 
                 alertMessage =
                     `🔔 Possible Match Found! ${score.toFixed(1)}%`;
-
             }
 
 
@@ -728,7 +1180,6 @@ async function findMatches(id) {
                 alertMessage,
                 "success"
             );
-
         }
 
     }
@@ -751,10 +1202,12 @@ async function findMatches(id) {
                 </h2>
 
                 <p>
+
                     ${escapeHtml(
                         error.message ||
                         "The AI matching service could not be reached."
                     )}
+
                 </p>
 
             </div>
@@ -769,11 +1222,8 @@ async function findMatches(id) {
                 "AI matching service could not be reached.",
                 "error"
             );
-
         }
-
     }
-
 }
 
 
@@ -787,6 +1237,7 @@ function viewItem(id) {
         return;
     }
 
+
     window.location.href =
         `item-detail.html?id=${encodeURIComponent(id)}`;
 }
@@ -798,28 +1249,44 @@ function viewItem(id) {
 
 async function contactReporter(id) {
 
-    const storedUser = localStorage.getItem("user");
+    const storedUser =
+        localStorage.getItem("user");
+
 
     // -----------------------------------------------------
     // CHECK LOGIN
     // -----------------------------------------------------
 
     if (!storedUser) {
+
         showToast(
             "Please login before contacting the reporter.",
             "warning"
         );
+
         return;
     }
 
+
     let user;
 
+
     try {
-        user = JSON.parse(storedUser);
-    } catch (error) {
-        console.error("Invalid user:", error);
+
+        user =
+            JSON.parse(storedUser);
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Invalid user:",
+            error
+        );
 
         localStorage.removeItem("user");
+
 
         showToast(
             "Your login session is invalid. Please login again.",
@@ -829,13 +1296,17 @@ async function contactReporter(id) {
         return;
     }
 
+
     if (!user || !user.id) {
+
         showToast(
             "User information not found. Please login again.",
             "error"
         );
+
         return;
     }
+
 
     try {
 
@@ -843,19 +1314,30 @@ async function contactReporter(id) {
         // GET ITEM INFORMATION
         // -------------------------------------------------
 
-        const response = await fetch(
-            `${API_URL}/items/${encodeURIComponent(id)}`
-        );
+        const response =
+            await fetch(
+                `${API_URL}/items/${encodeURIComponent(id)}`
+            );
+
 
         let item = null;
 
+
         try {
-            item = await response.json();
-        } catch {
+
+            item =
+                await response.json();
+
+        }
+
+        catch {
+
             item = null;
         }
 
+
         if (!response.ok) {
+
             throw new Error(
                 item?.detail ||
                 item?.message ||
@@ -863,7 +1345,12 @@ async function contactReporter(id) {
             );
         }
 
-        console.log("Matched item:", item);
+
+        console.log(
+            "Matched item:",
+            item
+        );
+
 
         // -------------------------------------------------
         // CHECK REPORTER
@@ -874,10 +1361,12 @@ async function contactReporter(id) {
             item.user_id === undefined ||
             item.user_id === ""
         ) {
+
             showToast(
                 "Reporter information is unavailable.",
                 "error"
             );
+
 
             console.error(
                 "Missing user_id in /items response:",
@@ -887,11 +1376,15 @@ async function contactReporter(id) {
             return;
         }
 
+
         // -------------------------------------------------
         // PREVENT CONTACTING YOURSELF
         // -------------------------------------------------
 
-        if (Number(item.user_id) === Number(user.id)) {
+        if (
+            Number(item.user_id) ===
+            Number(user.id)
+        ) {
 
             showToast(
                 "This is your own reported item.",
@@ -901,29 +1394,36 @@ async function contactReporter(id) {
             return;
         }
 
+
         // -------------------------------------------------
         // OPEN MESSAGES PAGE
         // -------------------------------------------------
 
-        const messagesUrl = new URL(
-            "messages.html",
-            window.location.href
-        );
+        const messagesUrl =
+            new URL(
+                "messages.html",
+                window.location.href
+            );
+
 
         messagesUrl.searchParams.set(
             "item_id",
             id
         );
 
+
         window.location.href =
             messagesUrl.toString();
+    }
 
-    } catch (error) {
+
+    catch (error) {
 
         console.error(
             "Contact Reporter Error:",
             error
         );
+
 
         showToast(
             error.message ||
@@ -939,3 +1439,4 @@ async function contactReporter(id) {
 // =========================================================
 
 loadItem();
+

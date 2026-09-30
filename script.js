@@ -1,6 +1,12 @@
 // =========================================================
 // LOST & FOUND AI
 // MAIN FRONTEND SCRIPT
+// GPS LOCATION ENABLED
+// =========================================================
+
+
+// =========================================================
+// GET FORMS
 // =========================================================
 
 const lostForm =
@@ -8,6 +14,91 @@ const lostForm =
 
 const foundForm =
     document.getElementById("found-item-form");
+
+
+// =========================================================
+// GPS LOCATION
+// =========================================================
+
+let currentLatitude = null;
+let currentLongitude = null;
+
+
+// Get user's current location
+function getUserLocation() {
+
+    return new Promise((resolve) => {
+
+        if (!navigator.geolocation) {
+
+            console.warn("Geolocation is not supported.");
+
+            resolve({
+                latitude: null,
+                longitude: null
+            });
+
+            return;
+        }
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            function (position) {
+
+                currentLatitude =
+                    position.coords.latitude;
+
+                currentLongitude =
+                    position.coords.longitude;
+
+
+                console.log(
+                    "GPS Location:",
+                    currentLatitude,
+                    currentLongitude
+                );
+
+
+                resolve({
+                    latitude: currentLatitude,
+                    longitude: currentLongitude
+                });
+
+            },
+
+
+            function (error) {
+
+                console.warn(
+                    "Location permission/error:",
+                    error.message
+                );
+
+
+                currentLatitude = null;
+                currentLongitude = null;
+
+
+                resolve({
+                    latitude: null,
+                    longitude: null
+                });
+
+            },
+
+
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+            }
+
+        );
+
+    });
+
+}
 
 
 // =========================================================
@@ -380,6 +471,20 @@ async function handleFormSubmit(
 
 
     // -----------------------------------------------------
+    // GET GPS LOCATION
+    // -----------------------------------------------------
+
+    showToast(
+        "Getting your location...",
+        "success"
+    );
+
+
+    const gps =
+        await getUserLocation();
+
+
+    // -----------------------------------------------------
     // CREATE FORM DATA
     // -----------------------------------------------------
 
@@ -451,12 +556,51 @@ async function handleFormSubmit(
     );
 
 
+    // -----------------------------------------------------
+    // ADD GPS COORDINATES
+    // -----------------------------------------------------
+
+    if (
+        gps.latitude !== null &&
+        gps.longitude !== null
+    ) {
+
+        formData.append(
+            "latitude",
+            gps.latitude
+        );
+
+
+        formData.append(
+            "longitude",
+            gps.longitude
+        );
+
+
+        console.log(
+            "GPS coordinates added:",
+            gps.latitude,
+            gps.longitude
+        );
+
+    }
+    else {
+
+        console.log(
+            "GPS location unavailable. Submitting without coordinates."
+        );
+
+    }
+
+
     console.log(
         "Submitting item:",
         {
             user_id: user.id,
             item_type: type,
-            item_name: itemName.value
+            item_name: itemName.value,
+            latitude: gps.latitude,
+            longitude: gps.longitude
         }
     );
 
@@ -554,6 +698,12 @@ async function handleFormSubmit(
         // -------------------------------------------------
 
         form.reset();
+
+
+        // Reset GPS values
+
+        currentLatitude = null;
+        currentLongitude = null;
 
 
         // -------------------------------------------------
