@@ -1,15 +1,27 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Item Details | Lost & Found AI</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="style.css">
+    <title>
+        Item Details | Lost & Found AI
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 
     <style>
+
         /* =====================================================
            LOGGED-IN USER
         ===================================================== */
@@ -21,17 +33,294 @@
             white-space: nowrap;
         }
 
+
+        /* =====================================================
+           OWNERSHIP VERIFICATION
+        ===================================================== */
+
+        .verification-wrapper {
+            margin-top: 25px;
+        }
+
+        .verification-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .verification-card h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .verification-card p {
+            line-height: 1.6;
+        }
+
+        .owner-card {
+            border-left: 5px solid #2563eb;
+        }
+
+        .claimant-card {
+            border-left: 5px solid #7c3aed;
+        }
+
+        .ownership-proof {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px;
+            margin-top: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        .ownership-proof:focus,
+        .verification-response:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .verification-submit-btn,
+        .verification-review-btn,
+        .verification-login-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .verification-submit-btn {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .verification-submit-btn:hover {
+            background: #6d28d9;
+        }
+
+        .verification-review-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .verification-review-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .verification-login-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .verification-submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .verification-success {
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+            line-height: 1.6;
+        }
+
+        .verification-error {
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .verification-empty {
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .verification-muted {
+            color: #6b7280;
+        }
+
+        .verification-loading {
+            margin-top: 15px;
+            padding: 14px;
+            background: #eff6ff;
+            border-radius: 10px;
+            color: #1e40af;
+        }
+
+        .verification-list {
+            margin-top: 20px;
+        }
+
+        .verification-list h3 {
+            margin-bottom: 15px;
+        }
+
+        .verification-request-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 15px;
+        }
+
+        .verification-request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .verification-request-header h4 {
+            margin: 0;
+        }
+
+        .verification-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .verification-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .verification-status.approved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .verification-status.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .proof-box {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            margin-top: 12px;
+        }
+
+        .proof-box p {
+            margin-bottom: 0;
+            white-space: pre-wrap;
+        }
+
+        .response-box {
+            margin-top: 12px;
+            padding: 12px;
+            background: #eff6ff;
+            border-radius: 10px;
+            color: #1e3a8a;
+        }
+
+        .verification-response {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin-top: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .verification-action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .approve-btn,
+        .reject-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .approve-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .approve-btn:hover {
+            background: #15803d;
+        }
+
+        .reject-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        .reject-btn:hover {
+            background: #b91c1c;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
         @media (max-width: 700px) {
 
             .user-welcome {
                 font-size: 14px;
             }
 
+            .verification-card {
+                padding: 18px;
+            }
+
+            .verification-request-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .verification-action-buttons {
+                flex-direction: column;
+            }
+
+            .approve-btn,
+            .reject-btn {
+                width: 100%;
+            }
+
         }
+
     </style>
+
 </head>
 
+
 <body>
+
 
     <!-- =====================================================
          NAVBAR
@@ -67,14 +356,12 @@
 
         <div class="nav-buttons">
 
-            <!-- Logged-in user name -->
             <span
                 class="user-welcome"
                 id="userWelcome"
             ></span>
 
 
-            <!-- My Reports -->
             <a
                 href="my-reports.html"
                 class="login-btn"
@@ -84,7 +371,6 @@
             </a>
 
 
-            <!-- Logout -->
             <a
                 href="#"
                 class="signup-btn"
@@ -94,7 +380,6 @@
             </a>
 
 
-            <!-- Login -->
             <a
                 href="login.html"
                 class="login-btn"
@@ -104,7 +389,6 @@
             </a>
 
 
-            <!-- Sign Up -->
             <a
                 href="signup.html"
                 class="signup-btn"
@@ -116,6 +400,7 @@
         </div>
 
     </nav>
+
 
 
     <!-- =====================================================
@@ -135,21 +420,27 @@
     </section>
 
 
+
     <!-- =====================================================
          SCRIPTS
     ===================================================== -->
 
     <script src="config.js"></script>
+
     <script src="script.js"></script>
 
-    <!-- Leaflet Map JS -->
+
+    <!-- Leaflet -->
+
     <script
         src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin="">
-    </script>
+        crossorigin=""
+    ></script>
+
 
     <script src="item-detail.js"></script>
+
 
 
     <!-- =====================================================
@@ -171,20 +462,24 @@
                         "userWelcome"
                     );
 
+
                 const myReportsBtn =
                     document.getElementById(
                         "myReportsBtn"
                     );
+
 
                 const logoutBtn =
                     document.getElementById(
                         "logoutBtn"
                     );
 
+
                 const loginBtn =
                     document.getElementById(
                         "loginBtn"
                     );
+
 
                 const signupBtn =
                     document.getElementById(
@@ -211,7 +506,6 @@
                             user.id
                         ) {
 
-                            // Show user name
                             if (userWelcome) {
 
                                 userWelcome.textContent =
@@ -222,7 +516,6 @@
                             }
 
 
-                            // Show My Reports
                             if (myReportsBtn) {
 
                                 myReportsBtn.style.display =
@@ -230,7 +523,6 @@
                             }
 
 
-                            // Show Logout
                             if (logoutBtn) {
 
                                 logoutBtn.style.display =
@@ -238,7 +530,6 @@
                             }
 
 
-                            // Hide Login
                             if (loginBtn) {
 
                                 loginBtn.style.display =
@@ -246,7 +537,6 @@
                             }
 
 
-                            // Hide Sign Up
                             if (signupBtn) {
 
                                 signupBtn.style.display =
@@ -287,7 +577,6 @@
                         localStorage.removeItem(
                             "user"
                         );
-
                     }
 
                 }
@@ -304,13 +593,11 @@
                             "none";
                     }
 
-
                     if (myReportsBtn) {
 
                         myReportsBtn.style.display =
                             "none";
                     }
-
 
                     if (logoutBtn) {
 
@@ -318,20 +605,17 @@
                             "none";
                     }
 
-
                     if (loginBtn) {
 
                         loginBtn.style.display =
                             "inline-block";
                     }
 
-
                     if (signupBtn) {
 
                         signupBtn.style.display =
                             "inline-block";
                     }
-
                 }
 
             }
@@ -339,6 +623,8 @@
 
     </script>
 
+
 </body>
 
 </html>
+
