@@ -1,7 +1,7 @@
 
 // =========================================================
 // LOST & FOUND AI
-// ITEM DETAIL + AI MATCHING + OWNERSHIP VERIFICATION
+// ITEM DETAIL + AI MATCHING + LOCATION MAP
 // =========================================================
 
 const itemDetail = document.getElementById("item-detail");
@@ -9,89 +9,388 @@ const itemDetail = document.getElementById("item-detail");
 const params = new URLSearchParams(window.location.search);
 const itemId = params.get("id");
 
+// Store current item for map
+let currentItem = null;
 
-// =========================================================
-// GET CURRENT USER
-// =========================================================
-
-function getCurrentUser() {
-
-    const storedUser = localStorage.getItem("user");
-
-    if (!storedUser) {
-        return null;
-    }
-
-    try {
-
-        const user = JSON.parse(storedUser);
-
-        if (!user || !user.id) {
-            return null;
-        }
-
-        return user;
-
-    }
-    catch (error) {
-
-        console.error("Invalid user:", error);
-
-        localStorage.removeItem("user");
-
-        return null;
-    }
-}
+// Store Leaflet map
+let matchMap = null;
 
 
 // =========================================================
-// SAFE HTML
+// HELPER - ESCAPE HTML
 // =========================================================
 
 function escapeHtml(value) {
-
     if (value === null || value === undefined) {
         return "";
     }
 
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    const div = document.createElement("div");
+    div.textContent = String(value);
+
+    return div.innerHTML;
 }
 
 
 // =========================================================
-// IMAGE URL
+// HELPER - IMAGE URL
 // =========================================================
 
 function getImageUrl(item) {
 
     if (!item) {
-        return null;
+        return "";
     }
 
     if (item.image_url) {
-
-        if (item.image_url.startsWith("http")) {
-            return item.image_url;
-        }
-
-        return `${API_URL}${item.image_url}`;
+        return item.image_url;
     }
 
-    if (item.image_name) {
-        return `${API_URL}/uploads/${item.image_name}`;
+    if (!item.image_name) {
+        return "";
     }
 
-    return null;
+    return `${API_URL}/uploads/${encodeURIComponent(item.image_name)}`;
 }
 
 
 // =========================================================
-// LOAD ITEM
+// IMAGE ERROR FALLBACK
+// =========================================================
+
+function imageErrorHandler(img) {
+
+    img.onerror = null;
+    img.style.display = "none";
+
+    if (img.parentElement) {
+
+        img.parentElement.classList.add("image-failed");
+
+        img.parentElement.innerHTML = `
+            <div class="image-placeholder">
+                📦
+                <span>Image unavailable</span>
+            </div>
+        `;
+    }
+}
+
+
+// =========================================================
+// LOAD LEAFLET CSS + JS
+// =========================================================
+
+function loadLeaflet() {
+
+    return new Promise((resolve, reject) => {
+
+        // Already loaded
+        if (window.L) {
+            resolve();
+            return;
+        }
+
+        // -------------------------------
+        // Leaflet CSS
+        // -------------------------------
+
+        if (!document.getElementById("leaflet-css")) {
+
+            const css = document.createElement("link");
+
+            css.id = "leaflet-css";
+            css.rel = "stylesheet";
+            css.href =
+                "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+
+            document.head.appendChild(css);
+        }
+
+
+        // -------------------------------
+        // Leaflet JS
+        // -------------------------------
+
+        const script = document.createElement("script");
+
+        script.src =
+            "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+
+        script.onload = () => resolve();
+
+        script.onerror = () => {
+            reject(
+                new Error("Unable to load map library.")
+            );
+        };
+
+        document.head.appendChild(script);
+    });
+}
+
+
+// =========================================================
+// CHECK GPS COORDINATES
+// =========================================================
+
+function hasCoordinates(item) {
+
+    if (!item) {
+        return false;
+    }
+
+    const lat = Number(item.latitude);
+    const lon = Number(item.longitude);
+
+    return (
+        Number.isFinite(lat) &&
+        Number.isFinite(lon) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lon >= -180 &&
+        lon <= 180
+    );
+}
+
+
+// =========================================================
+// CREATE LOCATION MAP
+// =========================================================
+
+async function createMatchMap(item, matches) {
+
+    const mapContainer =
+        document.getElementById("match-map");
+
+    const mapStatus =
+        document.getElementById("map-status");
+
+    if (!mapContainer) {
+        return;
+    }
+
+
+    // -----------------------------------------
+    // Check current item GPS
+    // -----------------------------------------
+
+    const currentHasGPS = hasCoordinates(item);
+
+
+    // -----------------------------------------
+    // Find matches having GPS
+    // -----------------------------------------
+
+    const matchesWithGPS = matches.filter(
+        match => hasCoordinates(match)
+    );
+
+
+    // -----------------------------------------
+    // If nothing has GPS
+    // -----------------------------------------
+
+    if (!currentHasGPS && matchesWithGPS.length === 0) {
+
+        if (mapStatus) {
+
+            mapStatus.innerHTML = `
+                📍 Location data is not available
+                for these items.
+            `;
+        }
+
+        mapContainer.style.display = "none";
+
+        return;
+    }
+
+
+    try {
+
+        await loadLeaflet();
+
+        mapContainer.style.display = "block";
+
+        if (mapStatus) {
+            mapStatus.innerHTML =
+                "📍 Showing reported item locations";
+        }
+
+
+        // -----------------------------------------
+        // Remove old map
+        // -----------------------------------------
+
+        if (matchMap) {
+
+            matchMap.remove();
+
+            matchMap = null;
+        }
+
+
+        // -----------------------------------------
+        // Create map
+        // -----------------------------------------
+
+        matchMap = L.map("match-map");
+
+
+        // -----------------------------------------
+        // OpenStreetMap tiles
+        // -----------------------------------------
+
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                maxZoom: 19,
+                attribution:
+                    '&copy; OpenStreetMap contributors'
+            }
+        ).addTo(matchMap);
+
+
+        // -----------------------------------------
+        // Markers
+        // -----------------------------------------
+
+        const mapPoints = [];
+
+
+        // -----------------------------------------
+        // Current item marker
+        // -----------------------------------------
+
+        if (currentHasGPS) {
+
+            const lat =
+                Number(item.latitude);
+
+            const lon =
+                Number(item.longitude);
+
+            const marker =
+                L.marker([lat, lon])
+                    .addTo(matchMap);
+
+            marker.bindPopup(`
+                <strong>Current Item</strong><br>
+                ${escapeHtml(
+                    item.item_name || "Reported Item"
+                )}<br>
+                ${escapeHtml(
+                    item.location || "Location unavailable"
+                )}
+            `);
+
+            mapPoints.push([lat, lon]);
+        }
+
+
+        // -----------------------------------------
+        // Match markers
+        // -----------------------------------------
+
+        matchesWithGPS.forEach((match, index) => {
+
+            const lat =
+                Number(match.latitude);
+
+            const lon =
+                Number(match.longitude);
+
+            const marker =
+                L.marker([lat, lon])
+                    .addTo(matchMap);
+
+            const score =
+                Number(match.match_score || 0);
+
+            marker.bindPopup(`
+                <strong>Possible Match #${index + 1}</strong><br>
+                ${escapeHtml(
+                    match.item_name || "Possible Match"
+                )}<br>
+                Match: ${score.toFixed(1)}%<br>
+                ${escapeHtml(
+                    match.location || "Location unavailable"
+                )}
+            `);
+
+            mapPoints.push([lat, lon]);
+        });
+
+
+        // -----------------------------------------
+        // Fit map to all markers
+        // -----------------------------------------
+
+        if (mapPoints.length === 1) {
+
+            matchMap.setView(
+                mapPoints[0],
+                14
+            );
+
+        }
+        else if (mapPoints.length > 1) {
+
+            const bounds =
+                L.latLngBounds(mapPoints);
+
+            matchMap.fitBounds(
+                bounds,
+                {
+                    padding: [50, 50]
+                }
+            );
+
+        }
+        else {
+
+            matchMap.setView(
+                [20.5937, 78.9629],
+                5
+            );
+        }
+
+
+        // -----------------------------------------
+        // Fix Leaflet rendering
+        // -----------------------------------------
+
+        setTimeout(() => {
+
+            if (matchMap) {
+                matchMap.invalidateSize();
+            }
+
+        }, 300);
+
+
+    }
+    catch (error) {
+
+        console.error(
+            "Map Error:",
+            error
+        );
+
+        mapContainer.style.display = "none";
+
+        if (mapStatus) {
+
+            mapStatus.innerHTML =
+                "Unable to load location map.";
+        }
+    }
+}
+
+
+// =========================================================
+// LOAD ITEM DETAILS
 // =========================================================
 
 async function loadItem() {
@@ -119,9 +418,12 @@ async function loadItem() {
         let data = null;
 
         try {
+
             data = await response.json();
+
         }
         catch {
+
             data = null;
         }
 
@@ -138,14 +440,13 @@ async function loadItem() {
 
         const item = data;
 
-        const currentUser = getCurrentUser();
+        // Store globally for map
+        currentItem = item;
 
-        const imageUrl = getImageUrl(item);
 
+        const imageUrl =
+            getImageUrl(item);
 
-        // =================================================
-        // IMAGE
-        // =================================================
 
         const imageHTML = imageUrl
 
@@ -153,7 +454,7 @@ async function loadItem() {
                 <img
                     src="${escapeHtml(imageUrl)}"
                     alt="${escapeHtml(item.item_name)}"
-                    onerror="this.style.display='none';"
+                    onerror="imageErrorHandler(this)"
                 >
               `
 
@@ -165,221 +466,12 @@ async function loadItem() {
               `;
 
 
-        // =================================================
-        // USER ROLE
-        // =================================================
-
-        const isOwner =
-            currentUser &&
-            Number(currentUser.id) === Number(item.user_id);
-
-
-        // =================================================
-        // ACTIONS
-        // =================================================
-
-        let actionHTML = "";
-
-
-        // -------------------------------------------------
-        // LOST ITEM
-        // -------------------------------------------------
-
-        if (item.item_type === "lost") {
-
-            actionHTML += `
-
-                <button
-                    class="match-btn"
-                    onclick="findMatches(${item.id})"
-                >
-                    🤖 Find AI Matches
-                </button>
-
-            `;
-
-
-            // Owner sees their own report
-            if (isOwner) {
-
-                actionHTML += `
-
-                    <div class="verification-info">
-
-                        <p>
-                            📋 This is your lost-item report.
-                        </p>
-
-                        <p>
-                            AI matching will search for
-                            matching found items.
-                        </p>
-
-                    </div>
-
-                `;
-
-            }
-
-            // Other users can contact lost-item reporter
-            else if (currentUser) {
-
-                actionHTML += `
-
-                    <button
-                        class="contact-btn"
-                        onclick="contactReporter(${item.id})"
-                    >
-                        📩 Contact Reporter
-                    </button>
-
-                `;
-
-            }
-
-            else {
-
-                actionHTML += `
-
-                    <p class="login-note">
-                        Login to contact the reporter.
-                    </p>
-
-                `;
-
-            }
-
-        }
-
-
-        // -------------------------------------------------
-        // FOUND ITEM
-        // -------------------------------------------------
-
-        else if (item.item_type === "found") {
-
-
-            // ---------------------------------------------
-            // FOUND ITEM OWNER / REPORTER
-            // ---------------------------------------------
-
-            if (isOwner) {
-
-                actionHTML += `
-
-                    <div class="verification-owner-box">
-
-                        <h3>
-                            📦 Your Found Item
-                        </h3>
-
-                        <p>
-                            You reported this found item.
-                        </p>
-
-                        <p>
-                            If someone claims this item,
-                            their ownership proof will
-                            appear in your verification
-                            requests.
-                        </p>
-
-                        <a
-                            href="my-reports.html"
-                            class="contact-btn"
-                        >
-                            🔍 View Verification Requests
-                        </a>
-
-                    </div>
-
-                `;
-
-            }
-
-
-            // ---------------------------------------------
-            // OTHER USER = POSSIBLE CLAIMANT
-            // ---------------------------------------------
-
-            else if (currentUser) {
-
-                actionHTML += `
-
-                    <div class="verification-claim-box">
-
-                        <h3>
-                            🔐 Claim This Found Item
-                        </h3>
-
-                        <p>
-                            If this item belongs to you,
-                            submit ownership proof to
-                            the person who reported it.
-                        </p>
-
-                        <textarea
-                            id="ownership-proof"
-                            rows="5"
-                            placeholder="Explain why this item belongs to you. Mention identifying details, purchase information, unique marks, etc."
-                        ></textarea>
-
-                        <button
-                            class="match-btn"
-                            onclick="submitOwnershipClaim(${item.id})"
-                        >
-                            🔐 Submit Ownership Proof
-                        </button>
-
-                    </div>
-
-                `;
-
-            }
-
-
-            // ---------------------------------------------
-            // NOT LOGGED IN
-            // ---------------------------------------------
-
-            else {
-
-                actionHTML += `
-
-                    <div class="login-note">
-
-                        <p>
-                            🔐 Login to submit an ownership claim.
-                        </p>
-
-                        <a
-                            href="login.html"
-                            class="login-btn"
-                        >
-                            Login
-                        </a>
-
-                    </div>
-
-                `;
-
-            }
-
-        }
-
-
-        // =================================================
-        // DISPLAY ITEM
-        // =================================================
-
         itemDetail.innerHTML = `
 
             <div class="detail-card">
 
                 <div class="detail-image">
-
                     ${imageHTML}
-
                 </div>
 
 
@@ -407,64 +499,96 @@ async function loadItem() {
 
 
                     <p>
+
                         <strong>Category:</strong>
+
                         ${escapeHtml(
                             item.category ||
                             "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Description:</strong>
+
                         ${escapeHtml(
                             item.description ||
                             "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Color:</strong>
+
                         ${escapeHtml(
                             item.color ||
                             "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Brand:</strong>
+
                         ${escapeHtml(
                             item.brand ||
                             "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Location:</strong>
+
                         ${escapeHtml(
                             item.location ||
                             "Not specified"
                         )}
+
                     </p>
 
 
                     <p>
+
                         <strong>Date:</strong>
+
                         ${escapeHtml(
                             item.item_date ||
                             "Not specified"
                         )}
+
                     </p>
 
 
-                    <div class="item-actions">
+                    ${
+                        item.item_type === "lost" ||
+                        item.item_type === "found"
 
-                        ${actionHTML}
+                        ?
 
-                    </div>
+                        `
+                            <button
+                                class="match-btn"
+                                onclick="findMatches(${item.id})"
+                            >
+                                🤖 Find AI Matches
+                            </button>
+                        `
+
+                        :
+
+                        ""
+                    }
 
                 </div>
 
@@ -474,7 +598,6 @@ async function loadItem() {
             <div id="match-results"></div>
 
         `;
-
     }
 
 
@@ -495,224 +618,18 @@ async function loadItem() {
                 </h2>
 
                 <p>
+
                     ${escapeHtml(
                         error.message ||
-                        "Something went wrong."
+                        "Something went wrong while loading the item."
                     )}
+
                 </p>
 
             </div>
 
         `;
-
     }
-
-}
-
-
-// =========================================================
-// SUBMIT OWNERSHIP CLAIM
-// =========================================================
-
-async function submitOwnershipClaim(id) {
-
-    const currentUser = getCurrentUser();
-
-
-    // -----------------------------------------------------
-    // LOGIN CHECK
-    // -----------------------------------------------------
-
-    if (!currentUser) {
-
-        showToast(
-            "Please login before submitting an ownership claim.",
-            "warning"
-        );
-
-        return;
-    }
-
-
-    const proofElement =
-        document.getElementById("ownership-proof");
-
-
-    if (!proofElement) {
-        return;
-    }
-
-
-    const proof =
-        proofElement.value.trim();
-
-
-    // -----------------------------------------------------
-    // PROOF CHECK
-    // -----------------------------------------------------
-
-    if (!proof) {
-
-        showToast(
-            "Please provide ownership proof.",
-            "warning"
-        );
-
-        proofElement.focus();
-
-        return;
-    }
-
-
-    if (proof.length < 10) {
-
-        showToast(
-            "Please provide more detailed ownership proof.",
-            "warning"
-        );
-
-        proofElement.focus();
-
-        return;
-    }
-
-
-    // -----------------------------------------------------
-    // BUTTON
-    // -----------------------------------------------------
-
-    const buttons =
-        document.querySelectorAll(
-            ".verification-claim-box button"
-        );
-
-
-    buttons.forEach(button => {
-
-        button.disabled = true;
-
-        button.textContent =
-            "Submitting...";
-
-    });
-
-
-    try {
-
-        // =================================================
-        // SEND QUERY PARAMETERS
-        // Backend expects:
-        // item_id
-        // claimant_id
-        // proof
-        // =================================================
-
-        const url =
-            `${API_URL}/verification/request` +
-            `?item_id=${encodeURIComponent(id)}` +
-            `&claimant_id=${encodeURIComponent(currentUser.id)}` +
-            `&proof=${encodeURIComponent(proof)}`;
-
-
-        const response = await fetch(
-            url,
-            {
-                method: "POST"
-            }
-        );
-
-
-        let data = null;
-
-
-        try {
-
-            data = await response.json();
-
-        }
-        catch {
-
-            data = null;
-
-        }
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data?.detail ||
-                data?.message ||
-                "Unable to submit ownership claim."
-            );
-
-        }
-
-
-        showToast(
-            "🔐 Ownership proof submitted successfully!",
-            "success"
-        );
-
-
-        // Replace form with submitted message
-
-        const claimBox =
-            document.querySelector(
-                ".verification-claim-box"
-            );
-
-
-        if (claimBox) {
-
-            claimBox.innerHTML = `
-
-                <h3>
-                    ✅ Claim Submitted
-                </h3>
-
-                <p>
-                    Your ownership proof has been
-                    sent to the person who reported
-                    this found item.
-                </p>
-
-                <p>
-                    Please wait for their response.
-                </p>
-
-            `;
-
-        }
-
-    }
-
-
-    catch (error) {
-
-        console.error(
-            "Ownership Claim Error:",
-            error
-        );
-
-
-        showToast(
-            error.message ||
-            "Unable to submit ownership claim.",
-            "error"
-        );
-
-
-        buttons.forEach(button => {
-
-            button.disabled = false;
-
-            button.textContent =
-                "🔐 Submit Ownership Proof";
-
-        });
-
-    }
-
 }
 
 
@@ -757,19 +674,17 @@ async function findMatches(id) {
             "🤖 AI matching started...",
             "success"
         );
-
     }
 
 
     try {
 
         const response = await fetch(
-            `${API_URL}/match/${id}`
+            `${API_URL}/match/${encodeURIComponent(id)}`
         );
 
 
         let data = null;
-
 
         try {
 
@@ -779,7 +694,6 @@ async function findMatches(id) {
         catch {
 
             data = null;
-
         }
 
 
@@ -790,7 +704,6 @@ async function findMatches(id) {
                 data?.message ||
                 "Matching failed"
             );
-
         }
 
 
@@ -801,11 +714,12 @@ async function findMatches(id) {
 
 
         // =================================================
-        // NO MATCH
+        // NO MATCH FOUND
         // =================================================
 
         if (
             !data.matches ||
+            !Array.isArray(data.matches) ||
             data.matches.length === 0
         ) {
 
@@ -814,11 +728,11 @@ async function findMatches(id) {
                 <div class="no-match">
 
                     <h2>
-                        ⚠️ No opposite item found
+                        ⚠️ No strong match found
                     </h2>
 
                     <p>
-                        The AI could not find a
+                        The AI could not find a strong
                         matching found item.
                     </p>
 
@@ -830,18 +744,18 @@ async function findMatches(id) {
             if (typeof showToast === "function") {
 
                 showToast(
-                    "No matching item found.",
+                    "No strong match found.",
                     "warning"
                 );
-
             }
+
 
             return;
         }
 
 
         // =================================================
-        // TOP 5
+        // TAKE TOP 5 MATCHES
         // =================================================
 
         const topMatches =
@@ -849,12 +763,13 @@ async function findMatches(id) {
 
 
         // =================================================
-        // DISPLAY
+        // DISPLAY AI RESULTS
         // =================================================
 
         matchResults.innerHTML = `
 
             <div class="ai-results">
+
 
                 <div class="ai-summary">
 
@@ -870,16 +785,35 @@ async function findMatches(id) {
                             ${data.matches.length}
                         </strong>
 
-                        possible match${data.matches.length === 1
-                            ? ""
-                            : "es"
-                        }.
+                        possible match${
+                            data.matches.length === 1
+                                ? ""
+                                : "es"
+                        }
+
+                        for this lost item.
 
                     </p>
 
+
                     <p>
-                        Results are based on image,
-                        description and item information.
+
+                        Results are based on
+
+                        <strong>
+                            image similarity
+                        </strong>,
+
+                        <strong>
+                            description similarity
+                        </strong>
+
+                        and
+
+                        <strong>
+                            item information
+                        </strong>.
+
                     </p>
 
                 </div>
@@ -892,213 +826,293 @@ async function findMatches(id) {
 
                 <p class="ai-subtitle">
 
-                    Matches are ranked using image
-                    similarity, text similarity
-                    and item metadata.
+                    Matches are ranked using image similarity,
+                    text similarity and item metadata.
 
                 </p>
 
 
-                ${topMatches.map(match => {
+                ${
+                    topMatches.map(match => {
 
-                    const score =
-                        Number(match.match_score || 0);
-
-
-                    let confidence =
-                        "Low Match";
-
-
-                    if (score >= 90) {
-
-                        confidence =
-                            "Very High Match";
-
-                    }
-
-                    else if (score >= 75) {
-
-                        confidence =
-                            "High Match";
-
-                    }
-
-                    else if (score >= 50) {
-
-                        confidence =
-                            "Possible Match";
-
-                    }
+                        const score =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.match_score || 0
+                                    )
+                                )
+                            );
 
 
-                    const imageScore =
-                        Number(
-                            match.image_score || 0
-                        );
+                        const imageScore =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.image_similarity || 0
+                                    )
+                                )
+                            );
 
 
-                    const textScore =
-                        Number(
-                            match.text_score || 0
-                        );
+                        const textScore =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.text_similarity || 0
+                                    )
+                                )
+                            );
 
 
-                    const metadataScore =
-                        Number(
-                            match.metadata_score || 0
-                        );
+                        const metadataScore =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.metadata_score || 0
+                                    )
+                                )
+                            );
 
 
-                    const imageUrl =
-                        match.image_url
-                            ? (
-                                match.image_url.startsWith("http")
-                                    ? match.image_url
-                                    : `${API_URL}${match.image_url}`
-                              )
-                            : (
-                                match.image_name
-                                    ? `${API_URL}/uploads/${match.image_name}`
-                                    : null
-                              );
+                        let confidence =
+                            "Low Match";
 
 
-                    return `
+                        if (score >= 90) {
 
-                        <div class="match-card">
+                            confidence =
+                                "Very High Match";
+
+                        }
+                        else if (score >= 75) {
+
+                            confidence =
+                                "High Match";
+
+                        }
+                        else if (score >= 50) {
+
+                            confidence =
+                                "Possible Match";
+                        }
 
 
-                            <div class="match-image">
+                        const imageUrl =
+                            getImageUrl(match);
 
-                                ${
-                                    imageUrl
 
-                                    ? `
+                        const matchImage = imageUrl
 
-                                        <img
-                                            src="${escapeHtml(imageUrl)}"
-                                            alt="${escapeHtml(
-                                                match.item_name ||
-                                                "Possible match"
-                                            )}"
+                            ?
+
+                            `
+                                <img
+                                    src="${escapeHtml(imageUrl)}"
+                                    alt="${escapeHtml(
+                                        match.item_name ||
+                                        "Possible match"
+                                    )}"
+                                    onerror="imageErrorHandler(this)"
+                                >
+                            `
+
+                            :
+
+                            `
+                                <div class="image-placeholder">
+
+                                    📦
+
+                                    <span>
+                                        No image
+                                    </span>
+
+                                </div>
+                            `;
+
+
+                        const reasons =
+                            Array.isArray(match.reasons)
+                                ? match.reasons
+                                : [];
+
+
+                        return `
+
+                            <div class="match-card">
+
+
+                                <div class="match-image">
+
+                                    ${matchImage}
+
+                                </div>
+
+
+                                <div class="match-info">
+
+
+                                    <h3>
+
+                                        ${escapeHtml(
+                                            match.item_name ||
+                                            "Possible Match"
+                                        )}
+
+                                    </h3>
+
+
+                                    <div class="match-score">
+
+                                        ${score.toFixed(1)}%
+
+                                    </div>
+
+
+                                    <p>
+
+                                        <strong>
+                                            ${confidence}
+                                        </strong>
+
+                                    </p>
+
+
+                                    <p>
+
+                                        🖼️
+                                        Image Similarity:
+
+                                        ${imageScore.toFixed(1)}%
+
+                                    </p>
+
+
+                                    <p>
+
+                                        📝
+                                        Text Similarity:
+
+                                        ${textScore.toFixed(1)}%
+
+                                    </p>
+
+
+                                    <p>
+
+                                        📋
+                                        Metadata Score:
+
+                                        ${metadataScore.toFixed(1)}%
+
+                                    </p>
+
+
+                                    <h4>
+
+                                        Why this may be a match:
+
+                                    </h4>
+
+
+                                    <ul>
+
+                                        ${
+                                            reasons.length > 0
+
+                                                ?
+
+                                                reasons
+                                                    .map(
+                                                        reason =>
+                                                            `
+                                                            <li>
+                                                                ${escapeHtml(reason)}
+                                                            </li>
+                                                            `
+                                                    )
+                                                    .join("")
+
+                                                :
+
+                                                `
+                                                    <li>
+                                                        No strong matching features found.
+                                                    </li>
+                                                `
+                                        }
+
+                                    </ul>
+
+
+                                    <div class="match-actions">
+
+
+                                        <button
+                                            class="view-match-btn"
+                                            onclick="viewItem(${Number(match.item_id)})"
                                         >
 
-                                      `
+                                            View Possible Match
 
-                                    : `
-
-                                        <div class="image-placeholder">
-                                            📦
-                                        </div>
-
-                                      `
-                                }
-
-                            </div>
+                                        </button>
 
 
-                            <div class="match-info">
+                                        <button
+                                            class="contact-btn"
+                                            onclick="contactReporter(${Number(match.item_id)})"
+                                        >
+
+                                            📩 Contact Reporter
+
+                                        </button>
 
 
-                                <h3>
-
-                                    ${escapeHtml(
-                                        match.item_name ||
-                                        "Unnamed Item"
-                                    )}
-
-                                </h3>
-
-
-                                <div class="match-score">
-
-                                    ${score}%
-
-                                </div>
-
-
-                                <p>
-
-                                    <strong>
-                                        ${confidence}
-                                    </strong>
-
-                                </p>
-
-
-                                <p>
-
-                                    🖼️ Image Similarity:
-
-                                    ${imageScore}%
-
-                                </p>
-
-
-                                <p>
-
-                                    📝 Text Similarity:
-
-                                    ${textScore}%
-
-                                </p>
-
-
-                                <p>
-
-                                    📋 Metadata Score:
-
-                                    ${metadataScore}%
-
-                                </p>
-
-
-                                ${
-                                    match.distance_km !== null &&
-                                    match.distance_km !== undefined
-
-                                    ? `
-
-                                        <p>
-                                            📍 Distance:
-                                            ${match.distance_km} km
-                                        </p>
-
-                                      `
-
-                                    : ""
-                                }
-
-
-                                <div class="match-actions">
-
-
-                                    <button
-                                        class="view-match-btn"
-                                        onclick="viewItem(${match.item_id})"
-                                    >
-                                        View Possible Match
-                                    </button>
-
-
-                                    <button
-                                        class="contact-btn"
-                                        onclick="contactReporter(${match.item_id})"
-                                    >
-                                        📩 Contact Reporter
-                                    </button>
+                                    </div>
 
 
                                 </div>
 
-
                             </div>
 
-                        </div>
+                        `;
+                    }).join("")
+                }
 
-                    `;
 
-                }).join("")}
+                <!-- MAP -->
+
+                <div class="location-map-section">
+
+                    <h2>
+                        📍 Item Locations
+                    </h2>
+
+                    <p id="map-status">
+                        Loading location map...
+                    </p>
+
+                    <div
+                        id="match-map"
+                        style="
+                            width: 100%;
+                            height: 450px;
+                            border-radius: 15px;
+                            overflow: hidden;
+                            margin-top: 15px;
+                        "
+                    ></div>
+
+                </div>
 
 
             </div>
@@ -1107,7 +1121,17 @@ async function findMatches(id) {
 
 
         // =================================================
-        // MATCH TOAST
+        // CREATE MAP AFTER RESULTS ARE DISPLAYED
+        // =================================================
+
+        await createMatchMap(
+            currentItem,
+            topMatches
+        );
+
+
+        // =================================================
+        // MATCH ALERT
         // =================================================
 
         if (typeof showToast === "function") {
@@ -1117,32 +1141,38 @@ async function findMatches(id) {
 
 
             const score =
-                Number(topMatch.match_score || 0);
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        Number(
+                            topMatch.match_score || 0
+                        )
+                    )
+                );
 
 
-            let alertMessage =
-                "🔔 Possible Match Found!";
+            let alertMessage;
 
 
             if (score >= 90) {
 
                 alertMessage =
-                    `🔔 Very High Match Found! ${score}%`;
+                    `🔔 Very High Match Found! ${score.toFixed(1)}%`;
 
             }
 
             else if (score >= 75) {
 
                 alertMessage =
-                    `🔔 High Match Found! ${score}%`;
+                    `🔔 High Match Found! ${score.toFixed(1)}%`;
 
             }
 
             else {
 
                 alertMessage =
-                    `🔔 Possible Match Found! ${score}%`;
-
+                    `🔔 Possible Match Found! ${score.toFixed(1)}%`;
             }
 
 
@@ -1150,7 +1180,6 @@ async function findMatches(id) {
                 alertMessage,
                 "success"
             );
-
         }
 
     }
@@ -1173,10 +1202,12 @@ async function findMatches(id) {
                 </h2>
 
                 <p>
+
                     ${escapeHtml(
                         error.message ||
                         "The AI matching service could not be reached."
                     )}
+
                 </p>
 
             </div>
@@ -1191,11 +1222,8 @@ async function findMatches(id) {
                 "AI matching service could not be reached.",
                 "error"
             );
-
         }
-
     }
-
 }
 
 
@@ -1205,9 +1233,13 @@ async function findMatches(id) {
 
 function viewItem(id) {
 
+    if (!id) {
+        return;
+    }
+
+
     window.location.href =
         `item-detail.html?id=${encodeURIComponent(id)}`;
-
 }
 
 
@@ -1217,15 +1249,15 @@ function viewItem(id) {
 
 async function contactReporter(id) {
 
-    const currentUser =
-        getCurrentUser();
+    const storedUser =
+        localStorage.getItem("user");
 
 
     // -----------------------------------------------------
-    // LOGIN
+    // CHECK LOGIN
     // -----------------------------------------------------
 
-    if (!currentUser) {
+    if (!storedUser) {
 
         showToast(
             "Please login before contacting the reporter.",
@@ -1236,11 +1268,56 @@ async function contactReporter(id) {
     }
 
 
+    let user;
+
+
     try {
 
-        const response = await fetch(
-            `${API_URL}/items/${encodeURIComponent(id)}`
+        user =
+            JSON.parse(storedUser);
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Invalid user:",
+            error
         );
+
+        localStorage.removeItem("user");
+
+
+        showToast(
+            "Your login session is invalid. Please login again.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    if (!user || !user.id) {
+
+        showToast(
+            "User information not found. Please login again.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    try {
+
+        // -------------------------------------------------
+        // GET ITEM INFORMATION
+        // -------------------------------------------------
+
+        const response =
+            await fetch(
+                `${API_URL}/items/${encodeURIComponent(id)}`
+            );
 
 
         let item = null;
@@ -1248,35 +1325,52 @@ async function contactReporter(id) {
 
         try {
 
-            item = await response.json();
+            item =
+                await response.json();
 
         }
+
         catch {
 
             item = null;
-
         }
 
 
-        if (!response.ok || !item) {
+        if (!response.ok) {
 
             throw new Error(
                 item?.detail ||
+                item?.message ||
                 "Unable to get item information."
             );
-
         }
 
 
+        console.log(
+            "Matched item:",
+            item
+        );
+
+
         // -------------------------------------------------
-        // REPORTER CHECK
+        // CHECK REPORTER
         // -------------------------------------------------
 
-        if (!item.user_id) {
+        if (
+            item.user_id === null ||
+            item.user_id === undefined ||
+            item.user_id === ""
+        ) {
 
             showToast(
                 "Reporter information is unavailable.",
                 "error"
+            );
+
+
+            console.error(
+                "Missing user_id in /items response:",
+                item
             );
 
             return;
@@ -1284,12 +1378,12 @@ async function contactReporter(id) {
 
 
         // -------------------------------------------------
-        // SELF CHECK
+        // PREVENT CONTACTING YOURSELF
         // -------------------------------------------------
 
         if (
             Number(item.user_id) ===
-            Number(currentUser.id)
+            Number(user.id)
         ) {
 
             showToast(
@@ -1302,12 +1396,24 @@ async function contactReporter(id) {
 
 
         // -------------------------------------------------
-        // OPEN MESSAGES
+        // OPEN MESSAGES PAGE
         // -------------------------------------------------
 
-        window.location.href =
-            `messages.html?item_id=${encodeURIComponent(id)}`;
+        const messagesUrl =
+            new URL(
+                "messages.html",
+                window.location.href
+            );
 
+
+        messagesUrl.searchParams.set(
+            "item_id",
+            id
+        );
+
+
+        window.location.href =
+            messagesUrl.toString();
     }
 
 
@@ -1324,9 +1430,7 @@ async function contactReporter(id) {
             "Unable to contact reporter.",
             "error"
         );
-
     }
-
 }
 
 
@@ -1334,4 +1438,5 @@ async function contactReporter(id) {
 // START
 // =========================================================
 
+loadItem();
 
