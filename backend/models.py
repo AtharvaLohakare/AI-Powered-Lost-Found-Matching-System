@@ -196,3 +196,110 @@ class Message(Base):
     created_at = Column(
         TIMESTAMP
     )
+
+
+
+# =========================================================
+# NOTIFICATION MODEL
+# =========================================================
+
+class Notification(Base):
+
+    __tablename__ = "notifications"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    user_id = Column(
+        Integer,
+        nullable=False,
+        index=True
+    )
+
+    item_id = Column(
+        Integer,
+        nullable=True,
+        index=True
+    )
+
+    title = Column(
+        String(200),
+        nullable=False
+    )
+
+    message = Column(
+        Text,
+        nullable=False
+    )
+
+    notification_type = Column(
+        String(50),
+        nullable=False
+    )
+
+    is_read = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
+
+    created_at = Column(
+        TIMESTAMP
+    )
+
+
+# =========================================================
+# OWNERSHIP VERIFICATION MODEL
+# =========================================================
+
+class VerificationRequest(Base):
+
+    __tablename__ = "verification_requests"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    item_id = Column(
+        Integer,
+        nullable=False,
+        index=True
+    )
+
+    claimant_id = Column(
+        Integer,
+        nullable=False,
+        index=True
+    )
+
+    reporter_id = Column(
+        Integer,
+        nullable=False,
+        index=True
+    )
+
+    proof = Column(
+        Text,
+        nullable=False
+    )
+
+    status = Column(
+        String(20),
+        nullable=False,
+        default="pending"
+    )
+
+    response_message = Column(
+        Text,
+        nullable=True
+    )
+
+    created_at = Column(
+        TIMESTAMP
+    )
+

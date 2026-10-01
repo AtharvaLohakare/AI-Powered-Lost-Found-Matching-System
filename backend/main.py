@@ -1,3 +1,4 @@
+
 from fastapi import (
     FastAPI,
     Form,
@@ -6,24 +7,32 @@ from fastapi import (
     Depends,
     HTTPException
 )
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-
 from sqlalchemy.orm import Session
 
 import os
 import shutil
 import uuid
+import bcrypt
+
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
 
-import bcrypt
-
 from .database import SessionLocal
-from .models import Item, User, Message
+
+from .models import (
+    Item,
+    User,
+    Message,
+    Notification,
+    VerificationRequest
+)
+
 from .text_matcher import calculate_text_similarity
 from .image_matcher import calculate_image_similarity
-from math import radians, sin, cos, sqrt, atan2
+
 
 # =========================================================
 # FASTAPI APP
@@ -66,7 +75,10 @@ os.makedirs(
 )
 
 
-# Serve uploaded images
+# =========================================================
+# SERVE UPLOADED IMAGES
+# =========================================================
+
 app.mount(
     "/uploads",
     StaticFiles(directory=UPLOAD_DIR),
@@ -83,6 +95,7 @@ def get_db():
 
     try:
         yield db
+
     finally:
         db.close()
 
@@ -95,6 +108,7 @@ def image_url(filename):
     """
     Returns the API-relative URL for an uploaded image.
     """
+
     if not filename:
         return None
 
@@ -103,9 +117,10 @@ def image_url(filename):
 
 def image_exists(filename):
     """
-    Checks whether an image physically exists on the
-    current server.
+    Checks whether an image physically exists
+    on the current server.
     """
+
     if not filename:
         return False
 
@@ -119,19 +134,17 @@ def image_exists(filename):
 
 def serialize_item(item):
     """
-    Converts SQLAlchemy Item object into a consistent
-    JSON-friendly dictionary.
+    Converts SQLAlchemy Item object into
+    a JSON-friendly dictionary.
     """
 
     return {
         "id": item.id,
         "user_id": item.user_id,
-
         "item_type": item.item_type,
         "item_name": item.item_name,
         "category": item.category,
         "description": item.description,
-
         "color": item.color,
         "brand": item.brand,
         "location": item.location,
@@ -168,6 +181,113 @@ def normalize_text(value):
         value.strip().lower().split()
     )
 
+
+# =========================================================
+# METADATA SIMILARITY
+# =========================================================
+
+def calculate_metadata_similarity(item1, item2):
+    """
+    Calculates metadata similarity between two items.
+
+    Category = 25%
+    Color    = 20%
+    Brand    = 20%
+    Location = 20%
+    Name     = 15%
+
+    Total = 100%
+    """
+
+    score = 0.0
+
+    # -----------------------------------------------------
+    # CATEGORY
+    # -----------------------------------------------------
+
+    if (
+        normalize_text(item1.category)
+        and
+        normalize_text(item2.category)
+        and
+        normalize_text(item1.category)
+        ==
+        normalize_text(item2.category)
+    ):
+        score += 25
+
+
+    # -----------------------------------------------------
+    # COLOR
+    # -----------------------------------------------------
+
+    if (
+        normalize_text(item1.color)
+        and
+        normalize_text(item2.color)
+        and
+        normalize_text(item1.color)
+        ==
+        normalize_text(item2.color)
+    ):
+        score += 20
+
+
+    # -----------------------------------------------------
+    # BRAND
+    # -----------------------------------------------------
+
+    if (
+        normalize_text(item1.brand)
+        and
+        normalize_text(item2.brand)
+        and
+        normalize_text(item1.brand)
+        ==
+        normalize_text(item2.brand)
+    ):
+        score += 20
+
+
+    # -----------------------------------------------------
+    # LOCATION
+    # -----------------------------------------------------
+
+    if (
+        normalize_text(item1.location)
+        and
+        normalize_text(item2.location)
+        and
+        normalize_text(item1.location)
+        ==
+        normalize_text(item2.location)
+    ):
+        score += 20
+
+
+    # -----------------------------------------------------
+    # ITEM NAME
+    # -----------------------------------------------------
+
+    if (
+        normalize_text(item1.item_name)
+        and
+        normalize_text(item2.item_name)
+        and
+        normalize_text(item1.item_name)
+        ==
+        normalize_text(item2.item_name)
+    ):
+        score += 15
+
+
+    return score
+
+
+# =========================================================
+# GPS DISTANCE
+# =========================================================
+
 def calculate_distance_km(
     lat1,
     lon1,
@@ -175,7 +295,7 @@ def calculate_distance_km(
     lon2
 ):
     """
-    Calculate distance between two GPS coordinates
+    Calculates distance between two GPS coordinates
     using the Haversine formula.
     """
 
@@ -187,32 +307,33 @@ def calculate_distance_km(
     ):
         return None
 
-
     R = 6371.0
 
     lat1 = radians(lat1)
     lat2 = radians(lat2)
 
     dlat = lat2 - lat1
-    dlon = radians(lon2 - lon1)
 
+    dlon = radians(lon2 - lon1)
 
     a = (
         sin(dlat / 2) ** 2
         +
         cos(lat1)
-        * cos(lat2)
-        * sin(dlon / 2) ** 2
+        *
+        cos(lat2)
+        *
+        sin(dlon / 2) ** 2
     )
-
 
     c = 2 * atan2(
         sqrt(a),
         sqrt(1 - a)
     )
 
-
     return R * c
+
+
 # =========================================================
 # HOME
 # =========================================================
@@ -256,18 +377,21 @@ def signup(
     email = email.strip().lower()
 
     if not name:
+
         raise HTTPException(
             status_code=400,
             detail="Name cannot be empty."
         )
 
     if not email:
+
         raise HTTPException(
             status_code=400,
             detail="Email cannot be empty."
         )
 
     if len(password) < 6:
+
         raise HTTPException(
             status_code=400,
             detail="Password must contain at least 6 characters."
@@ -280,6 +404,7 @@ def signup(
     )
 
     if existing_user:
+
         raise HTTPException(
             status_code=400,
             detail="Email already registered."
@@ -340,6 +465,7 @@ def login(
     )
 
     if not user:
+
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password."
@@ -357,6 +483,7 @@ def login(
         password_match = False
 
     if not password_match:
+
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password."
@@ -403,10 +530,12 @@ async def report_item(
     )
 
     if not user:
+
         raise HTTPException(
             status_code=404,
             detail="User account not found."
         )
+
 
     # -----------------------------------------------------
     # VALIDATE ITEM TYPE
@@ -421,6 +550,7 @@ async def report_item(
             detail="Item type must be lost or found."
         )
 
+
     # -----------------------------------------------------
     # CLEAN TEXT
     # -----------------------------------------------------
@@ -432,33 +562,39 @@ async def report_item(
     brand = brand.strip()
     location = location.strip()
 
+
     # -----------------------------------------------------
     # REQUIRED FIELDS
     # -----------------------------------------------------
 
     if not item_name:
+
         raise HTTPException(
             status_code=400,
             detail="Item name is required."
         )
 
     if not category:
+
         raise HTTPException(
             status_code=400,
             detail="Category is required."
         )
 
     if not description:
+
         raise HTTPException(
             status_code=400,
             detail="Description is required."
         )
 
     if not location:
+
         raise HTTPException(
             status_code=400,
             detail="Location is required."
         )
+
 
     # -----------------------------------------------------
     # VALIDATE DATE
@@ -477,6 +613,7 @@ async def report_item(
             status_code=400,
             detail="Invalid date format. Use YYYY-MM-DD."
         )
+
 
     # -----------------------------------------------------
     # VALIDATE IMAGE
@@ -512,6 +649,7 @@ async def report_item(
             )
         )
 
+
     # -----------------------------------------------------
     # GENERATE UNIQUE FILENAME
     # -----------------------------------------------------
@@ -524,6 +662,7 @@ async def report_item(
         UPLOAD_DIR,
         unique_filename
     )
+
 
     # -----------------------------------------------------
     # SAVE IMAGE
@@ -552,6 +691,7 @@ async def report_item(
 
         await image.close()
 
+
     # -----------------------------------------------------
     # SAVE ITEM
     # -----------------------------------------------------
@@ -565,10 +705,8 @@ async def report_item(
         color=color,
         brand=brand,
         location=location,
-
         latitude=latitude,
         longitude=longitude,
-
         item_date=item_date,
         image_name=unique_filename
     )
@@ -576,9 +714,7 @@ async def report_item(
     try:
 
         db.add(new_item)
-
         db.commit()
-
         db.refresh(new_item)
 
     except Exception as e:
@@ -593,6 +729,7 @@ async def report_item(
             status_code=500,
             detail=f"Unable to save item: {str(e)}"
         )
+
 
     return {
         "status": "success",
@@ -642,12 +779,8 @@ def get_my_items(
 
     items = (
         db.query(Item)
-        .filter(
-            Item.user_id == user_id
-        )
-        .order_by(
-            Item.id.desc()
-        )
+        .filter(Item.user_id == user_id)
+        .order_by(Item.id.desc())
         .all()
     )
 
@@ -669,9 +802,7 @@ def get_item(
 
     item = (
         db.query(Item)
-        .filter(
-            Item.id == item_id
-        )
+        .filter(Item.id == item_id)
         .first()
     )
 
@@ -686,15 +817,11 @@ def get_item(
 
 
 # =========================================================
-# AI MATCHING
-# =========================================================
-
-# =========================================================
-# AI MATCHING
+# AI MATCHING + AUTOMATIC NOTIFICATIONS
 # =========================================================
 
 @app.get("/match/{item_id}")
-def match_item(
+def find_matches(
     item_id: int,
     db: Session = Depends(get_db)
 ):
@@ -705,9 +832,7 @@ def match_item(
 
     current_item = (
         db.query(Item)
-        .filter(
-            Item.id == item_id
-        )
+        .filter(Item.id == item_id)
         .first()
     )
 
@@ -715,403 +840,135 @@ def match_item(
 
         raise HTTPException(
             status_code=404,
-            detail="Item not found."
+            detail="Item not found"
         )
 
+
     # -----------------------------------------------------
-    # DETERMINE OPPOSITE ITEM TYPE
+    # FIND OPPOSITE ITEM TYPE
     # -----------------------------------------------------
 
-    current_type = normalize_text(
-        current_item.item_type
+    opposite_type = (
+        "found"
+        if current_item.item_type == "lost"
+        else "lost"
     )
 
-    if current_type == "lost":
-
-        target_type = "found"
-
-    elif current_type == "found":
-
-        target_type = "lost"
-
-    else:
-
-        raise HTTPException(
-            status_code=400,
-            detail="Item type must be lost or found."
-        )
-
-    # -----------------------------------------------------
-    # GET OPPOSITE TYPE ITEMS
-    # -----------------------------------------------------
 
     candidate_items = (
         db.query(Item)
         .filter(
-            Item.item_type == target_type
+            Item.item_type == opposite_type,
+            Item.id != current_item.id
         )
         .all()
     )
 
+
     matches = []
 
-    # -----------------------------------------------------
-    # CURRENT ITEM TEXT
-    # -----------------------------------------------------
-
-    current_text = " ".join([
-        current_item.item_name or "",
-        current_item.description or "",
-        current_item.color or "",
-        current_item.brand or ""
-    ])
 
     # =====================================================
-    # COMPARE CANDIDATE ITEMS
+    # CHECK EACH CANDIDATE
     # =====================================================
 
-    for candidate_item in candidate_items:
+    for candidate in candidate_items:
 
         # -------------------------------------------------
-        # 1. TEXT SIMILARITY
+        # IMAGE SCORE
         # -------------------------------------------------
 
-        candidate_text = " ".join([
-            candidate_item.item_name or "",
-            candidate_item.description or "",
-            candidate_item.color or "",
-            candidate_item.brand or ""
-        ])
+        image_score = 0
 
-        try:
-
-            text_similarity = (
-                calculate_text_similarity(
-                    current_text,
-                    candidate_text
-                )
-            )
-
-        except Exception:
-
-            text_similarity = 0.0
-
-        text_score = round(
-            max(
-                0.0,
-                min(
-                    1.0,
-                    text_similarity
-                )
-            ) * 100,
-            2
-        )
-
-        # -------------------------------------------------
-        # 2. IMAGE SIMILARITY
-        # -------------------------------------------------
-
-        image_score = 0.0
-
-        current_image_path = None
-        candidate_image_path = None
-
-        if current_item.image_name:
-
-            current_image_path = os.path.join(
-                UPLOAD_DIR,
-                current_item.image_name
-            )
-
-        if candidate_item.image_name:
-
-            candidate_image_path = os.path.join(
-                UPLOAD_DIR,
-                candidate_item.image_name
-            )
-
-        image_available = (
-            bool(
-                current_image_path
-                and candidate_image_path
-                and os.path.isfile(
-                    current_image_path
-                )
-                and os.path.isfile(
-                    candidate_image_path
-                )
-            )
-        )
-
-        if image_available:
+        if (
+            current_item.image_name
+            and candidate.image_name
+        ):
 
             try:
 
-                image_similarity = (
-                    calculate_image_similarity(
+                current_image_path = os.path.join(
+                    UPLOAD_DIR,
+                    current_item.image_name
+                )
+
+                candidate_image_path = os.path.join(
+                    UPLOAD_DIR,
+                    candidate.image_name
+                )
+
+                if (
+                    os.path.exists(current_image_path)
+                    and
+                    os.path.exists(candidate_image_path)
+                ):
+
+                    image_score = calculate_image_similarity(
                         current_image_path,
                         candidate_image_path
                     )
+
+            except Exception as e:
+
+                print(
+                    "Image matching error:",
+                    e
                 )
 
-                image_score = round(
-                    max(
-                        0.0,
-                        min(
-                            1.0,
-                            image_similarity
-                        )
-                    ) * 100,
-                    2
-                )
-
-            except Exception:
-
-                image_score = 0.0
 
         # -------------------------------------------------
-        # 3. METADATA MATCHING
+        # TEXT SCORE
         # -------------------------------------------------
 
-        metadata_score = 0.0
+        current_text = " ".join([
+            current_item.item_name or "",
+            current_item.description or ""
+        ])
 
-        reasons = []
+        candidate_text = " ".join([
+            candidate.item_name or "",
+            candidate.description or ""
+        ])
 
-        # Category = 25
-        if (
-            normalize_text(
-                current_item.category
-            )
-            and
-            normalize_text(
-                current_item.category
-            )
-            ==
-            normalize_text(
-                candidate_item.category
-            )
-        ):
-
-            metadata_score += 25
-
-            reasons.append(
-                "Category matches"
-            )
-
-        # Color = 20
-        if (
-            normalize_text(
-                current_item.color
-            )
-            and
-            normalize_text(
-                current_item.color
-            )
-            ==
-            normalize_text(
-                candidate_item.color
-            )
-        ):
-
-            metadata_score += 20
-
-            reasons.append(
-                "Color matches"
-            )
-
-        # Brand = 20
-        if (
-            normalize_text(
-                current_item.brand
-            )
-            and
-            normalize_text(
-                current_item.brand
-            )
-            ==
-            normalize_text(
-                candidate_item.brand
-            )
-        ):
-
-            metadata_score += 20
-
-            reasons.append(
-                "Brand matches"
-            )
-
-        # Location = 20
-        if (
-            normalize_text(
-                current_item.location
-            )
-            and
-            normalize_text(
-                current_item.location
-            )
-            ==
-            normalize_text(
-                candidate_item.location
-            )
-        ):
-
-            metadata_score += 20
-
-            reasons.append(
-                "Location matches"
-            )
-
-        # Item name = 15
-        if (
-            normalize_text(
-                current_item.item_name
-            )
-            and
-            normalize_text(
-                current_item.item_name
-            )
-            ==
-            normalize_text(
-                candidate_item.item_name
-            )
-        ):
-
-            metadata_score += 15
-
-            reasons.append(
-                "Item name matches"
-            )
-
-        metadata_score = min(
-            metadata_score,
-            100
+        text_score = calculate_text_similarity(
+            current_text,
+            candidate_text
         )
 
 
-# -------------------------------------------------
-# LOCATION DISTANCE
-# -------------------------------------------------
+        # -------------------------------------------------
+        # METADATA SCORE
+        # -------------------------------------------------
 
-    distance_km = calculate_distance_km(
-        current_item.latitude,
-        current_item.longitude,
-        candidate_item.latitude,
-        candidate_item.longitude
-    )
-
-
-    location_bonus = 0.0
-
-
-    if distance_km is not None:
-
-        if distance_km <= 0.5:
-
-            location_bonus = 5.0
-
-        elif distance_km <= 1.0:
-
-            location_bonus = 3.0
-
-        elif distance_km <= 3.0:
-
-            location_bonus = 1.0
-
-        reasons.append(
-            f"📍 {round(distance_km, 2)} km away"
+        metadata_score = calculate_metadata_similarity(
+            current_item,
+            candidate
         )
-        # -------------------------------------------------
-        # 4. IMAGE REASON
-        # -------------------------------------------------
 
-        if image_score >= 95:
-
-            reasons.append(
-                "✓ Very strong image similarity"
-            )
-
-        elif image_score >= 80:
-
-            reasons.append(
-                "✓ Strong image similarity"
-            )
-
-        elif image_score >= 60:
-
-            reasons.append(
-                "✓ Moderate image similarity"
-            )
-
-        elif image_score > 0:
-
-            reasons.append(
-                "⚠ Low image similarity"
-            )
-
-        else:
-
-            reasons.append(
-                "⚠ Image unavailable for comparison"
-            )
 
         # -------------------------------------------------
-        # 5. TEXT REASON
+        # GPS DISTANCE
         # -------------------------------------------------
 
-        if text_score >= 75:
+        distance_km = None
 
-            reasons.append(
-                "✓ Strong description similarity"
+        if (
+            current_item.latitude is not None
+            and current_item.longitude is not None
+            and candidate.latitude is not None
+            and candidate.longitude is not None
+        ):
+
+            distance_km = calculate_distance_km(
+                current_item.latitude,
+                current_item.longitude,
+                candidate.latitude,
+                candidate.longitude
             )
 
-        elif text_score >= 50:
-
-            reasons.append(
-                "✓ Moderate description similarity"
-            )
-
-        elif text_score > 0:
-
-            reasons.append(
-                "⚠ Low description similarity"
-            )
-
-        else:
-
-            reasons.append(
-                "⚠ Limited description similarity"
-            )
 
         # -------------------------------------------------
-        # 6. METADATA REASON
-        # -------------------------------------------------
-
-        if metadata_score >= 75:
-
-            reasons.append(
-                "✓ Strong metadata match"
-            )
-
-        elif metadata_score >= 50:
-
-            reasons.append(
-                "✓ Moderate metadata match"
-            )
-
-        elif metadata_score > 0:
-
-            reasons.append(
-                "⚠ Partial metadata match"
-            )
-
-        else:
-
-            reasons.append(
-                "⚠ Limited metadata match"
-            )
-
-        # -------------------------------------------------
-        # 7. FINAL SCORE
+        # FINAL MATCH SCORE
         # -------------------------------------------------
 
         final_score = (
@@ -1122,91 +979,228 @@ def match_item(
             (metadata_score * 0.30)
         )
 
-        final_score = min(100.0, final_score)
+        final_score = max(
+            0.0,
+            min(100.0, final_score)
+        )
 
         final_score = round(
             final_score,
             2
         )
+
+
         # -------------------------------------------------
-        # 8. STORE MATCH
+        # MATCH RESULT
         # -------------------------------------------------
 
         matches.append({
 
-            "item_id":
-                candidate_item.id,
+            "item_id": candidate.id,
 
-            "user_id":
-                candidate_item.user_id,
+            "item_type": candidate.item_type,
 
-            "item_name":
-                candidate_item.item_name,
+            "item_name": candidate.item_name,
 
-            "item_type":
-                candidate_item.item_type,
+            "category": candidate.category,
 
-            "category":
-                candidate_item.category,
+            "description": candidate.description,
 
-            "description":
-                candidate_item.description,
+            "color": candidate.color,
 
-            "color":
-                candidate_item.color,
+            "brand": candidate.brand,
 
-            "brand":
-                candidate_item.brand,
+            "location": candidate.location,
 
-            "location":
-                candidate_item.location,
+            "latitude": candidate.latitude,
 
-            "latitude":
-                candidate_item.latitude,
+            "longitude": candidate.longitude,
 
-            "longitude":
-                candidate_item.longitude,
+            "distance_km": (
+                round(distance_km, 2)
+                if distance_km is not None
+                else None
+            ),
 
-            "distance_km":
-                (
-                    round(distance_km, 2)
-                    if distance_km is not None
-                    else None
-                ),
-
-            "item_date":
-                (
-                    str(candidate_item.item_date)
-                    if candidate_item.item_date
-                    else None
-                ),
-
-            "image_name":
-                candidate_item.image_name,
-
-            "image_url":
-                image_url(
-                    candidate_item.image_name
-                ),
-
-            "image_similarity":
+            "image_score": round(
                 image_score,
+                2
+            ),
 
-            "text_similarity":
+            "text_score": round(
                 text_score,
+                2
+            ),
 
-            "metadata_score":
+            "metadata_score": round(
                 metadata_score,
+                2
+            ),
 
-            "match_score":
-                final_score,
+            "match_score": final_score,
 
-            "image_available":
-                image_available,
-
-            "reasons":
-                reasons
+            "strong_match": (
+                final_score >= 50
+            )
         })
+
+
+        # =================================================
+        # AUTOMATIC MATCH NOTIFICATIONS
+        # =================================================
+
+        if final_score >= 50:
+
+            # ---------------------------------------------
+            # NOTIFY CURRENT ITEM OWNER
+            # ---------------------------------------------
+
+            if current_item.user_id:
+
+                existing_current_notification = (
+                    db.query(Notification)
+                    .filter(
+                        Notification.user_id
+                        ==
+                        current_item.user_id,
+
+                        Notification.item_id
+                        ==
+                        current_item.id,
+
+                        Notification.notification_type
+                        ==
+                        "match",
+
+                        Notification.message.contains(
+                            f"Item #{candidate.id}"
+                        )
+                    )
+                    .first()
+                )
+
+
+                if not existing_current_notification:
+
+                    notification_current = Notification(
+
+                        user_id=current_item.user_id,
+
+                        item_id=current_item.id,
+
+                        title="🔔 Possible Match Found",
+
+                        message=(
+                            f"AI found a possible match "
+                            f"for your "
+                            f"{current_item.item_type} item. "
+                            f"Item #{candidate.id} has a "
+                            f"{final_score}% match score."
+                        ),
+
+                        notification_type="match"
+                    )
+
+                    db.add(
+                        notification_current
+                    )
+
+                    print(
+                        f"Notification created for "
+                        f"User {current_item.user_id} "
+                        f"for Item #{current_item.id}"
+                    )
+
+
+            # ---------------------------------------------
+            # NOTIFY CANDIDATE ITEM OWNER
+            # ---------------------------------------------
+
+            if (
+                candidate.user_id
+                and
+                candidate.user_id
+                !=
+                current_item.user_id
+            ):
+
+                existing_candidate_notification = (
+                    db.query(Notification)
+                    .filter(
+                        Notification.user_id
+                        ==
+                        candidate.user_id,
+
+                        Notification.item_id
+                        ==
+                        candidate.id,
+
+                        Notification.notification_type
+                        ==
+                        "match",
+
+                        Notification.message.contains(
+                            f"Item #{current_item.id}"
+                        )
+                    )
+                    .first()
+                )
+
+
+                if not existing_candidate_notification:
+
+                    notification_candidate = Notification(
+
+                        user_id=candidate.user_id,
+
+                        item_id=candidate.id,
+
+                        title="🔔 Possible Match Found",
+
+                        message=(
+                            f"AI found a possible match "
+                            f"for your "
+                            f"{candidate.item_type} item. "
+                            f"Item #{current_item.id} has a "
+                            f"{final_score}% match score."
+                        ),
+
+                        notification_type="match"
+                    )
+
+                    db.add(
+                        notification_candidate
+                    )
+
+                    print(
+                        f"Notification created for "
+                        f"User {candidate.user_id} "
+                        f"for Item #{candidate.id}"
+                    )
+
+
+    # =====================================================
+    # SAVE NOTIFICATIONS
+    # =====================================================
+
+    try:
+
+        db.commit()
+
+    except Exception as e:
+
+        db.rollback()
+
+        print(
+            "Notification commit error:",
+            e
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unable to save match notifications: {str(e)}"
+        )
+
 
     # =====================================================
     # SORT MATCHES
@@ -1217,61 +1211,21 @@ def match_item(
         reverse=True
     )
 
-    # =====================================================
-    # FILTER STRONG MATCHES
-    # =====================================================
-
-    strong_matches = [
-        match
-        for match in matches
-        if match["match_score"] >= 50
-    ]
 
     # =====================================================
-    # NO MATCH
-    # =====================================================
-
-    if not strong_matches:
-
-        return {
-            "status": "success",
-
-            "item_id":
-                current_item.id,
-
-            "item_type":
-                current_item.item_type,
-
-            "searching_for":
-                target_type,
-
-            "matches": [],
-
-            "message":
-                f"No strong {target_type} match found."
-        }
-
-    # =====================================================
-    # RETURN MATCHES
+    # RESPONSE
     # =====================================================
 
     return {
 
-        "status":
-            "success",
+        "item_id": current_item.id,
 
-        "item_id":
-            current_item.id,
+        "item_type": current_item.item_type,
 
-        "item_type":
-            current_item.item_type,
-
-        "searching_for":
-            target_type,
-
-        "matches":
-            strong_matches
+        "matches": matches
     }
+
+
 # =========================================================
 # SEND MESSAGE
 # =========================================================
@@ -1300,15 +1254,14 @@ def send_message(
             detail="Message is too long."
         )
 
+
     # -----------------------------------------------------
     # CHECK SENDER
     # -----------------------------------------------------
 
     sender = (
         db.query(User)
-        .filter(
-            User.id == sender_id
-        )
+        .filter(User.id == sender_id)
         .first()
     )
 
@@ -1319,15 +1272,14 @@ def send_message(
             detail="Sender account not found."
         )
 
+
     # -----------------------------------------------------
     # CHECK ITEM
     # -----------------------------------------------------
 
     item = (
         db.query(Item)
-        .filter(
-            Item.id == item_id
-        )
+        .filter(Item.id == item_id)
         .first()
     )
 
@@ -1337,6 +1289,7 @@ def send_message(
             status_code=404,
             detail="Item not found."
         )
+
 
     # -----------------------------------------------------
     # GET REPORTER
@@ -1348,11 +1301,9 @@ def send_message(
 
         raise HTTPException(
             status_code=400,
-            detail=(
-                "Reporter information "
-                "is not available."
-            )
+            detail="Reporter information is not available."
         )
+
 
     # -----------------------------------------------------
     # PREVENT SELF MESSAGE
@@ -1365,15 +1316,14 @@ def send_message(
             detail="You cannot message yourself."
         )
 
+
     # -----------------------------------------------------
     # CHECK RECEIVER
     # -----------------------------------------------------
 
     receiver = (
         db.query(User)
-        .filter(
-            User.id == receiver_id
-        )
+        .filter(User.id == receiver_id)
         .first()
     )
 
@@ -1384,23 +1334,27 @@ def send_message(
             detail="Reporter account not found."
         )
 
+
     # -----------------------------------------------------
     # CREATE MESSAGE
     # -----------------------------------------------------
 
     new_message = Message(
+
         sender_id=sender_id,
+
         receiver_id=receiver_id,
+
         item_id=item_id,
+
         message=message
     )
+
 
     try:
 
         db.add(new_message)
-
         db.commit()
-
         db.refresh(new_message)
 
     except Exception as e:
@@ -1412,13 +1366,21 @@ def send_message(
             detail=f"Unable to send message: {str(e)}"
         )
 
+
     return {
+
         "status": "success",
+
         "message": "Message sent successfully.",
+
         "message_id": new_message.id,
+
         "item_id": item_id,
+
         "sender_id": sender_id,
+
         "receiver_id": receiver_id,
+
         "created_at": (
             str(new_message.created_at)
             if new_message.created_at
@@ -1444,9 +1406,7 @@ def get_messages(
 
     item = (
         db.query(Item)
-        .filter(
-            Item.id == item_id
-        )
+        .filter(Item.id == item_id)
         .first()
     )
 
@@ -1456,6 +1416,7 @@ def get_messages(
             status_code=404,
             detail="Item not found."
         )
+
 
     # -----------------------------------------------------
     # GET MESSAGES
@@ -1477,66 +1438,580 @@ def get_messages(
         .all()
     )
 
+
     result = []
+
 
     for msg in messages:
 
         sender = (
             db.query(User)
-            .filter(
-                User.id == msg.sender_id
-            )
+            .filter(User.id == msg.sender_id)
             .first()
         )
 
         receiver = (
             db.query(User)
+            .filter(User.id == msg.receiver_id)
+            .first()
+        )
+
+
+        result.append({
+
+            "id": msg.id,
+
+            "sender_id": msg.sender_id,
+
+            "sender_name": (
+                sender.name
+                if sender
+                else "Unknown User"
+            ),
+
+            "receiver_id": msg.receiver_id,
+
+            "receiver_name": (
+                receiver.name
+                if receiver
+                else "Unknown User"
+            ),
+
+            "item_id": msg.item_id,
+
+            "message": msg.message,
+
+            "created_at": (
+                str(msg.created_at)
+                if msg.created_at
+                else None
+            )
+        })
+
+
+    return {
+
+        "status": "success",
+
+        "messages": result
+    }
+
+
+# =========================================================
+# FEATURE 3 — NOTIFICATIONS
+# =========================================================
+
+@app.get("/notifications/{user_id}")
+def get_notifications(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+
+    notifications = (
+        db.query(Notification)
+        .filter(
+            Notification.user_id == user_id
+        )
+        .order_by(
+            Notification.id.desc()
+        )
+        .all()
+    )
+
+
+    return [
+
+        {
+
+            "id": notification.id,
+
+            "user_id": notification.user_id,
+
+            "item_id": notification.item_id,
+
+            "title": notification.title,
+
+            "message": notification.message,
+
+            "notification_type":
+                notification.notification_type,
+
+            "is_read":
+                bool(notification.is_read),
+
+            "created_at":
+                notification.created_at
+        }
+
+        for notification in notifications
+    ]
+
+
+# =========================================================
+# MARK ONE NOTIFICATION AS READ
+# =========================================================
+
+@app.put("/notifications/{notification_id}/read")
+def mark_notification_read(
+    notification_id: int,
+    db: Session = Depends(get_db)
+):
+
+    notification = (
+        db.query(Notification)
+        .filter(
+            Notification.id == notification_id
+        )
+        .first()
+    )
+
+
+    if not notification:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Notification not found"
+        )
+
+
+    notification.is_read = 1
+
+    db.commit()
+
+
+    return {
+
+        "message":
+            "Notification marked as read"
+    }
+
+
+# =========================================================
+# MARK ALL NOTIFICATIONS AS READ
+# =========================================================
+
+@app.put("/notifications/{user_id}/read-all")
+def mark_all_notifications_read(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+
+    notifications = (
+        db.query(Notification)
+        .filter(
+            Notification.user_id == user_id,
+            Notification.is_read == 0
+        )
+        .all()
+    )
+
+
+    for notification in notifications:
+
+        notification.is_read = 1
+
+
+    db.commit()
+
+
+    return {
+
+        "message":
+            "All notifications marked as read",
+
+        "count":
+            len(notifications)
+    }
+
+
+# =========================================================
+# FEATURE 4 — OWNERSHIP VERIFICATION
+# =========================================================
+
+@app.post("/verification/request")
+def create_verification_request(
+    item_id: int,
+    claimant_id: int,
+    proof: str,
+    db: Session = Depends(get_db)
+):
+
+    # -----------------------------------------------------
+    # CHECK ITEM
+    # -----------------------------------------------------
+
+    item = (
+        db.query(Item)
+        .filter(Item.id == item_id)
+        .first()
+    )
+
+
+    if not item:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Item not found"
+        )
+
+
+    # -----------------------------------------------------
+    # CHECK OWNER
+    # -----------------------------------------------------
+
+    if not item.user_id:
+
+        raise HTTPException(
+            status_code=400,
+            detail="This item has no owner account"
+        )
+
+
+    # -----------------------------------------------------
+    # PREVENT SELF VERIFICATION
+    # -----------------------------------------------------
+
+    if claimant_id == item.user_id:
+
+        raise HTTPException(
+            status_code=400,
+            detail="You cannot verify your own item"
+        )
+
+
+    # -----------------------------------------------------
+    # CHECK PROOF
+    # -----------------------------------------------------
+
+    if not proof.strip():
+
+        raise HTTPException(
+            status_code=400,
+            detail="Verification proof is required"
+        )
+
+
+    # -----------------------------------------------------
+    # PREVENT DUPLICATE REQUEST
+    # -----------------------------------------------------
+
+    existing = (
+        db.query(VerificationRequest)
+        .filter(
+            VerificationRequest.item_id == item_id,
+
+            VerificationRequest.claimant_id
+            == claimant_id,
+
+            VerificationRequest.status
+            == "pending"
+        )
+        .first()
+    )
+
+
+    if existing:
+
+        raise HTTPException(
+            status_code=400,
+            detail="A verification request is already pending"
+        )
+
+
+    # -----------------------------------------------------
+    # CREATE VERIFICATION REQUEST
+    # -----------------------------------------------------
+
+    request = VerificationRequest(
+
+        item_id=item_id,
+
+        claimant_id=claimant_id,
+
+        reporter_id=item.user_id,
+
+        proof=proof,
+
+        status="pending"
+    )
+
+
+    db.add(request)
+
+    db.commit()
+
+    db.refresh(request)
+
+
+    # -----------------------------------------------------
+    # NOTIFY ITEM OWNER
+    # -----------------------------------------------------
+
+    notification = Notification(
+
+        user_id=item.user_id,
+
+        item_id=item.id,
+
+        title="New Ownership Verification",
+
+        message=(
+            "Someone has submitted ownership "
+            "proof for your item."
+        ),
+
+        notification_type="verification"
+    )
+
+
+    db.add(notification)
+
+    db.commit()
+
+
+    return {
+
+        "message":
+            "Verification request submitted",
+
+        "request_id":
+            request.id,
+
+        "status":
+            request.status
+    }
+
+
+# =========================================================
+# GET VERIFICATION REQUESTS
+# =========================================================
+
+@app.get("/verification/user/{user_id}")
+def get_verification_requests(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+
+    requests = (
+        db.query(VerificationRequest)
+        .filter(
+            (
+                VerificationRequest.claimant_id
+                == user_id
+            )
+            |
+            (
+                VerificationRequest.reporter_id
+                == user_id
+            )
+        )
+        .order_by(
+            VerificationRequest.id.desc()
+        )
+        .all()
+    )
+
+
+    result = []
+
+
+    for request in requests:
+
+        item = (
+            db.query(Item)
             .filter(
-                User.id == msg.receiver_id
+                Item.id == request.item_id
             )
             .first()
         )
 
+
+        claimant = (
+            db.query(User)
+            .filter(
+                User.id == request.claimant_id
+            )
+            .first()
+        )
+
+
+        reporter = (
+            db.query(User)
+            .filter(
+                User.id == request.reporter_id
+            )
+            .first()
+        )
+
+
         result.append({
 
-            "id":
-                msg.id,
+            "id": request.id,
 
-            "sender_id":
-                msg.sender_id,
+            "item_id": request.item_id,
 
-            "sender_name":
-                (
-                    sender.name
-                    if sender
-                    else "Unknown User"
-                ),
+            "item_name":
+                item.item_name
+                if item
+                else None,
 
-            "receiver_id":
-                msg.receiver_id,
+            "claimant_id":
+                request.claimant_id,
 
-            "receiver_name":
-                (
-                    receiver.name
-                    if receiver
-                    else "Unknown User"
-                ),
+            "claimant_name":
+                claimant.name
+                if claimant
+                else None,
 
-            "item_id":
-                msg.item_id,
+            "reporter_id":
+                request.reporter_id,
 
-            "message":
-                msg.message,
+            "reporter_name":
+                reporter.name
+                if reporter
+                else None,
+
+            "proof":
+                request.proof,
+
+            "status":
+                request.status,
+
+            "response_message":
+                request.response_message,
 
             "created_at":
-                (
-                    str(msg.created_at)
-                    if msg.created_at
-                    else None
-                )
+                request.created_at
         })
 
+
+    return result
+
+
+# =========================================================
+# RESPOND TO VERIFICATION REQUEST
+# =========================================================
+
+@app.put("/verification/{request_id}/respond")
+def respond_to_verification(
+    request_id: int,
+    reporter_id: int,
+    status: str,
+    response_message: str = "",
+    db: Session = Depends(get_db)
+):
+
+    # -----------------------------------------------------
+    # VALIDATE STATUS
+    # -----------------------------------------------------
+
+    if status not in [
+        "approved",
+        "rejected"
+    ]:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Status must be approved or rejected"
+        )
+
+
+    # -----------------------------------------------------
+    # FIND REQUEST
+    # -----------------------------------------------------
+
+    request = (
+        db.query(VerificationRequest)
+        .filter(
+            VerificationRequest.id
+            == request_id,
+
+            VerificationRequest.reporter_id
+            == reporter_id
+        )
+        .first()
+    )
+
+
+    if not request:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Verification request not found"
+        )
+
+
+    # -----------------------------------------------------
+    # PREVENT DOUBLE RESPONSE
+    # -----------------------------------------------------
+
+    if request.status != "pending":
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "This verification request "
+                "has already been processed"
+            )
+        )
+
+
+    # -----------------------------------------------------
+    # UPDATE REQUEST
+    # -----------------------------------------------------
+
+    request.status = status
+
+    request.response_message = response_message
+
+    db.commit()
+
+
+    # -----------------------------------------------------
+    # NOTIFY CLAIMANT
+    # -----------------------------------------------------
+
+    notification = Notification(
+
+        user_id=request.claimant_id,
+
+        item_id=request.item_id,
+
+        title=(
+            "Ownership Verified"
+            if status == "approved"
+            else "Verification Rejected"
+        ),
+
+        message=(
+            response_message
+            if response_message.strip()
+            else (
+                "Your ownership verification was approved."
+                if status == "approved"
+                else
+                "Your ownership verification was rejected."
+            )
+        ),
+
+        notification_type="verification_response"
+    )
+
+
+    db.add(notification)
+
+    db.commit()
+
+
     return {
-        "status": "success",
-        "messages": result
+
+        "message":
+            "Verification response saved",
+
+        "request_id":
+            request.id,
+
+        "status":
+            request.status
     }
+
