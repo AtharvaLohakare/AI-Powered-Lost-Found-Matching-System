@@ -1,8 +1,7 @@
 
 // =========================================================
 // LOST & FOUND AI
-// ITEM DETAIL + AI MATCHING + LOCATION MAP
-// + OWNERSHIP VERIFICATION
+// ITEM DETAIL + AI MATCHING + OWNERSHIP VERIFICATION
 // =========================================================
 
 const itemDetail = document.getElementById("item-detail");
@@ -10,321 +9,14 @@ const itemDetail = document.getElementById("item-detail");
 const params = new URLSearchParams(window.location.search);
 const itemId = params.get("id");
 
-// Store current item for map
-let currentItem = null;
-
-// Store Leaflet map
-let matchMap = null;
-
 
 // =========================================================
-// HELPER - ESCAPE HTML
+// GET CURRENT USER
 // =========================================================
 
-function escapeHtml(value) {
-    if (value === null || value === undefined) {
-        return "";
-    }
+function getCurrentUser() {
 
-    const div = document.createElement("div");
-    div.textContent = String(value);
-    return div.innerHTML;
-}
-
-
-// =========================================================
-// HELPER - IMAGE URL
-// =========================================================
-
-function getImageUrl(item) {
-    if (!item) {
-        return "";
-    }
-
-    if (item.image_url) {
-        if (item.image_url.startsWith("http")) {
-            return item.image_url;
-        }
-
-        return `${API_URL}${item.image_url}`;
-    }
-
-    if (!item.image_name) {
-        return "";
-    }
-
-    return `${API_URL}/uploads/${encodeURIComponent(item.image_name)}`;
-}
-
-
-// =========================================================
-// IMAGE ERROR FALLBACK
-// =========================================================
-
-function imageErrorHandler(img) {
-    img.onerror = null;
-    img.style.display = "none";
-
-    if (img.parentElement) {
-        img.parentElement.classList.add("image-failed");
-
-        img.parentElement.innerHTML = `
-            <div class="image-placeholder">
-                📦
-                <span>Image unavailable</span>
-            </div>
-        `;
-    }
-}
-
-
-// =========================================================
-// LOAD LEAFLET CSS + JS
-// =========================================================
-
-function loadLeaflet() {
-    return new Promise((resolve, reject) => {
-
-        if (window.L) {
-            resolve();
-            return;
-        }
-
-        if (!document.getElementById("leaflet-css")) {
-
-            const css = document.createElement("link");
-
-            css.id = "leaflet-css";
-            css.rel = "stylesheet";
-            css.href =
-                "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-
-            document.head.appendChild(css);
-        }
-
-        const script = document.createElement("script");
-
-        script.src =
-            "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-
-        script.onload = () => resolve();
-
-        script.onerror = () => {
-            reject(
-                new Error("Unable to load map library.")
-            );
-        };
-
-        document.head.appendChild(script);
-    });
-}
-
-
-// =========================================================
-// CHECK GPS COORDINATES
-// =========================================================
-
-function hasCoordinates(item) {
-
-    if (!item) {
-        return false;
-    }
-
-    const lat = Number(item.latitude);
-    const lon = Number(item.longitude);
-
-    return (
-        Number.isFinite(lat) &&
-        Number.isFinite(lon) &&
-        lat >= -90 &&
-        lat <= 90 &&
-        lon >= -180 &&
-        lon <= 180
-    );
-}
-
-
-// =========================================================
-// CREATE LOCATION MAP
-// =========================================================
-
-async function createMatchMap(item, matches) {
-
-    const mapContainer =
-        document.getElementById("match-map");
-
-    const mapStatus =
-        document.getElementById("map-status");
-
-    if (!mapContainer) {
-        return;
-    }
-
-    const currentHasGPS = hasCoordinates(item);
-
-    const matchesWithGPS = matches.filter(
-        match => hasCoordinates(match)
-    );
-
-    if (!currentHasGPS && matchesWithGPS.length === 0) {
-
-        if (mapStatus) {
-            mapStatus.innerHTML = `
-                📍 Location data is not available
-                for these items.
-            `;
-        }
-
-        mapContainer.style.display = "none";
-        return;
-    }
-
-    try {
-
-        await loadLeaflet();
-
-        mapContainer.style.display = "block";
-
-        if (mapStatus) {
-            mapStatus.innerHTML =
-                "📍 Showing reported item locations";
-        }
-
-        if (matchMap) {
-            matchMap.remove();
-            matchMap = null;
-        }
-
-        matchMap = L.map("match-map");
-
-        L.tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-                maxZoom: 19,
-                attribution:
-                    "&copy; OpenStreetMap contributors"
-            }
-        ).addTo(matchMap);
-
-        const mapPoints = [];
-
-        // Current item marker
-        if (currentHasGPS) {
-
-            const lat =
-                Number(item.latitude);
-
-            const lon =
-                Number(item.longitude);
-
-            const marker =
-                L.marker([lat, lon])
-                    .addTo(matchMap);
-
-            marker.bindPopup(`
-                <strong>Current Item</strong><br>
-                ${escapeHtml(
-                    item.item_name || "Reported Item"
-                )}<br>
-                ${escapeHtml(
-                    item.location || "Location unavailable"
-                )}
-            `);
-
-            mapPoints.push([lat, lon]);
-        }
-
-        // Match markers
-        matchesWithGPS.forEach((match, index) => {
-
-            const lat =
-                Number(match.latitude);
-
-            const lon =
-                Number(match.longitude);
-
-            const marker =
-                L.marker([lat, lon])
-                    .addTo(matchMap);
-
-            const score =
-                Number(match.match_score || 0);
-
-            marker.bindPopup(`
-                <strong>Possible Match #${index + 1}</strong><br>
-                ${escapeHtml(
-                    match.item_name || "Possible Match"
-                )}<br>
-                Match: ${score.toFixed(1)}%<br>
-                ${escapeHtml(
-                    match.location || "Location unavailable"
-                )}
-            `);
-
-            mapPoints.push([lat, lon]);
-        });
-
-        if (mapPoints.length === 1) {
-
-            matchMap.setView(
-                mapPoints[0],
-                14
-            );
-
-        } else if (mapPoints.length > 1) {
-
-            const bounds =
-                L.latLngBounds(mapPoints);
-
-            matchMap.fitBounds(
-                bounds,
-                {
-                    padding: [50, 50]
-                }
-            );
-
-        } else {
-
-            matchMap.setView(
-                [20.5937, 78.9629],
-                5
-            );
-        }
-
-        setTimeout(() => {
-
-            if (matchMap) {
-                matchMap.invalidateSize();
-            }
-
-        }, 300);
-
-    }
-    catch (error) {
-
-        console.error(
-            "Map Error:",
-            error
-        );
-
-        mapContainer.style.display = "none";
-
-        if (mapStatus) {
-            mapStatus.innerHTML =
-                "Unable to load location map.";
-        }
-    }
-}
-
-
-// =========================================================
-// GET CURRENT LOGGED-IN USER
-// =========================================================
-
-function getLoggedInUser() {
-
-    const storedUser =
-        localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
     if (!storedUser) {
         return null;
@@ -332,8 +24,7 @@ function getLoggedInUser() {
 
     try {
 
-        const user =
-            JSON.parse(storedUser);
+        const user = JSON.parse(storedUser);
 
         if (!user || !user.id) {
             return null;
@@ -344,10 +35,9 @@ function getLoggedInUser() {
     }
     catch (error) {
 
-        console.error(
-            "Invalid user:",
-            error
-        );
+        console.error("Invalid user:", error);
+
+        localStorage.removeItem("user");
 
         return null;
     }
@@ -355,721 +45,53 @@ function getLoggedInUser() {
 
 
 // =========================================================
-// OWNERSHIP VERIFICATION UI
+// SAFE HTML
 // =========================================================
 
-function renderVerificationSection(item) {
+function escapeHtml(value) {
 
-    const verificationContainer =
-        document.getElementById(
-            "verification-section"
-        );
-
-    if (!verificationContainer) {
-        return;
+    if (value === null || value === undefined) {
+        return "";
     }
 
-    const user =
-        getLoggedInUser();
-
-    // -----------------------------------------------------
-    // NOT LOGGED IN
-    // -----------------------------------------------------
-
-    if (!user) {
-
-        verificationContainer.innerHTML = `
-            <div class="verification-card">
-                <h2>🔐 Ownership Verification</h2>
-
-                <p>
-                    Login to submit or review ownership verification.
-                </p>
-
-                <a
-                    href="login.html"
-                    class="verification-login-btn"
-                >
-                    Login
-                </a>
-            </div>
-        `;
-
-        return;
-    }
-
-    // -----------------------------------------------------
-    // ITEM HAS NO OWNER
-    // -----------------------------------------------------
-
-    if (
-        item.user_id === null ||
-        item.user_id === undefined ||
-        item.user_id === ""
-    ) {
-
-        verificationContainer.innerHTML = `
-            <div class="verification-card">
-                <h2>🔐 Ownership Verification</h2>
-
-                <p>
-                    Ownership verification is unavailable
-                    for this item.
-                </p>
-            </div>
-        `;
-
-        return;
-    }
-
-    // -----------------------------------------------------
-    // CURRENT USER OWNS THIS ITEM
-    // -----------------------------------------------------
-
-    if (
-        Number(item.user_id) ===
-        Number(user.id)
-    ) {
-
-        verificationContainer.innerHTML = `
-            <div class="verification-card owner-card">
-
-                <h2>🛡️ Your Item</h2>
-
-                <p>
-                    You reported this item.
-                    You can review ownership claims submitted
-                    by other users.
-                </p>
-
-                <button
-                    class="verification-review-btn"
-                    onclick="loadVerificationRequests(${Number(item.id)})"
-                >
-                    📋 Review Ownership Claims
-                </button>
-
-                <div id="verification-requests">
-                    <p class="verification-muted">
-                        Click the button above to view claims.
-                    </p>
-                </div>
-
-            </div>
-        `;
-
-        return;
-    }
-
-    // -----------------------------------------------------
-    // CURRENT USER IS NOT THE OWNER
-    // -----------------------------------------------------
-
-    verificationContainer.innerHTML = `
-        <div class="verification-card claimant-card">
-
-            <h2>🔐 Ownership Verification</h2>
-
-            <p>
-                Do you believe this item belongs to you?
-                Submit proof of ownership to the reporter.
-            </p>
-
-            <textarea
-                id="ownership-proof"
-                class="ownership-proof"
-                placeholder="Example: I purchased these Boat earbuds on 25 September. The left earbud has a small scratch..."
-                rows="5"
-            ></textarea>
-
-            <button
-                class="verification-submit-btn"
-                onclick="submitOwnershipProof(${Number(item.id)})"
-            >
-                🔐 Submit Ownership Proof
-            </button>
-
-            <div id="claim-status"></div>
-
-        </div>
-    `;
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
 // =========================================================
-// SUBMIT OWNERSHIP PROOF
+// IMAGE URL
 // =========================================================
 
-async function submitOwnershipProof(itemId) {
+function getImageUrl(item) {
 
-    const user =
-        getLoggedInUser();
-
-    if (!user) {
-
-        showToast(
-            "Please login before submitting ownership proof.",
-            "warning"
-        );
-
-        return;
+    if (!item) {
+        return null;
     }
 
-    if (
-        !currentItem ||
-        Number(currentItem.user_id) === Number(user.id)
-    ) {
+    if (item.image_url) {
 
-        showToast(
-            "You cannot submit ownership proof for your own item.",
-            "warning"
-        );
-
-        return;
-    }
-
-    const proofInput =
-        document.getElementById(
-            "ownership-proof"
-        );
-
-    const statusContainer =
-        document.getElementById(
-            "claim-status"
-        );
-
-    if (!proofInput) {
-        return;
-    }
-
-    const proof =
-        proofInput.value.trim();
-
-    if (!proof) {
-
-        showToast(
-            "Please enter your ownership proof.",
-            "warning"
-        );
-
-        proofInput.focus();
-        return;
-    }
-
-    if (proof.length < 10) {
-
-        showToast(
-            "Please provide more details about your proof of ownership.",
-            "warning"
-        );
-
-        proofInput.focus();
-        return;
-    }
-
-    const button =
-        document.querySelector(
-            ".verification-submit-btn"
-        );
-
-    if (button) {
-        button.disabled = true;
-        button.textContent =
-            "Submitting...";
-    }
-
-    try {
-
-        const url =
-            new URL(
-                `${API_URL}/verification/request`
-            );
-
-        url.searchParams.set(
-            "item_id",
-            itemId
-        );
-
-        url.searchParams.set(
-            "claimant_id",
-            user.id
-        );
-
-        url.searchParams.set(
-            "proof",
-            proof
-        );
-
-        const response =
-            await fetch(
-                url.toString(),
-                {
-                    method: "POST"
-                }
-            );
-
-        let data = null;
-
-        try {
-            data = await response.json();
-        }
-        catch {
-            data = null;
+        if (item.image_url.startsWith("http")) {
+            return item.image_url;
         }
 
-        if (!response.ok) {
-
-            throw new Error(
-                data?.detail ||
-                data?.message ||
-                "Unable to submit ownership proof."
-            );
-        }
-
-        if (statusContainer) {
-
-            statusContainer.innerHTML = `
-                <div class="verification-success">
-                    ✅ Ownership proof submitted successfully.
-                    <br>
-                    The item reporter can now review your claim.
-                </div>
-            `;
-        }
-
-        proofInput.value = "";
-
-        showToast(
-            "Ownership proof submitted successfully.",
-            "success"
-        );
-
-        if (button) {
-            button.disabled = true;
-            button.textContent =
-                "✅ Proof Submitted";
-        }
-
+        return `${API_URL}${item.image_url}`;
     }
-    catch (error) {
 
-        console.error(
-            "Verification Submit Error:",
-            error
-        );
-
-        showToast(
-            error.message ||
-            "Unable to submit ownership proof.",
-            "error"
-        );
-
-        if (button) {
-            button.disabled = false;
-            button.textContent =
-                "🔐 Submit Ownership Proof";
-        }
+    if (item.image_name) {
+        return `${API_URL}/uploads/${item.image_name}`;
     }
+
+    return null;
 }
 
 
 // =========================================================
-// LOAD OWNERSHIP CLAIMS
-// =========================================================
-
-async function loadVerificationRequests(itemId) {
-
-    const user =
-        getLoggedInUser();
-
-    const container =
-        document.getElementById(
-            "verification-requests"
-        );
-
-    if (!user || !container) {
-        return;
-    }
-
-    // Security check on frontend
-    if (
-        !currentItem ||
-        Number(currentItem.user_id) !== Number(user.id)
-    ) {
-
-        container.innerHTML = `
-            <p class="verification-error">
-                You are not the owner of this item.
-            </p>
-        `;
-
-        return;
-    }
-
-    container.innerHTML = `
-        <div class="verification-loading">
-            Loading ownership claims...
-        </div>
-    `;
-
-    try {
-
-        const response =
-            await fetch(
-                `${API_URL}/verification/user/${encodeURIComponent(user.id)}`
-            );
-
-        let data = null;
-
-        try {
-            data = await response.json();
-        }
-        catch {
-            data = null;
-        }
-
-        if (!response.ok) {
-
-            throw new Error(
-                data?.detail ||
-                data?.message ||
-                "Unable to load verification requests."
-            );
-        }
-
-        let requests = [];
-
-        if (Array.isArray(data)) {
-            requests = data;
-        }
-        else if (Array.isArray(data.requests)) {
-            requests = data.requests;
-        }
-        else if (Array.isArray(data.verifications)) {
-            requests = data.verifications;
-        }
-
-        // Only requests for THIS item
-        // where current user is the reporter/owner
-        requests = requests.filter(request => {
-
-            return (
-                Number(request.item_id) === Number(itemId) &&
-                Number(request.reporter_id) === Number(user.id)
-            );
-
-        });
-
-        if (requests.length === 0) {
-
-            container.innerHTML = `
-                <div class="verification-empty">
-                    <p>
-                        📭 No ownership claims have been submitted
-                        for this item yet.
-                    </p>
-                </div>
-            `;
-
-            return;
-        }
-
-        container.innerHTML = `
-            <div class="verification-list">
-
-                <h3>
-                    Ownership Claims
-                </h3>
-
-                ${requests.map(request => {
-
-                    const status =
-                        String(
-                            request.status || "pending"
-                        ).toLowerCase();
-
-                    const claimantName =
-                        request.claimant_name ||
-                        request.claimant?.name ||
-                        `User ${request.claimant_id}`;
-
-                    const proof =
-                        request.proof ||
-                        "No proof provided.";
-
-                    const responseMessage =
-                        request.response_message ||
-                        "";
-
-                    const isPending =
-                        status === "pending";
-
-                    return `
-                        <div class="verification-request-card">
-
-                            <div class="verification-request-header">
-
-                                <h4>
-                                    👤 ${escapeHtml(claimantName)}
-                                </h4>
-
-                                <span
-                                    class="verification-status ${escapeHtml(status)}"
-                                >
-                                    ${escapeHtml(
-                                        status.toUpperCase()
-                                    )}
-                                </span>
-
-                            </div>
-
-                            <p>
-                                <strong>Claimant ID:</strong>
-                                ${escapeHtml(
-                                    request.claimant_id
-                                )}
-                            </p>
-
-                            <div class="proof-box">
-
-                                <strong>
-                                    Ownership Proof:
-                                </strong>
-
-                                <p>
-                                    ${escapeHtml(proof)}
-                                </p>
-
-                            </div>
-
-                            ${
-                                responseMessage
-                                    ? `
-                                        <div class="response-box">
-                                            <strong>
-                                                Response:
-                                            </strong>
-                                            <p>
-                                                ${escapeHtml(
-                                                    responseMessage
-                                                )}
-                                            </p>
-                                        </div>
-                                    `
-                                    : ""
-                            }
-
-                            ${
-                                isPending
-                                    ? `
-                                        <div class="verification-response-area">
-
-                                            <textarea
-                                                id="response-${Number(request.id)}"
-                                                class="verification-response"
-                                                placeholder="Optional message to the claimant..."
-                                                rows="3"
-                                            ></textarea>
-
-                                            <div class="verification-action-buttons">
-
-                                                <button
-                                                    class="approve-btn"
-                                                    onclick="respondToVerification(
-                                                        ${Number(request.id)},
-                                                        'approved'
-                                                    )"
-                                                >
-                                                    ✅ Approve
-                                                </button>
-
-                                                <button
-                                                    class="reject-btn"
-                                                    onclick="respondToVerification(
-                                                        ${Number(request.id)},
-                                                        'rejected'
-                                                    )"
-                                                >
-                                                    ❌ Reject
-                                                </button>
-
-                                            </div>
-
-                                        </div>
-                                    `
-                                    : ""
-                            }
-
-                        </div>
-                    `;
-
-                }).join("")}
-
-            </div>
-        `;
-    }
-    catch (error) {
-
-        console.error(
-            "Load Verification Error:",
-            error
-        );
-
-        container.innerHTML = `
-            <div class="verification-error">
-                ❌ ${escapeHtml(
-                    error.message ||
-                    "Unable to load ownership claims."
-                )}
-            </div>
-        `;
-
-        showToast(
-            error.message ||
-            "Unable to load ownership claims.",
-            "error"
-        );
-    }
-}
-
-
-// =========================================================
-// APPROVE / REJECT OWNERSHIP CLAIM
-// =========================================================
-
-async function respondToVerification(
-    requestId,
-    status
-) {
-
-    const user =
-        getLoggedInUser();
-
-    if (!user) {
-
-        showToast(
-            "Please login again.",
-            "warning"
-        );
-
-        return;
-    }
-
-    if (
-        !currentItem ||
-        Number(currentItem.user_id) !== Number(user.id)
-    ) {
-
-        showToast(
-            "Only the item reporter can respond to this claim.",
-            "error"
-        );
-
-        return;
-    }
-
-    const responseInput =
-        document.getElementById(
-            `response-${Number(requestId)}`
-        );
-
-    const responseMessage =
-        responseInput
-            ? responseInput.value.trim()
-            : "";
-
-    const actionText =
-        status === "approved"
-            ? "approve"
-            : "reject";
-
-    const confirmed =
-        window.confirm(
-            `Are you sure you want to ${actionText} this ownership claim?`
-        );
-
-    if (!confirmed) {
-        return;
-    }
-
-    try {
-
-        const url =
-            new URL(
-                `${API_URL}/verification/${encodeURIComponent(requestId)}/respond`
-            );
-
-        url.searchParams.set(
-            "reporter_id",
-            user.id
-        );
-
-        url.searchParams.set(
-            "status",
-            status
-        );
-
-        url.searchParams.set(
-            "response_message",
-            responseMessage
-        );
-
-        const request =
-            await fetch(
-                url.toString(),
-                {
-                    method: "PUT"
-                }
-            );
-
-        let data = null;
-
-        try {
-            data = await request.json();
-        }
-        catch {
-            data = null;
-        }
-
-        if (!request.ok) {
-
-            throw new Error(
-                data?.detail ||
-                data?.message ||
-                "Unable to respond to verification request."
-            );
-        }
-
-        showToast(
-            status === "approved"
-                ? "Ownership claim approved."
-                : "Ownership claim rejected.",
-            "success"
-        );
-
-        await loadVerificationRequests(
-            currentItem.id
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "Verification Response Error:",
-            error
-        );
-
-        showToast(
-            error.message ||
-            "Unable to process ownership claim.",
-            "error"
-        );
-    }
-}
-
-
-// =========================================================
-// LOAD ITEM DETAILS
+// LOAD ITEM
 // =========================================================
 
 async function loadItem() {
@@ -1086,12 +108,13 @@ async function loadItem() {
         return;
     }
 
+
     try {
 
-        const response =
-            await fetch(
-                `${API_URL}/items/${encodeURIComponent(itemId)}`
-            );
+        const response = await fetch(
+            `${API_URL}/items/${encodeURIComponent(itemId)}`
+        );
+
 
         let data = null;
 
@@ -1102,6 +125,7 @@ async function loadItem() {
             data = null;
         }
 
+
         if (!response.ok) {
 
             throw new Error(
@@ -1111,21 +135,28 @@ async function loadItem() {
             );
         }
 
+
         const item = data;
 
-        currentItem = item;
+        const currentUser = getCurrentUser();
 
-        const imageUrl =
-            getImageUrl(item);
+        const imageUrl = getImageUrl(item);
+
+
+        // =================================================
+        // IMAGE
+        // =================================================
 
         const imageHTML = imageUrl
+
             ? `
                 <img
                     src="${escapeHtml(imageUrl)}"
                     alt="${escapeHtml(item.item_name)}"
-                    onerror="imageErrorHandler(this)"
+                    onerror="this.style.display='none';"
                 >
               `
+
             : `
                 <div class="image-placeholder">
                     📦
@@ -1133,30 +164,247 @@ async function loadItem() {
                 </div>
               `;
 
+
+        // =================================================
+        // USER ROLE
+        // =================================================
+
+        const isOwner =
+            currentUser &&
+            Number(currentUser.id) === Number(item.user_id);
+
+
+        // =================================================
+        // ACTIONS
+        // =================================================
+
+        let actionHTML = "";
+
+
+        // -------------------------------------------------
+        // LOST ITEM
+        // -------------------------------------------------
+
+        if (item.item_type === "lost") {
+
+            actionHTML += `
+
+                <button
+                    class="match-btn"
+                    onclick="findMatches(${item.id})"
+                >
+                    🤖 Find AI Matches
+                </button>
+
+            `;
+
+
+            // Owner sees their own report
+            if (isOwner) {
+
+                actionHTML += `
+
+                    <div class="verification-info">
+
+                        <p>
+                            📋 This is your lost-item report.
+                        </p>
+
+                        <p>
+                            AI matching will search for
+                            matching found items.
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+
+            // Other users can contact lost-item reporter
+            else if (currentUser) {
+
+                actionHTML += `
+
+                    <button
+                        class="contact-btn"
+                        onclick="contactReporter(${item.id})"
+                    >
+                        📩 Contact Reporter
+                    </button>
+
+                `;
+
+            }
+
+            else {
+
+                actionHTML += `
+
+                    <p class="login-note">
+                        Login to contact the reporter.
+                    </p>
+
+                `;
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // FOUND ITEM
+        // -------------------------------------------------
+
+        else if (item.item_type === "found") {
+
+
+            // ---------------------------------------------
+            // FOUND ITEM OWNER / REPORTER
+            // ---------------------------------------------
+
+            if (isOwner) {
+
+                actionHTML += `
+
+                    <div class="verification-owner-box">
+
+                        <h3>
+                            📦 Your Found Item
+                        </h3>
+
+                        <p>
+                            You reported this found item.
+                        </p>
+
+                        <p>
+                            If someone claims this item,
+                            their ownership proof will
+                            appear in your verification
+                            requests.
+                        </p>
+
+                        <a
+                            href="my-reports.html"
+                            class="contact-btn"
+                        >
+                            🔍 View Verification Requests
+                        </a>
+
+                    </div>
+
+                `;
+
+            }
+
+
+            // ---------------------------------------------
+            // OTHER USER = POSSIBLE CLAIMANT
+            // ---------------------------------------------
+
+            else if (currentUser) {
+
+                actionHTML += `
+
+                    <div class="verification-claim-box">
+
+                        <h3>
+                            🔐 Claim This Found Item
+                        </h3>
+
+                        <p>
+                            If this item belongs to you,
+                            submit ownership proof to
+                            the person who reported it.
+                        </p>
+
+                        <textarea
+                            id="ownership-proof"
+                            rows="5"
+                            placeholder="Explain why this item belongs to you. Mention identifying details, purchase information, unique marks, etc."
+                        ></textarea>
+
+                        <button
+                            class="match-btn"
+                            onclick="submitOwnershipClaim(${item.id})"
+                        >
+                            🔐 Submit Ownership Proof
+                        </button>
+
+                    </div>
+
+                `;
+
+            }
+
+
+            // ---------------------------------------------
+            // NOT LOGGED IN
+            // ---------------------------------------------
+
+            else {
+
+                actionHTML += `
+
+                    <div class="login-note">
+
+                        <p>
+                            🔐 Login to submit an ownership claim.
+                        </p>
+
+                        <a
+                            href="login.html"
+                            class="login-btn"
+                        >
+                            Login
+                        </a>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+
+        // =================================================
+        // DISPLAY ITEM
+        // =================================================
+
         itemDetail.innerHTML = `
 
             <div class="detail-card">
 
                 <div class="detail-image">
+
                     ${imageHTML}
+
                 </div>
+
 
                 <div class="detail-content">
 
                     <span class="item-type">
+
                         ${escapeHtml(
                             String(
                                 item.item_type || ""
                             ).toUpperCase()
                         )}
+
                     </span>
 
+
                     <h1>
+
                         ${escapeHtml(
                             item.item_name ||
                             "Unnamed Item"
                         )}
+
                     </h1>
+
 
                     <p>
                         <strong>Category:</strong>
@@ -1166,6 +414,7 @@ async function loadItem() {
                         )}
                     </p>
 
+
                     <p>
                         <strong>Description:</strong>
                         ${escapeHtml(
@@ -1173,6 +422,7 @@ async function loadItem() {
                             "Not specified"
                         )}
                     </p>
+
 
                     <p>
                         <strong>Color:</strong>
@@ -1182,6 +432,7 @@ async function loadItem() {
                         )}
                     </p>
 
+
                     <p>
                         <strong>Brand:</strong>
                         ${escapeHtml(
@@ -1189,6 +440,7 @@ async function loadItem() {
                             "Not specified"
                         )}
                     </p>
+
 
                     <p>
                         <strong>Location:</strong>
@@ -1198,6 +450,7 @@ async function loadItem() {
                         )}
                     </p>
 
+
                     <p>
                         <strong>Date:</strong>
                         ${escapeHtml(
@@ -1206,48 +459,24 @@ async function loadItem() {
                         )}
                     </p>
 
-                    ${
-                        item.item_type === "lost" ||
-                        item.item_type === "found"
 
-                        ?
+                    <div class="item-actions">
 
-                        `
-                            <button
-                                class="match-btn"
-                                onclick="findMatches(${item.id})"
-                            >
-                                🤖 Find AI Matches
-                            </button>
-                        `
+                        ${actionHTML}
 
-                        :
-
-                        ""
-                    }
+                    </div>
 
                 </div>
 
             </div>
 
-            <!-- OWNERSHIP VERIFICATION -->
-
-            <div
-                id="verification-section"
-                class="verification-wrapper"
-            >
-                <div class="verification-card">
-                    Loading ownership verification...
-                </div>
-            </div>
 
             <div id="match-results"></div>
+
         `;
 
-        // Render role-based verification UI
-        renderVerificationSection(item);
-
     }
+
 
     catch (error) {
 
@@ -1256,7 +485,9 @@ async function loadItem() {
             error
         );
 
+
         itemDetail.innerHTML = `
+
             <div class="detail-card">
 
                 <h2>
@@ -1266,13 +497,222 @@ async function loadItem() {
                 <p>
                     ${escapeHtml(
                         error.message ||
-                        "Something went wrong while loading the item."
+                        "Something went wrong."
                     )}
                 </p>
 
             </div>
+
         `;
+
     }
+
+}
+
+
+// =========================================================
+// SUBMIT OWNERSHIP CLAIM
+// =========================================================
+
+async function submitOwnershipClaim(id) {
+
+    const currentUser = getCurrentUser();
+
+
+    // -----------------------------------------------------
+    // LOGIN CHECK
+    // -----------------------------------------------------
+
+    if (!currentUser) {
+
+        showToast(
+            "Please login before submitting an ownership claim.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    const proofElement =
+        document.getElementById("ownership-proof");
+
+
+    if (!proofElement) {
+        return;
+    }
+
+
+    const proof =
+        proofElement.value.trim();
+
+
+    // -----------------------------------------------------
+    // PROOF CHECK
+    // -----------------------------------------------------
+
+    if (!proof) {
+
+        showToast(
+            "Please provide ownership proof.",
+            "warning"
+        );
+
+        proofElement.focus();
+
+        return;
+    }
+
+
+    if (proof.length < 10) {
+
+        showToast(
+            "Please provide more detailed ownership proof.",
+            "warning"
+        );
+
+        proofElement.focus();
+
+        return;
+    }
+
+
+    // -----------------------------------------------------
+    // BUTTON
+    // -----------------------------------------------------
+
+    const buttons =
+        document.querySelectorAll(
+            ".verification-claim-box button"
+        );
+
+
+    buttons.forEach(button => {
+
+        button.disabled = true;
+
+        button.textContent =
+            "Submitting...";
+
+    });
+
+
+    try {
+
+        // =================================================
+        // SEND QUERY PARAMETERS
+        // Backend expects:
+        // item_id
+        // claimant_id
+        // proof
+        // =================================================
+
+        const url =
+            `${API_URL}/verification/request` +
+            `?item_id=${encodeURIComponent(id)}` +
+            `&claimant_id=${encodeURIComponent(currentUser.id)}` +
+            `&proof=${encodeURIComponent(proof)}`;
+
+
+        const response = await fetch(
+            url,
+            {
+                method: "POST"
+            }
+        );
+
+
+        let data = null;
+
+
+        try {
+
+            data = await response.json();
+
+        }
+        catch {
+
+            data = null;
+
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data?.detail ||
+                data?.message ||
+                "Unable to submit ownership claim."
+            );
+
+        }
+
+
+        showToast(
+            "🔐 Ownership proof submitted successfully!",
+            "success"
+        );
+
+
+        // Replace form with submitted message
+
+        const claimBox =
+            document.querySelector(
+                ".verification-claim-box"
+            );
+
+
+        if (claimBox) {
+
+            claimBox.innerHTML = `
+
+                <h3>
+                    ✅ Claim Submitted
+                </h3>
+
+                <p>
+                    Your ownership proof has been
+                    sent to the person who reported
+                    this found item.
+                </p>
+
+                <p>
+                    Please wait for their response.
+                </p>
+
+            `;
+
+        }
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Ownership Claim Error:",
+            error
+        );
+
+
+        showToast(
+            error.message ||
+            "Unable to submit ownership claim.",
+            "error"
+        );
+
+
+        buttons.forEach(button => {
+
+            button.disabled = false;
+
+            button.textContent =
+                "🔐 Submit Ownership Proof";
+
+        });
+
+    }
+
 }
 
 
@@ -1285,11 +725,14 @@ async function findMatches(id) {
     const matchResults =
         document.getElementById("match-results");
 
+
     if (!matchResults) {
         return;
     }
 
+
     matchResults.innerHTML = `
+
         <div class="ai-loading">
 
             <div class="ai-spinner"></div>
@@ -1304,7 +747,9 @@ async function findMatches(id) {
             </p>
 
         </div>
+
     `;
+
 
     if (typeof showToast === "function") {
 
@@ -1312,23 +757,31 @@ async function findMatches(id) {
             "🤖 AI matching started...",
             "success"
         );
+
     }
+
 
     try {
 
-        const response =
-            await fetch(
-                `${API_URL}/match/${encodeURIComponent(id)}`
-            );
+        const response = await fetch(
+            `${API_URL}/match/${id}`
+        );
+
 
         let data = null;
 
+
         try {
+
             data = await response.json();
+
         }
         catch {
+
             data = null;
+
         }
+
 
         if (!response.ok) {
 
@@ -1337,58 +790,66 @@ async function findMatches(id) {
                 data?.message ||
                 "Matching failed"
             );
+
         }
+
 
         console.log(
             "AI Match Results:",
             data
         );
 
+
         // =================================================
-        // NO MATCH FOUND
+        // NO MATCH
         // =================================================
 
         if (
             !data.matches ||
-            !Array.isArray(data.matches) ||
             data.matches.length === 0
         ) {
 
             matchResults.innerHTML = `
+
                 <div class="no-match">
 
                     <h2>
-                        ⚠️ No strong match found
+                        ⚠️ No opposite item found
                     </h2>
 
                     <p>
-                        The AI could not find a strong
-                        matching item.
+                        The AI could not find a
+                        matching found item.
                     </p>
 
                 </div>
+
             `;
+
 
             if (typeof showToast === "function") {
 
                 showToast(
-                    "No strong match found.",
+                    "No matching item found.",
                     "warning"
                 );
+
             }
 
             return;
         }
 
+
         // =================================================
-        // TAKE TOP 5 MATCHES
+        // TOP 5
         // =================================================
 
         const topMatches =
             data.matches.slice(0, 5);
 
+
         // =================================================
-        // DISPLAY AI RESULTS
+        // DISPLAY
         // =================================================
 
         matchResults.innerHTML = `
@@ -1402,280 +863,251 @@ async function findMatches(id) {
                     </h2>
 
                     <p>
+
                         We found
+
                         <strong>
                             ${data.matches.length}
                         </strong>
-                        possible match${
-                            data.matches.length === 1
-                                ? ""
-                                : "es"
-                        }
-                        for this item.
+
+                        possible match${data.matches.length === 1
+                            ? ""
+                            : "es"
+                        }.
+
                     </p>
 
                     <p>
-                        Results are based on
-                        <strong>image similarity</strong>,
-                        <strong>description similarity</strong>
-                        and
-                        <strong>item information</strong>.
+                        Results are based on image,
+                        description and item information.
                     </p>
 
                 </div>
+
 
                 <h2>
                     🤖 AI Possible Matches
                 </h2>
 
+
                 <p class="ai-subtitle">
-                    Matches are ranked using image similarity,
-                    text similarity and item metadata.
+
+                    Matches are ranked using image
+                    similarity, text similarity
+                    and item metadata.
+
                 </p>
 
-                ${
-                    topMatches.map(match => {
 
-                        const score =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    100,
-                                    Number(
-                                        match.match_score || 0
-                                    )
-                                )
-                            );
+                ${topMatches.map(match => {
 
-                        const imageScore =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    100,
-                                    Number(
-                                        match.image_similarity || 0
-                                    )
-                                )
-                            );
+                    const score =
+                        Number(match.match_score || 0);
 
-                        const textScore =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    100,
-                                    Number(
-                                        match.text_similarity || 0
-                                    )
-                                )
-                            );
 
-                        const metadataScore =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    100,
-                                    Number(
-                                        match.metadata_score || 0
-                                    )
-                                )
-                            );
+                    let confidence =
+                        "Low Match";
 
-                        let confidence =
-                            "Low Match";
 
-                        if (score >= 90) {
+                    if (score >= 90) {
 
-                            confidence =
-                                "Very High Match";
+                        confidence =
+                            "Very High Match";
 
-                        }
-                        else if (score >= 75) {
+                    }
 
-                            confidence =
-                                "High Match";
+                    else if (score >= 75) {
 
-                        }
-                        else if (score >= 50) {
+                        confidence =
+                            "High Match";
 
-                            confidence =
-                                "Possible Match";
-                        }
+                    }
 
-                        const imageUrl =
-                            getImageUrl(match);
+                    else if (score >= 50) {
 
-                        const matchImage =
-                            imageUrl
+                        confidence =
+                            "Possible Match";
 
-                            ?
+                    }
 
-                            `
-                                <img
-                                    src="${escapeHtml(imageUrl)}"
-                                    alt="${escapeHtml(
-                                        match.item_name ||
-                                        "Possible match"
-                                    )}"
-                                    onerror="imageErrorHandler(this)"
-                                >
-                            `
 
-                            :
+                    const imageScore =
+                        Number(
+                            match.image_score || 0
+                        );
 
-                            `
-                                <div class="image-placeholder">
-                                    📦
-                                    <span>
-                                        No image
-                                    </span>
-                                </div>
-                            `;
 
-                        const reasons =
-                            Array.isArray(match.reasons)
-                                ? match.reasons
-                                : [];
+                    const textScore =
+                        Number(
+                            match.text_score || 0
+                        );
 
-                        return `
 
-                            <div class="match-card">
+                    const metadataScore =
+                        Number(
+                            match.metadata_score || 0
+                        );
 
-                                <div class="match-image">
-                                    ${matchImage}
-                                </div>
 
-                                <div class="match-info">
+                    const imageUrl =
+                        match.image_url
+                            ? (
+                                match.image_url.startsWith("http")
+                                    ? match.image_url
+                                    : `${API_URL}${match.image_url}`
+                              )
+                            : (
+                                match.image_name
+                                    ? `${API_URL}/uploads/${match.image_name}`
+                                    : null
+                              );
 
-                                    <h3>
-                                        ${escapeHtml(
-                                            match.item_name ||
-                                            "Possible Match"
-                                        )}
-                                    </h3>
 
-                                    <div class="match-score">
-                                        ${score.toFixed(1)}%
-                                    </div>
+                    return `
 
-                                    <p>
-                                        <strong>
-                                            ${confidence}
-                                        </strong>
-                                    </p>
+                        <div class="match-card">
 
-                                    <p>
-                                        🖼️
-                                        Image Similarity:
-                                        ${imageScore.toFixed(1)}%
-                                    </p>
 
-                                    <p>
-                                        📝
-                                        Text Similarity:
-                                        ${textScore.toFixed(1)}%
-                                    </p>
+                            <div class="match-image">
 
-                                    <p>
-                                        📋
-                                        Metadata Score:
-                                        ${metadataScore.toFixed(1)}%
-                                    </p>
+                                ${
+                                    imageUrl
 
-                                    <h4>
-                                        Why this may be a match:
-                                    </h4>
+                                    ? `
 
-                                    <ul>
-
-                                        ${
-                                            reasons.length > 0
-
-                                            ?
-
-                                            reasons
-                                                .map(
-                                                    reason => `
-                                                        <li>
-                                                            ${escapeHtml(reason)}
-                                                        </li>
-                                                    `
-                                                )
-                                                .join("")
-
-                                            :
-
-                                            `
-                                                <li>
-                                                    No strong matching features found.
-                                                </li>
-                                            `
-                                        }
-
-                                    </ul>
-
-                                    <div class="match-actions">
-
-                                        <button
-                                            class="view-match-btn"
-                                            onclick="viewItem(${Number(match.item_id)})"
+                                        <img
+                                            src="${escapeHtml(imageUrl)}"
+                                            alt="${escapeHtml(
+                                                match.item_name ||
+                                                "Possible match"
+                                            )}"
                                         >
-                                            View Possible Match
-                                        </button>
 
-                                        <button
-                                            class="contact-btn"
-                                            onclick="contactReporter(${Number(match.item_id)})"
-                                        >
-                                            📩 Contact Reporter
-                                        </button>
+                                      `
 
-                                    </div>
+                                    : `
 
-                                </div>
+                                        <div class="image-placeholder">
+                                            📦
+                                        </div>
+
+                                      `
+                                }
 
                             </div>
 
-                        `;
 
-                    }).join("")
-                }
+                            <div class="match-info">
 
-                <!-- MAP -->
 
-                <div class="location-map-section">
+                                <h3>
 
-                    <h2>
-                        📍 Item Locations
-                    </h2>
+                                    ${escapeHtml(
+                                        match.item_name ||
+                                        "Unnamed Item"
+                                    )}
 
-                    <p id="map-status">
-                        Loading location map...
-                    </p>
+                                </h3>
 
-                    <div
-                        id="match-map"
-                        style="
-                            width: 100%;
-                            height: 450px;
-                            border-radius: 15px;
-                            overflow: hidden;
-                            margin-top: 15px;
-                        "
-                    ></div>
 
-                </div>
+                                <div class="match-score">
+
+                                    ${score}%
+
+                                </div>
+
+
+                                <p>
+
+                                    <strong>
+                                        ${confidence}
+                                    </strong>
+
+                                </p>
+
+
+                                <p>
+
+                                    🖼️ Image Similarity:
+
+                                    ${imageScore}%
+
+                                </p>
+
+
+                                <p>
+
+                                    📝 Text Similarity:
+
+                                    ${textScore}%
+
+                                </p>
+
+
+                                <p>
+
+                                    📋 Metadata Score:
+
+                                    ${metadataScore}%
+
+                                </p>
+
+
+                                ${
+                                    match.distance_km !== null &&
+                                    match.distance_km !== undefined
+
+                                    ? `
+
+                                        <p>
+                                            📍 Distance:
+                                            ${match.distance_km} km
+                                        </p>
+
+                                      `
+
+                                    : ""
+                                }
+
+
+                                <div class="match-actions">
+
+
+                                    <button
+                                        class="view-match-btn"
+                                        onclick="viewItem(${match.item_id})"
+                                    >
+                                        View Possible Match
+                                    </button>
+
+
+                                    <button
+                                        class="contact-btn"
+                                        onclick="contactReporter(${match.item_id})"
+                                    >
+                                        📩 Contact Reporter
+                                    </button>
+
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }).join("")}
+
 
             </div>
+
         `;
 
-        // Create map
-        await createMatchMap(
-            currentItem,
-            topMatches
-        );
 
         // =================================================
-        // MATCH ALERT
+        // MATCH TOAST
         // =================================================
 
         if (typeof showToast === "function") {
@@ -1683,44 +1115,47 @@ async function findMatches(id) {
             const topMatch =
                 data.matches[0];
 
-            const score =
-                Math.max(
-                    0,
-                    Math.min(
-                        100,
-                        Number(
-                            topMatch.match_score || 0
-                        )
-                    )
-                );
 
-            let alertMessage;
+            const score =
+                Number(topMatch.match_score || 0);
+
+
+            let alertMessage =
+                "🔔 Possible Match Found!";
+
 
             if (score >= 90) {
 
                 alertMessage =
-                    `🔔 Very High Match Found! ${score.toFixed(1)}%`;
+                    `🔔 Very High Match Found! ${score}%`;
 
             }
+
             else if (score >= 75) {
 
                 alertMessage =
-                    `🔔 High Match Found! ${score.toFixed(1)}%`;
+                    `🔔 High Match Found! ${score}%`;
 
             }
+
             else {
 
                 alertMessage =
-                    `🔔 Possible Match Found! ${score.toFixed(1)}%`;
+                    `🔔 Possible Match Found! ${score}%`;
+
             }
+
 
             showToast(
                 alertMessage,
                 "success"
             );
+
         }
 
     }
+
+
     catch (error) {
 
         console.error(
@@ -1728,7 +1163,9 @@ async function findMatches(id) {
             error
         );
 
+
         matchResults.innerHTML = `
+
             <div class="no-match">
 
                 <h2>
@@ -1743,7 +1180,9 @@ async function findMatches(id) {
                 </p>
 
             </div>
+
         `;
+
 
         if (typeof showToast === "function") {
 
@@ -1752,8 +1191,11 @@ async function findMatches(id) {
                 "AI matching service could not be reached.",
                 "error"
             );
+
         }
+
     }
+
 }
 
 
@@ -1763,12 +1205,9 @@ async function findMatches(id) {
 
 function viewItem(id) {
 
-    if (!id) {
-        return;
-    }
-
     window.location.href =
         `item-detail.html?id=${encodeURIComponent(id)}`;
+
 }
 
 
@@ -1778,10 +1217,15 @@ function viewItem(id) {
 
 async function contactReporter(id) {
 
-    const storedUser =
-        localStorage.getItem("user");
+    const currentUser =
+        getCurrentUser();
 
-    if (!storedUser) {
+
+    // -----------------------------------------------------
+    // LOGIN
+    // -----------------------------------------------------
+
+    if (!currentUser) {
 
         showToast(
             "Please login before contacting the reporter.",
@@ -1791,95 +1235,61 @@ async function contactReporter(id) {
         return;
     }
 
-    let user;
 
     try {
 
-        user =
-            JSON.parse(storedUser);
-
-    }
-    catch (error) {
-
-        console.error(
-            "Invalid user:",
-            error
+        const response = await fetch(
+            `${API_URL}/items/${encodeURIComponent(id)}`
         );
 
-        localStorage.removeItem("user");
-
-        showToast(
-            "Your login session is invalid. Please login again.",
-            "error"
-        );
-
-        return;
-    }
-
-    if (!user || !user.id) {
-
-        showToast(
-            "User information not found. Please login again.",
-            "error"
-        );
-
-        return;
-    }
-
-    try {
-
-        const response =
-            await fetch(
-                `${API_URL}/items/${encodeURIComponent(id)}`
-            );
 
         let item = null;
 
+
         try {
-            item =
-                await response.json();
+
+            item = await response.json();
+
         }
         catch {
+
             item = null;
+
         }
 
-        if (!response.ok) {
+
+        if (!response.ok || !item) {
 
             throw new Error(
                 item?.detail ||
-                item?.message ||
                 "Unable to get item information."
             );
+
         }
 
-        console.log(
-            "Matched item:",
-            item
-        );
 
-        if (
-            item.user_id === null ||
-            item.user_id === undefined ||
-            item.user_id === ""
-        ) {
+        // -------------------------------------------------
+        // REPORTER CHECK
+        // -------------------------------------------------
+
+        if (!item.user_id) {
 
             showToast(
                 "Reporter information is unavailable.",
                 "error"
             );
 
-            console.error(
-                "Missing user_id in /items response:",
-                item
-            );
-
             return;
         }
 
-        // Prevent contacting yourself
+
+        // -------------------------------------------------
+        // SELF CHECK
+        // -------------------------------------------------
+
         if (
             Number(item.user_id) ===
-            Number(user.id)
+            Number(currentUser.id)
         ) {
 
             showToast(
@@ -1890,21 +1300,17 @@ async function contactReporter(id) {
             return;
         }
 
-        const messagesUrl =
-            new URL(
-                "messages.html",
-                window.location.href
-            );
 
-        messagesUrl.searchParams.set(
-            "item_id",
-            id
-        );
+        // -------------------------------------------------
+        // OPEN MESSAGES
+        // -------------------------------------------------
 
         window.location.href =
-            messagesUrl.toString();
+            `messages.html?item_id=${encodeURIComponent(id)}`;
 
     }
+
+
     catch (error) {
 
         console.error(
@@ -1912,12 +1318,15 @@ async function contactReporter(id) {
             error
         );
 
+
         showToast(
             error.message ||
             "Unable to contact reporter.",
             "error"
         );
+
     }
+
 }
 
 
@@ -1925,5 +1334,4 @@ async function contactReporter(id) {
 // START
 // =========================================================
 
-loadItem();
 

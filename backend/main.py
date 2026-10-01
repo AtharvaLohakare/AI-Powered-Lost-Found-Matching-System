@@ -1637,7 +1637,7 @@ def create_verification_request(
 ):
 
     # -----------------------------------------------------
-    # CHECK ITEM
+    # FIND ITEM
     # -----------------------------------------------------
 
     item = (
@@ -1646,9 +1646,7 @@ def create_verification_request(
         .first()
     )
 
-
     if not item:
-
         raise HTTPException(
             status_code=404,
             detail="Item not found"
@@ -1656,26 +1654,56 @@ def create_verification_request(
 
 
     # -----------------------------------------------------
-    # CHECK OWNER
+    # ONLY FOUND ITEMS CAN BE CLAIMED
+    # -----------------------------------------------------
+
+    if item.item_type != "found":
+
+        raise HTTPException(
+            status_code=400,
+            detail="Ownership claims can only be submitted for found items."
+        )
+
+
+    # -----------------------------------------------------
+    # CHECK ITEM REPORTER
     # -----------------------------------------------------
 
     if not item.user_id:
 
         raise HTTPException(
             status_code=400,
-            detail="This item has no owner account"
+            detail="This item has no reporter account."
         )
 
 
     # -----------------------------------------------------
-    # PREVENT SELF VERIFICATION
+    # CHECK CLAIMANT
+    # -----------------------------------------------------
+
+    claimant = (
+        db.query(User)
+        .filter(User.id == claimant_id)
+        .first()
+    )
+
+    if not claimant:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Claimant account not found."
+        )
+
+
+    # -----------------------------------------------------
+    # PREVENT SELF CLAIM
     # -----------------------------------------------------
 
     if claimant_id == item.user_id:
 
         raise HTTPException(
             status_code=400,
-            detail="You cannot verify your own item"
+            detail="You cannot submit an ownership claim for your own found item."
         )
 
 
@@ -1683,43 +1711,48 @@ def create_verification_request(
     # CHECK PROOF
     # -----------------------------------------------------
 
-    if not proof.strip():
+    proof = proof.strip()
+
+    if not proof:
 
         raise HTTPException(
             status_code=400,
-            detail="Verification proof is required"
+            detail="Ownership proof is required."
+        )
+
+
+    if len(proof) < 10:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Please provide more detailed ownership proof."
         )
 
 
     # -----------------------------------------------------
-    # PREVENT DUPLICATE REQUEST
+    # PREVENT DUPLICATE PENDING REQUEST
     # -----------------------------------------------------
 
     existing = (
         db.query(VerificationRequest)
         .filter(
             VerificationRequest.item_id == item_id,
-
-            VerificationRequest.claimant_id
-            == claimant_id,
-
-            VerificationRequest.status
-            == "pending"
+            VerificationRequest.claimant_id == claimant_id,
+            VerificationRequest.status == "pending"
         )
         .first()
     )
-
 
     if existing:
 
         raise HTTPException(
             status_code=400,
-            detail="A verification request is already pending"
+            detail="A verification request is already pending."
         )
 
 
     # -----------------------------------------------------
-    # CREATE VERIFICATION REQUEST
+    # CREATE REQUEST
     # -----------------------------------------------------
 
     request = VerificationRequest(
@@ -1733,18 +1766,30 @@ def create_verification_request(
         proof=proof,
 
         status="pending"
+
     )
 
 
-    db.add(request)
+    try:
 
-    db.commit()
+        db.add(request)
 
-    db.refresh(request)
+        db.commit()
+
+        db.refresh(request)
+
+    except Exception as e:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unable to create verification request: {str(e)}"
+        )
 
 
     # -----------------------------------------------------
-    # NOTIFY ITEM OWNER
+    # NOTIFY FOUND-ITEM REPORTER
     # -----------------------------------------------------
 
     notification = Notification(
@@ -1753,32 +1798,46 @@ def create_verification_request(
 
         item_id=item.id,
 
-        title="New Ownership Verification",
+        title="🔐 New Ownership Claim",
 
         message=(
-            "Someone has submitted ownership "
-            "proof for your item."
+            f"{claimant.name} has submitted "
+            f"ownership proof for your found item "
+            f"\"{item.item_name}\"."
         ),
 
         notification_type="verification"
+
     )
 
 
-    db.add(notification)
+    try:
 
-    db.commit()
+        db.add(notification)
+
+        db.commit()
+
+    except Exception as e:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Verification saved but notification failed: {str(e)}"
+        )
 
 
     return {
 
         "message":
-            "Verification request submitted",
+            "Ownership claim submitted successfully.",
 
         "request_id":
             request.id,
 
         "status":
             request.status
+
     }
 
 
