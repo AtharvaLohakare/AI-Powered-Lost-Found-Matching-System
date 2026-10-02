@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications | Lost & Found AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="notifications_center.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Lost & Found AI</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="items.html">Items</a>
+            <a href="report-lost.html">Report Lost</a>
+            <a href="report-found.html">Report Found</a>
+            <a href="my-reports.html">My Reports</a>
+            <a href="notifications.html" class="notification-link">🔔 Notifications <span id="navBadge">0</span></a>
+        </div>
+        <div class="nav-buttons" id="navButtons"></div>
+    </nav>
+
+    <main class="notifications-page">
+        <div class="notifications-header">
+            <div>
+                <h1>Notifications 🔔</h1>
+                <p id="notificationSummary">Loading notifications...</p>
+            </div>
+            <button id="markAllBtn" class="mark-all-btn">Mark all as read</button>
+        </div>
+
+        <div id="notificationList" class="notification-list"></div>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="notifications_center.js"></script>
+</body>
+</html>

@@ -4,10 +4,7 @@
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>My Reports - Lost & Found AI</title>
 
@@ -51,10 +48,8 @@
             display: grid;
 
             grid-template-columns:
-                repeat(
-                    auto-fit,
-                    minmax(320px, 1fr)
-                );
+                repeat(auto-fit,
+                    minmax(320px, 1fr));
 
             gap: 25px;
         }
@@ -65,8 +60,7 @@
             overflow: hidden;
 
             box-shadow:
-                0 8px 30px
-                rgba(0, 0, 0, 0.08);
+                0 8px 30px rgba(0, 0, 0, 0.08);
 
             border: 1px solid #eeeeee;
 
@@ -79,8 +73,7 @@
             transform: translateY(-5px);
 
             box-shadow:
-                0 14px 35px
-                rgba(0, 0, 0, 0.12);
+                0 14px 35px rgba(0, 0, 0, 0.12);
         }
 
         .report-image-container {
@@ -240,8 +233,7 @@
             border-radius: 20px;
 
             box-shadow:
-                0 8px 30px
-                rgba(0, 0, 0, 0.07);
+                0 8px 30px rgba(0, 0, 0, 0.07);
         }
 
         .empty-icon {
@@ -342,208 +334,196 @@
 
 <body>
 
-<!-- =====================================================
+    <!-- =====================================================
      NAVBAR
 ===================================================== -->
 
-<nav class="navbar">
+    <nav class="navbar">
 
-    <div class="logo">
-        Lost & Found AI
-    </div>
-
-
-    <div class="nav-links">
-
-        <a href="index.html">
-            Home
-        </a>
-
-        <a href="items.html">
-            Items
-        </a>
-
-        <a href="report-lost.html">
-            Report Lost
-        </a>
-
-        <a href="report-found.html">
-            Report Found
-        </a>
-
-    </div>
+        <div class="logo">
+            Lost & Found AI
+        </div>
 
 
-    <div class="nav-buttons">
+        <div class="nav-links">
 
-        <span
-            class="user-welcome"
-            id="userWelcome"
-        ></span>
+            <a href="index.html">
+                Home
+            </a>
 
+            <a href="items.html">
+                Items
+            </a>
 
-        <a
-            href="my-reports.html"
-            class="login-btn"
-        >
-            My Reports
-        </a>
+            <a href="report-lost.html">
+                Report Lost
+            </a>
 
+            <a href="report-found.html">
+                Report Found
+            </a>
 
-        <a
-            href="#"
-            class="signup-btn"
-            id="logoutBtn"
-        >
-            Logout
-        </a>
-
-    </div>
-
-</nav>
+            <a href="notifications.html">
+                🔔 Notifications
+                <span id="navBadge">0</span>
+            </a>
+        </div>
 
 
-<!-- =====================================================
-     MAIN
-===================================================== -->
+        <div class="nav-buttons">
 
-<main class="reports-page">
+            <span class="user-welcome" id="userWelcome"></span>
 
 
-    <div class="reports-header">
-
-        <h1>
-            My Reports
-        </h1>
-
-        <p>
-            Manage and track the items you have reported.
-        </p>
-
-        <span
-            class="reports-count"
-            id="reportsCount"
-        >
-            Loading reports...
-        </span>
-
-    </div>
+            <a href="my-reports.html" class="login-btn">
+                My Reports
+            </a>
 
 
-    <div
-        id="reports-container"
-        class="reports-grid"
-    >
-
-        <div class="loading-state">
-
-            <h2>
-                Loading...
-            </h2>
-
-            <p>
-                Fetching your reports.
-            </p>
+            <a href="#" class="signup-btn" id="logoutBtn">
+                Logout
+            </a>
 
         </div>
 
-    </div>
-
-</main>
+    </nav>
 
 
-<!-- =====================================================
+    <!-- =====================================================
+     MAIN
+===================================================== -->
+
+    <main class="reports-page">
+
+
+        <div class="reports-header">
+
+            <h1>
+                My Reports
+            </h1>
+
+            <p>
+                Manage and track the items you have reported.
+            </p>
+
+            <span class="reports-count" id="reportsCount">
+                Loading reports...
+            </span>
+
+        </div>
+
+
+        <div id="reports-container" class="reports-grid">
+
+            <div class="loading-state">
+
+                <h2>
+                    Loading...
+                </h2>
+
+                <p>
+                    Fetching your reports.
+                </p>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
      CONFIG
 ===================================================== -->
 
-<script src="config.js"></script>
+    <script src="config.js"></script>
 
 
-<script>
+    <script>
 
-    // =====================================================
-    // ESCAPE HTML
-    // =====================================================
+        // =====================================================
+        // ESCAPE HTML
+        // =====================================================
 
-    function escapeHtml(value) {
-
-        if (
-            value === null ||
-            value === undefined
-        ) {
-            return "";
-        }
-
-        const div =
-            document.createElement("div");
-
-        div.textContent =
-            String(value);
-
-        return div.innerHTML;
-    }
-
-
-    // =====================================================
-    // IMAGE URL
-    // =====================================================
-
-    function getImageUrl(item) {
-
-        if (
-            item &&
-            item.image_url
-        ) {
-
-            let url = item.image_url;
-
-            /*
-             * If backend returns a relative URL,
-             * convert it to the Render backend URL.
-             */
+        function escapeHtml(value) {
 
             if (
-                url.startsWith("/")
+                value === null ||
+                value === undefined
             ) {
-
-                return `${API_URL}${url}`;
+                return "";
             }
 
-            return url;
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                String(value);
+
+            return div.innerHTML;
         }
 
 
-        if (
-            !item ||
-            !item.image_name
-        ) {
+        // =====================================================
+        // IMAGE URL
+        // =====================================================
 
-            return "";
+        function getImageUrl(item) {
+
+            if (
+                item &&
+                item.image_url
+            ) {
+
+                let url = item.image_url;
+
+                /*
+                 * If backend returns a relative URL,
+                 * convert it to the Render backend URL.
+                 */
+
+                if (
+                    url.startsWith("/")
+                ) {
+
+                    return `${API_URL}${url}`;
+                }
+
+                return url;
+            }
+
+
+            if (
+                !item ||
+                !item.image_name
+            ) {
+
+                return "";
+            }
+
+
+            return `${API_URL}/uploads/${encodeURIComponent(
+                item.image_name
+            )}`;
         }
 
 
-        return `${API_URL}/uploads/${encodeURIComponent(
-            item.image_name
-        )}`;
-    }
+        // =====================================================
+        // IMAGE ERROR
+        // =====================================================
 
+        function handleImageError(img) {
 
-    // =====================================================
-    // IMAGE ERROR
-    // =====================================================
+            img.onerror = null;
 
-    function handleImageError(img) {
+            const container =
+                img.parentElement;
 
-        img.onerror = null;
+            if (!container) {
+                return;
+            }
 
-        const container =
-            img.parentElement;
-
-        if (!container) {
-            return;
-        }
-
-        container.innerHTML = `
+            container.innerHTML = `
             <div class="image-placeholder">
 
                 📦
@@ -554,207 +534,206 @@
 
             </div>
         `;
-    }
-
-
-    // =====================================================
-    // GET LOGGED-IN USER
-    // =====================================================
-
-    function getLoggedInUser() {
-
-        const storedUser =
-            localStorage.getItem("user");
-
-
-        if (!storedUser) {
-
-            window.location.href =
-                "login.html";
-
-            return null;
         }
 
 
-        try {
+        // =====================================================
+        // GET LOGGED-IN USER
+        // =====================================================
 
-            const user =
-                JSON.parse(storedUser);
+        function getLoggedInUser() {
+
+            const storedUser =
+                localStorage.getItem("user");
 
 
-            if (
-                !user ||
-                !user.id
-            ) {
+            if (!storedUser) {
 
-                throw new Error(
-                    "Invalid user information."
-                );
+                window.location.href =
+                    "login.html";
+
+                return null;
             }
-
-
-            return user;
-
-        }
-        catch (error) {
-
-            console.error(
-                "Invalid user data:",
-                error
-            );
-
-            localStorage.removeItem(
-                "user"
-            );
-
-            window.location.href =
-                "login.html";
-
-            return null;
-        }
-    }
-
-
-    // =====================================================
-    // SET USER NAVBAR
-    // =====================================================
-
-    function setupNavbar(user) {
-
-        const userWelcome =
-            document.getElementById(
-                "userWelcome"
-            );
-
-        const logoutBtn =
-            document.getElementById(
-                "logoutBtn"
-            );
-
-
-        if (userWelcome) {
-
-            userWelcome.textContent =
-                `Hi, ${user.name || "User"} 👋`;
-        }
-
-
-        if (logoutBtn) {
-
-            logoutBtn.addEventListener(
-                "click",
-                function(event) {
-
-                    event.preventDefault();
-
-
-                    localStorage.removeItem(
-                        "user"
-                    );
-
-
-                    window.location.href =
-                        "index.html";
-                }
-            );
-        }
-    }
-
-
-    // =====================================================
-    // LOAD MY REPORTS
-    // =====================================================
-
-    async function loadMyReports(user) {
-
-        const container =
-            document.getElementById(
-                "reports-container"
-            );
-
-
-        const count =
-            document.getElementById(
-                "reportsCount"
-            );
-
-
-        try {
-
-            const url =
-                `${API_URL}/my-items/${encodeURIComponent(
-                    user.id
-                )}`;
-
-
-            console.log(
-                "Fetching:",
-                url
-            );
-
-
-            const response =
-                await fetch(url);
-
-
-            let items = null;
 
 
             try {
 
-                items =
-                    await response.json();
+                const user =
+                    JSON.parse(storedUser);
+
+
+                if (
+                    !user ||
+                    !user.id
+                ) {
+
+                    throw new Error(
+                        "Invalid user information."
+                    );
+                }
+
+
+                return user;
 
             }
-            catch {
+            catch (error) {
 
-                items = null;
+                console.error(
+                    "Invalid user data:",
+                    error
+                );
+
+                localStorage.removeItem(
+                    "user"
+                );
+
+                window.location.href =
+                    "login.html";
+
+                return null;
+            }
+        }
+
+
+        // =====================================================
+        // SET USER NAVBAR
+        // =====================================================
+
+        function setupNavbar(user) {
+
+            const userWelcome =
+                document.getElementById(
+                    "userWelcome"
+                );
+
+            const logoutBtn =
+                document.getElementById(
+                    "logoutBtn"
+                );
+
+
+            if (userWelcome) {
+
+                userWelcome.textContent =
+                    `Hi, ${user.name || "User"} 👋`;
             }
 
 
-            console.log(
-                "Reports received:",
-                items
-            );
+            if (logoutBtn) {
+
+                logoutBtn.addEventListener(
+                    "click",
+                    function (event) {
+
+                        event.preventDefault();
 
 
-            if (!response.ok) {
+                        localStorage.removeItem(
+                            "user"
+                        );
 
-                throw new Error(
-                    items?.detail ||
-                    items?.message ||
-                    "Could not load reports."
+
+                        window.location.href =
+                            "index.html";
+                    }
                 );
             }
+        }
 
 
-            if (
-                !Array.isArray(items)
-            ) {
+        // =====================================================
+        // LOAD MY REPORTS
+        // =====================================================
 
-                throw new Error(
-                    "Invalid reports data received from server."
+        async function loadMyReports(user) {
+
+            const container =
+                document.getElementById(
+                    "reports-container"
                 );
-            }
 
 
-            count.textContent =
-                `${items.length} Report${
-                    items.length === 1
+            const count =
+                document.getElementById(
+                    "reportsCount"
+                );
+
+
+            try {
+
+                const url =
+                    `${API_URL}/my-items/${encodeURIComponent(
+                        user.id
+                    )}`;
+
+
+                console.log(
+                    "Fetching:",
+                    url
+                );
+
+
+                const response =
+                    await fetch(url);
+
+
+                let items = null;
+
+
+                try {
+
+                    items =
+                        await response.json();
+
+                }
+                catch {
+
+                    items = null;
+                }
+
+
+                console.log(
+                    "Reports received:",
+                    items
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        items?.detail ||
+                        items?.message ||
+                        "Could not load reports."
+                    );
+                }
+
+
+                if (
+                    !Array.isArray(items)
+                ) {
+
+                    throw new Error(
+                        "Invalid reports data received from server."
+                    );
+                }
+
+
+                count.textContent =
+                    `${items.length} Report${items.length === 1
                         ? ""
                         : "s"
-                }`;
+                    }`;
 
 
-            // =================================================
-            // EMPTY
-            // =================================================
+                // =================================================
+                // EMPTY
+                // =================================================
 
-            if (
-                items.length === 0
-            ) {
+                if (
+                    items.length === 0
+                ) {
 
-                container.innerHTML = `
+                    container.innerHTML = `
 
                     <div class="empty-state">
 
@@ -782,73 +761,73 @@
 
                 `;
 
-                return;
-            }
+                    return;
+                }
 
 
-            container.innerHTML = "";
+                container.innerHTML = "";
 
 
-            // =================================================
-            // CREATE REPORT CARDS
-            // =================================================
+                // =================================================
+                // CREATE REPORT CARDS
+                // =================================================
 
-            items.forEach(function(item) {
+                items.forEach(function (item) {
 
-                const card =
-                    document.createElement(
-                        "article"
+                    const card =
+                        document.createElement(
+                            "article"
+                        );
+
+
+                    card.className =
+                        "report-card";
+
+
+                    card.addEventListener(
+                        "click",
+                        function () {
+
+                            window.location.href =
+                                `item-detail.html?id=${encodeURIComponent(
+                                    item.id
+                                )}`;
+                        }
                     );
 
 
-                card.className =
-                    "report-card";
+                    const isLost =
+                        String(
+                            item.item_type || ""
+                        ).toLowerCase() === "lost";
 
 
-                card.addEventListener(
-                    "click",
-                    function() {
-
-                        window.location.href =
-                            `item-detail.html?id=${encodeURIComponent(
-                                item.id
-                            )}`;
-                    }
-                );
+                    const status =
+                        isLost
+                            ? "Lost"
+                            : "Found";
 
 
-                const isLost =
-                    String(
-                        item.item_type || ""
-                    ).toLowerCase() === "lost";
+                    const statusClass =
+                        isLost
+                            ? "status-lost"
+                            : "status-found";
 
 
-                const status =
-                    isLost
-                        ? "Lost"
-                        : "Found";
+                    // =================================================
+                    // IMAGE
+                    // =================================================
+
+                    const imageUrl =
+                        getImageUrl(item);
 
 
-                const statusClass =
-                    isLost
-                        ? "status-lost"
-                        : "status-found";
+                    let imageHTML;
 
 
-                // =================================================
-                // IMAGE
-                // =================================================
+                    if (imageUrl) {
 
-                const imageUrl =
-                    getImageUrl(item);
-
-
-                let imageHTML;
-
-
-                if (imageUrl) {
-
-                    imageHTML = `
+                        imageHTML = `
 
                         <div
                             class="report-image-container"
@@ -857,11 +836,11 @@
                             <img
                                 class="report-image"
                                 src="${escapeHtml(
-                                    imageUrl
-                                )}"
+                            imageUrl
+                        )}"
                                 alt="${escapeHtml(
-                                    item.item_name
-                                )}"
+                            item.item_name
+                        )}"
                                 onerror="handleImageError(this)"
                             >
 
@@ -869,10 +848,10 @@
 
                     `;
 
-                }
-                else {
+                    }
+                    else {
 
-                    imageHTML = `
+                        imageHTML = `
 
                         <div
                             class="report-image-container"
@@ -893,14 +872,14 @@
                         </div>
 
                     `;
-                }
+                    }
 
 
-                // =================================================
-                // CARD
-                // =================================================
+                    // =================================================
+                    // CARD
+                    // =================================================
 
-                card.innerHTML = `
+                    card.innerHTML = `
 
                     ${imageHTML}
 
@@ -913,9 +892,9 @@
                             <h2 class="report-title">
 
                                 ${escapeHtml(
-                                    item.item_name ||
-                                    "Unnamed Item"
-                                )}
+                        item.item_name ||
+                        "Unnamed Item"
+                    )}
 
                             </h2>
 
@@ -934,9 +913,9 @@
                         <p class="report-description">
 
                             ${escapeHtml(
-                                item.description ||
-                                "No description"
-                            )}
+                        item.description ||
+                        "No description"
+                    )}
 
                         </p>
 
@@ -953,9 +932,9 @@
                                 <span class="info-value">
 
                                     ${escapeHtml(
-                                        item.location ||
-                                        "Not specified"
-                                    )}
+                        item.location ||
+                        "Not specified"
+                    )}
 
                                 </span>
 
@@ -971,9 +950,9 @@
                                 <span class="info-value">
 
                                     ${escapeHtml(
-                                        item.item_date ||
-                                        "Not specified"
-                                    )}
+                        item.item_date ||
+                        "Not specified"
+                    )}
 
                                 </span>
 
@@ -989,9 +968,9 @@
                                 <span class="info-value">
 
                                     ${escapeHtml(
-                                        item.color ||
-                                        "Not specified"
-                                    )}
+                        item.color ||
+                        "Not specified"
+                    )}
 
                                 </span>
 
@@ -1007,9 +986,9 @@
                                 <span class="info-value">
 
                                     ${escapeHtml(
-                                        item.brand ||
-                                        "Not specified"
-                                    )}
+                        item.brand ||
+                        "Not specified"
+                    )}
 
                                 </span>
 
@@ -1031,28 +1010,28 @@
                 `;
 
 
-                container.appendChild(
-                    card
+                    container.appendChild(
+                        card
+                    );
+
+                });
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "My Reports Error:",
+                    error
                 );
 
-            });
 
-        }
-
-
-        catch (error) {
-
-            console.error(
-                "My Reports Error:",
-                error
-            );
+                count.textContent =
+                    "Error";
 
 
-            count.textContent =
-                "Error";
-
-
-            container.innerHTML = `
+                container.innerHTML = `
 
                 <div class="empty-state">
 
@@ -1066,9 +1045,9 @@
 
                     <p>
                         ${escapeHtml(
-                            error.message ||
-                            "Something went wrong while loading your reports."
-                        )}
+                    error.message ||
+                    "Something went wrong while loading your reports."
+                )}
                     </p>
 
                     <button
@@ -1081,36 +1060,36 @@
                 </div>
 
             `;
-        }
-    }
-
-
-    // =====================================================
-    // PAGE START
-    // =====================================================
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function() {
-
-            const user =
-                getLoggedInUser();
-
-
-            if (!user) {
-                return;
             }
-
-
-            setupNavbar(user);
-
-
-            loadMyReports(user);
-
         }
-    );
 
-</script>
+
+        // =====================================================
+        // PAGE START
+        // =====================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const user =
+                    getLoggedInUser();
+
+
+                if (!user) {
+                    return;
+                }
+
+
+                setupNavbar(user);
+
+
+                loadMyReports(user);
+
+            }
+        );
+
+    </script>
 
 </body>
 

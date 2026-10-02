@@ -822,6 +822,163 @@ def get_items(
 
 
 # =========================================================
+# SMART SEARCH & FILTERS
+# =========================================================
+
+@app.get("/items/search")
+def search_items(
+    q: str = "",
+    item_type: str = "",
+    category: str = "",
+    color: str = "",
+    brand: str = "",
+    location: str = "",
+    latitude: float | None = None,
+    longitude: float | None = None,
+    max_distance_km: float | None = None,
+    date_from: str = "",
+    date_to: str = "",
+    db: Session = Depends(get_db)
+):
+    """
+    Real-world item search endpoint.
+    Supports text, type, category, color, brand, location,
+    date range and optional GPS-radius filtering.
+    """
+
+    query = db.query(Item)
+
+    item_type = normalize_text(item_type)
+    category = normalize_text(category)
+    color = normalize_text(color)
+    brand = normalize_text(brand)
+    location = normalize_text(location)
+    q = normalize_text(q)
+
+    if item_type in ["lost", "found"]:
+        query = query.filter(Item.item_type == item_type)
+
+    if category:
+        query = query.filter(Item.category.ilike(f"%{category}%"))
+
+    if color:
+        query = query.filter(Item.color.ilike(f"%{color}%"))
+
+    if brand:
+        query = query.filter(Item.brand.ilike(f"%{brand}%"))
+
+    if location:
+        query = query.filter(Item.location.ilike(f"%{location}%"))
+
+    if date_from:
+        try:
+            parsed_from = datetime.strptime(date_from, "%Y-%m-%d").date()
+            query = query.filter(Item.item_date >= parsed_from)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="date_from must use YYYY-MM-DD.")
+
+    if date_to:
+        try:
+            parsed_to = datetime.strptime(date_to, "%Y-%m-%d").date()
+            query = query.filter(Item.item_date <= parsed_to)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="date_to must use YYYY-MM-DD.")
+
+    items = query.order_by(Item.id.desc()).all()
+    results = []
+
+    for item in items:
+        if q:
+            searchable = normalize_text(" ".join([
+                item.item_name or "",
+                item.description or "",
+                item.category or "",
+                item.color or "",
+                item.brand or "",
+                item.location or ""
+            ]))
+            if not all(token in searchable for token in q.split()):
+                continue
+
+        distance_km = None
+        if latitude is not None and longitude is not None:
+            distance_km = calculate_distance_km(
+                latitude, longitude, item.latitude, item.longitude
+            )
+            if max_distance_km is not None:
+                if distance_km is None or distance_km > max_distance_km:
+                    continue
+
+        result = serialize_item(item)
+        result["distance_km"] = round(distance_km, 2) if distance_km is not None else None
+        results.append(result)
+
+    return {
+        "status": "success",
+        "count": len(results),
+        "filters": {
+            "q": q,
+            "item_type": item_type or None,
+            "category": category or None,
+            "color": color or None,
+            "brand": brand or None,
+            "location": location or None,
+            "latitude": latitude,
+            "longitude": longitude,
+            "max_distance_km": max_distance_km,
+            "date_from": date_from or None,
+            "date_to": date_to or None
+        },
+        "items": results
+    }
+
+
+# =========================================================
+# ITEM STATUS
+# =========================================================
+
+def get_item_status(db, item):
+    """Derive a useful status without changing the existing DB schema."""
+    if item.item_type.lower() != "found":
+        return "lost"
+
+    latest_request = (
+        db.query(VerificationRequest)
+        .filter(VerificationRequest.item_id == item.id)
+        .order_by(VerificationRequest.id.desc())
+        .first()
+    )
+
+    if not latest_request:
+        return "available"
+
+    if latest_request.status == "pending":
+        return "claim_pending"
+
+    if latest_request.status == "approved":
+        return "verified"
+
+    return "available"
+
+
+@app.get("/items/{item_id}/status")
+def get_item_status_endpoint(
+    item_id: int,
+    db: Session = Depends(get_db)
+):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found.")
+
+    return {
+        "status": "success",
+        "item_id": item.id,
+        "item_type": item.item_type,
+        "item_status": get_item_status(db, item)
+    }
+
+
+# =========================================================
 # GET MY ITEMS
 # =========================================================
 
@@ -877,575 +1034,325 @@ def get_item(
 
 
 # =========================================================
-# AI MATCHING
 # =========================================================
+# AI MATCHING + LOCATION-BASED MATCHING
+# =========================================================
+
+# =========================================================
+# BETTER AI MATCHING
+# =========================================================
+
+
+def _match_tokens(value):
+    """Return useful normalized words for lightweight text matching."""
+    text = normalize_text(value or "")
+    return {
+        token for token in text.replace("-", " ").split()
+        if len(token) >= 2
+    }
+
+
+def _field_similarity(value_a, value_b):
+    """Lightweight similarity without adding another heavy ML dependency."""
+    from difflib import SequenceMatcher
+
+    a = normalize_text(value_a or "")
+    b = normalize_text(value_b or "")
+
+    if not a or not b:
+        return 0.0
+    if a == b:
+        return 1.0
+
+    token_a = _match_tokens(a)
+    token_b = _match_tokens(b)
+    token_score = (
+        len(token_a & token_b) / len(token_a | token_b)
+        if token_a and token_b else 0.0
+    )
+    sequence_score = SequenceMatcher(None, a, b).ratio()
+    return max(token_score, sequence_score * 0.85)
+
+
+def _combined_text_score(item_a, item_b):
+    """Compare the most useful textual fields with field-specific weights."""
+    fields = [
+        (item_a.item_name, item_b.item_name, 0.35),
+        (item_a.description, item_b.description, 0.35),
+        (item_a.color, item_b.color, 0.15),
+        (item_a.brand, item_b.brand, 0.15),
+    ]
+
+    total = 0.0
+    weight_used = 0.0
+    for value_a, value_b, weight in fields:
+        if normalize_text(value_a) and normalize_text(value_b):
+            total += _field_similarity(value_a, value_b) * weight
+            weight_used += weight
+
+    if weight_used == 0:
+        return 0.0
+    return round((total / weight_used) * 100, 2)
+
+
+def _date_score(date_a, date_b):
+    """Give a small boost when lost/found dates are close."""
+    if not date_a or not date_b:
+        return 0.0
+
+    try:
+        days = abs((date_a - date_b).days)
+    except Exception:
+        return 0.0
+
+    if days == 0:
+        return 100.0
+    if days <= 1:
+        return 90.0
+    if days <= 3:
+        return 75.0
+    if days <= 7:
+        return 55.0
+    if days <= 14:
+        return 30.0
+    return 10.0
+
 
 @app.get("/match/{item_id}")
 def match_item(
     item_id: int,
     db: Session = Depends(get_db)
 ):
-
-    # -----------------------------------------------------
-    # GET CURRENT ITEM
-    # -----------------------------------------------------
-
-    current_item = (
-        db.query(Item)
-        .filter(
-            Item.id == item_id
-        )
-        .first()
-    )
-
+    current_item = db.query(Item).filter(Item.id == item_id).first()
     if not current_item:
+        raise HTTPException(status_code=404, detail="Item not found.")
 
-        raise HTTPException(
-            status_code=404,
-            detail="Item not found."
-        )
-
-    # -----------------------------------------------------
-    # DETERMINE OPPOSITE ITEM TYPE
-    # -----------------------------------------------------
-
-    current_type = normalize_text(
-        current_item.item_type
-    )
-
+    current_type = normalize_text(current_item.item_type)
     if current_type == "lost":
-
         target_type = "found"
-
     elif current_type == "found":
-
         target_type = "lost"
-
     else:
-
-        raise HTTPException(
-            status_code=400,
-            detail="Item type must be lost or found."
-        )
-
-    # -----------------------------------------------------
-    # GET OPPOSITE TYPE ITEMS
-    # -----------------------------------------------------
+        raise HTTPException(status_code=400, detail="Item type must be lost or found.")
 
     candidate_items = (
         db.query(Item)
-        .filter(
-            Item.item_type == target_type
-        )
+        .filter(Item.item_type == target_type)
         .all()
     )
 
     matches = []
-
-    # -----------------------------------------------------
-    # CURRENT ITEM TEXT
-    # -----------------------------------------------------
-
-    current_text = " ".join([
-        current_item.item_name or "",
-        current_item.description or "",
-        current_item.color or "",
-        current_item.brand or ""
-    ])
-
-    # =====================================================
-    # COMPARE CANDIDATE ITEMS
-    # =====================================================
+    current_image_path = ensure_local_image(current_item.image_name)
 
     for candidate_item in candidate_items:
-
-        # -------------------------------------------------
-        # 1. TEXT SIMILARITY
-        # -------------------------------------------------
-
-        candidate_text = " ".join([
-            candidate_item.item_name or "",
-            candidate_item.description or "",
-            candidate_item.color or "",
-            candidate_item.brand or ""
-        ])
-
-        try:
-
-            text_similarity = (
-                calculate_text_similarity(
-                    current_text,
-                    candidate_text
-                )
-            )
-
-        except Exception:
-
-            text_similarity = 0.0
-
-        text_score = round(
-            max(
-                0.0,
-                min(
-                    1.0,
-                    text_similarity
-                )
-            ) * 100,
-            2
-        )
-
-        # -------------------------------------------------
-        # 2. IMAGE SIMILARITY
-        # -------------------------------------------------
-
-        image_score = 0.0
-
-        # Render's filesystem is temporary. Recover images
-        # from Cloudinary whenever the local cache is gone.
-        current_image_path = ensure_local_image(
-            current_item.image_name
-        )
-
-        candidate_image_path = ensure_local_image(
-            candidate_item.image_name
-        )
-
-        image_available = bool(
-            current_image_path
-            and candidate_image_path
-        )
-
-        if image_available:
-
-            try:
-
-                image_similarity = (
-                    calculate_image_similarity(
-                        current_image_path,
-                        candidate_image_path
-                    )
-                )
-
-                image_score = round(
-                    max(
-                        0.0,
-                        min(
-                            1.0,
-                            image_similarity
-                        )
-                    ) * 100,
-                    2
-                )
-
-            except Exception:
-
-                image_score = 0.0
-
-        # -------------------------------------------------
-        # 3. METADATA MATCHING
-        # -------------------------------------------------
-
-        metadata_score = 0.0
-
         reasons = []
 
-        # Category = 25
-        if (
-            normalize_text(
-                current_item.category
-            )
-            and
-            normalize_text(
-                current_item.category
-            )
-            ==
-            normalize_text(
-                candidate_item.category
-            )
-        ):
-
-            metadata_score += 25
-
-            reasons.append(
-                "Category matches"
-            )
-
-        # Color = 20
-        if (
-            normalize_text(
-                current_item.color
-            )
-            and
-            normalize_text(
-                current_item.color
-            )
-            ==
-            normalize_text(
-                candidate_item.color
-            )
-        ):
-
-            metadata_score += 20
-
-            reasons.append(
-                "Color matches"
-            )
-
-        # Brand = 20
-        if (
-            normalize_text(
-                current_item.brand
-            )
-            and
-            normalize_text(
-                current_item.brand
-            )
-            ==
-            normalize_text(
-                candidate_item.brand
-            )
-        ):
-
-            metadata_score += 20
-
-            reasons.append(
-                "Brand matches"
-            )
-
-        # Location = 20
-        if (
-            normalize_text(
-                current_item.location
-            )
-            and
-            normalize_text(
-                current_item.location
-            )
-            ==
-            normalize_text(
-                candidate_item.location
-            )
-        ):
-
-            metadata_score += 20
-
-            reasons.append(
-                "Location matches"
-            )
-
-        # Item name = 15
-        if (
-            normalize_text(
-                current_item.item_name
-            )
-            and
-            normalize_text(
-                current_item.item_name
-            )
-            ==
-            normalize_text(
-                candidate_item.item_name
-            )
-        ):
-
-            metadata_score += 15
-
-            reasons.append(
-                "Item name matches"
-            )
-
-        metadata_score = min(
-            metadata_score,
-            100
-        )
-
-
-# -------------------------------------------------
-# LOCATION DISTANCE
-# -------------------------------------------------
-
-    distance_km = calculate_distance_km(
-        current_item.latitude,
-        current_item.longitude,
-        candidate_item.latitude,
-        candidate_item.longitude
-    )
-
-
-    location_bonus = 0.0
-
-
-    if distance_km is not None:
-
-        if distance_km <= 0.5:
-
-            location_bonus = 5.0
-
-        elif distance_km <= 1.0:
-
-            location_bonus = 3.0
-
-        elif distance_km <= 3.0:
-
-            location_bonus = 1.0
-
-        reasons.append(
-            f"📍 {round(distance_km, 2)} km away"
-        )
         # -------------------------------------------------
-        # 4. IMAGE REASON
+        # 1. Improved text matching
         # -------------------------------------------------
+        text_score = _combined_text_score(current_item, candidate_item)
 
-        if image_score >= 95:
-
-            reasons.append(
-                "✓ Very strong image similarity"
-            )
-
-        elif image_score >= 80:
-
-            reasons.append(
-                "✓ Strong image similarity"
-            )
-
-        elif image_score >= 60:
-
-            reasons.append(
-                "✓ Moderate image similarity"
-            )
-
-        elif image_score > 0:
-
-            reasons.append(
-                "⚠ Low image similarity"
-            )
-
-        else:
-
-            reasons.append(
-                "⚠ Image unavailable for comparison"
-            )
-
-        # -------------------------------------------------
-        # 5. TEXT REASON
-        # -------------------------------------------------
-
-        if text_score >= 75:
-
-            reasons.append(
-                "✓ Strong description similarity"
-            )
-
-        elif text_score >= 50:
-
-            reasons.append(
-                "✓ Moderate description similarity"
-            )
-
+        if text_score >= 85:
+            reasons.append("✓ Very strong text similarity")
+        elif text_score >= 65:
+            reasons.append("✓ Strong text similarity")
+        elif text_score >= 45:
+            reasons.append("✓ Moderate text similarity")
         elif text_score > 0:
+            reasons.append("⚠ Limited text similarity")
 
-            reasons.append(
-                "⚠ Low description similarity"
-            )
+        # -------------------------------------------------
+        # 2. Lightweight image matching
+        # -------------------------------------------------
+        image_score = 0.0
+        candidate_image_path = ensure_local_image(candidate_item.image_name)
+        image_available = bool(current_image_path and candidate_image_path)
 
+        if image_available:
+            try:
+                image_similarity = calculate_image_similarity(
+                    current_image_path,
+                    candidate_image_path
+                )
+                image_score = round(
+                    max(0.0, min(1.0, image_similarity)) * 100,
+                    2
+                )
+            except Exception:
+                image_score = 0.0
+
+        if image_score >= 90:
+            reasons.append("✓ Very strong image similarity")
+        elif image_score >= 75:
+            reasons.append("✓ Strong image similarity")
+        elif image_score >= 55:
+            reasons.append("✓ Moderate image similarity")
+        elif image_score > 0:
+            reasons.append("⚠ Low image similarity")
         else:
-
-            reasons.append(
-                "⚠ Limited description similarity"
-            )
+            reasons.append("⚠ Image unavailable for comparison")
 
         # -------------------------------------------------
-        # 6. METADATA REASON
+        # 3. Field-by-field metadata matching
         # -------------------------------------------------
-
-        if metadata_score >= 75:
-
-            reasons.append(
-                "✓ Strong metadata match"
-            )
-
-        elif metadata_score >= 50:
-
-            reasons.append(
-                "✓ Moderate metadata match"
-            )
-
-        elif metadata_score > 0:
-
-            reasons.append(
-                "⚠ Partial metadata match"
-            )
-
-        else:
-
-            reasons.append(
-                "⚠ Limited metadata match"
-            )
-
-        # -------------------------------------------------
-        # 7. FINAL SCORE
-        # -------------------------------------------------
-
-        final_score = (
-            (image_score * 0.40)
-            +
-            (text_score * 0.30)
-            +
-            (metadata_score * 0.30)
-        )
-
-        final_score = min(100.0, final_score)
-
-        final_score = round(
-            final_score,
-            2
-        )
-        # -------------------------------------------------
-        # 8. STORE MATCH
-        # -------------------------------------------------
-
-        matches.append({
-
-            "item_id":
-                candidate_item.id,
-
-            "user_id":
-                candidate_item.user_id,
-
-            "item_name":
-                candidate_item.item_name,
-
-            "item_type":
-                candidate_item.item_type,
-
-            "category":
-                candidate_item.category,
-
-            "description":
-                candidate_item.description,
-
-            "color":
-                candidate_item.color,
-
-            "brand":
-                candidate_item.brand,
-
-            "location":
-                candidate_item.location,
-
-            "latitude":
-                candidate_item.latitude,
-
-            "longitude":
-                candidate_item.longitude,
-
-            "distance_km":
-                (
-                    round(distance_km, 2)
-                    if distance_km is not None
-                    else None
-                ),
-
-            "item_date":
-                (
-                    str(candidate_item.item_date)
-                    if candidate_item.item_date
-                    else None
-                ),
-
-            "image_name":
-                candidate_item.image_name,
-
-            "image_url":
-                image_url(
-                    candidate_item.image_name
-                ),
-
-            "image_similarity":
-                image_score,
-
-            "text_similarity":
-                text_score,
-
-            "metadata_score":
-                metadata_score,
-
-            "match_score":
-                final_score,
-
-            "image_available":
-                image_available,
-
-            "reasons":
-                reasons
-        })
-
-    # =====================================================
-    # SORT MATCHES
-    # =====================================================
-
-    matches.sort(
-        key=lambda x: x["match_score"],
-        reverse=True
-    )
-
-    # =====================================================
-    # FILTER STRONG MATCHES
-    # =====================================================
-
-    strong_matches = [
-        match
-        for match in matches
-        if match["match_score"] >= 50
-    ]
-
-    # =====================================================
-    # NO MATCH
-    # =====================================================
-
-    if not strong_matches:
-
-        return {
-            "status": "success",
-
-            "item_id":
-                current_item.id,
-
-            "item_type":
-                current_item.item_type,
-
-            "searching_for":
-                target_type,
-
-            "matches": [],
-
-            "message":
-                f"No strong {target_type} match found."
+        metadata_parts = []
+        metadata_weights = {
+            "category": 30,
+            "color": 20,
+            "brand": 20,
+            "location": 20,
+            "item_name": 10,
         }
 
-    # =====================================================
-    # RETURN MATCHES
-    # =====================================================
+        field_pairs = {
+            "category": (current_item.category, candidate_item.category),
+            "color": (current_item.color, candidate_item.color),
+            "brand": (current_item.brand, candidate_item.brand),
+            "location": (current_item.location, candidate_item.location),
+            "item_name": (current_item.item_name, candidate_item.item_name),
+        }
+
+        metadata_score = 0.0
+        available_weight = 0.0
+
+        for field, (value_a, value_b) in field_pairs.items():
+            if not normalize_text(value_a) or not normalize_text(value_b):
+                continue
+
+            weight = metadata_weights[field]
+            available_weight += weight
+            similarity = _field_similarity(value_a, value_b)
+            metadata_parts.append((field, similarity, weight))
+
+        if available_weight:
+            metadata_score = sum(
+                similarity * weight * 100
+                for _, similarity, weight in metadata_parts
+            ) / available_weight
+            metadata_score = round(min(100.0, metadata_score), 2)
+
+        for field, similarity, _ in metadata_parts:
+            if similarity >= 0.95:
+                label = {
+                    "category": "Category matches",
+                    "color": "Color matches",
+                    "brand": "Brand matches",
+                    "location": "Location matches",
+                    "item_name": "Item name matches",
+                }[field]
+                reasons.append(label)
+
+        # -------------------------------------------------
+        # 4. GPS location matching
+        # -------------------------------------------------
+        distance_km = calculate_distance_km(
+            current_item.latitude,
+            current_item.longitude,
+            candidate_item.latitude,
+            candidate_item.longitude
+        )
+
+        location_score = 0.0
+        if distance_km is not None:
+            if distance_km <= 0.5:
+                location_score = 100.0
+            elif distance_km <= 1.0:
+                location_score = 80.0
+            elif distance_km <= 3.0:
+                location_score = 60.0
+            elif distance_km <= 5.0:
+                location_score = 35.0
+            else:
+                location_score = 0.0
+
+            reasons.append(f"📍 {round(distance_km, 2)} km away")
+
+        # -------------------------------------------------
+        # 5. Date proximity
+        # -------------------------------------------------
+        date_score = _date_score(
+            current_item.item_date,
+            candidate_item.item_date
+        )
+
+        if date_score >= 90:
+            reasons.append("✓ Very close report date")
+        elif date_score >= 55:
+            reasons.append("✓ Report dates are reasonably close")
+
+        # -------------------------------------------------
+        # 6. Final combined score
+        # -------------------------------------------------
+        # Image 30% + text 30% + metadata 25% + location 10% + date 5%
+        final_score = (
+            (image_score * 0.30)
+            + (text_score * 0.30)
+            + (metadata_score * 0.25)
+            + (location_score * 0.10)
+            + (date_score * 0.05)
+        )
+        final_score = round(max(0.0, min(100.0, final_score)), 2)
+
+        if final_score >= 85:
+            match_level = "Very High"
+        elif final_score >= 70:
+            match_level = "High"
+        elif final_score >= 50:
+            match_level = "Possible"
+        else:
+            match_level = "Low"
+
+        matches.append({
+            "item_id": candidate_item.id,
+            "user_id": candidate_item.user_id,
+            "item_name": candidate_item.item_name,
+            "item_type": candidate_item.item_type,
+            "category": candidate_item.category,
+            "description": candidate_item.description,
+            "color": candidate_item.color,
+            "brand": candidate_item.brand,
+            "location": candidate_item.location,
+            "latitude": candidate_item.latitude,
+            "longitude": candidate_item.longitude,
+            "distance_km": round(distance_km, 2) if distance_km is not None else None,
+            "item_date": str(candidate_item.item_date) if candidate_item.item_date else None,
+            "image_name": candidate_item.image_name,
+            "image_url": image_url(candidate_item.image_name),
+            "image_similarity": image_score,
+            "text_similarity": text_score,
+            "metadata_score": metadata_score,
+            "location_score": location_score,
+            "date_score": date_score,
+            "match_score": final_score,
+            "match_level": match_level,
+            "image_available": image_available,
+            "item_status": get_item_status(db, candidate_item),
+            "reasons": reasons,
+        })
+
+    matches.sort(key=lambda x: x["match_score"], reverse=True)
+    strong_matches = [m for m in matches if m["match_score"] >= 50]
+
+    if not strong_matches:
+        return {
+            "status": "success",
+            "item_id": current_item.id,
+            "item_type": current_item.item_type,
+            "searching_for": target_type,
+            "matches": [],
+            "message": f"No strong {target_type} match found."
+        }
 
     return {
-
-        "status":
-            "success",
-
-        "item_id":
-            current_item.id,
-
-        "item_type":
-            current_item.item_type,
-
-        "searching_for":
-            target_type,
-
-        "matches":
-            strong_matches
+        "status": "success",
+        "item_id": current_item.id,
+        "item_type": current_item.item_type,
+        "searching_for": target_type,
+        "match_count": len(strong_matches),
+        "matches": strong_matches,
     }
 
-# =========================================================
+
 # FEATURE 3
 # SEND MESSAGE TO ITEM REPORTER
 # =========================================================
@@ -2457,4 +2364,139 @@ def mark_notification_read(
 
         "message":
             "Notification marked as read."
+    }
+# =========================================================
+# NOTIFICATION CENTER - BATCH 2
+# =========================================================
+
+@app.get("/notifications/{user_id}/unread-count")
+def get_unread_notification_count(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """Return the number of unread notifications for a user."""
+    count = (
+        db.query(Notification)
+        .filter(
+            Notification.user_id == user_id,
+            Notification.is_read == 0
+        )
+        .count()
+    )
+
+    return {
+        "status": "success",
+        "user_id": user_id,
+        "unread_count": count
+    }
+
+
+@app.put("/notifications/read-all/{user_id}")
+def mark_all_notifications_read(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """Mark every unread notification belonging to this user as read."""
+    updated = (
+        db.query(Notification)
+        .filter(
+            Notification.user_id == user_id,
+            Notification.is_read == 0
+        )
+        .update(
+            {Notification.is_read: 1},
+            synchronize_session=False
+        )
+    )
+
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": "All notifications marked as read.",
+        "updated_count": updated
+    }
+
+
+@app.post("/notifications/check-matches/{user_id}")
+def create_match_notifications(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Check the user's reports against opposite item types and create
+    notifications for strong matches. Existing identical match
+    notifications are not duplicated.
+    """
+    user_items = (
+        db.query(Item)
+        .filter(Item.user_id == user_id)
+        .order_by(Item.id.desc())
+        .all()
+    )
+
+    created = []
+
+    for item in user_items:
+        try:
+            result = match_item(item.id, db)
+        except Exception:
+            continue
+
+        for match in result.get("matches", []):
+            score = float(match.get("match_score") or 0)
+            if score < 70:
+                continue
+
+            other_user_id = match.get("user_id")
+            if not other_user_id or other_user_id == user_id:
+                continue
+
+            item_id = match.get("item_id")
+            title = "Potential Match Found"
+            message = (
+                f"Your {item.item_type} report '{item.item_name}' has a "
+                f"{score:.0f}% match with '{match.get('item_name', 'an item')}'."
+            )
+
+            # Notify the owner of the current report and the other report owner.
+            recipients = {user_id, other_user_id}
+
+            for recipient_id in recipients:
+                duplicate = (
+                    db.query(Notification)
+                    .filter(
+                        Notification.user_id == recipient_id,
+                        Notification.item_id == item_id,
+                        Notification.notification_type == "match",
+                        Notification.message == message
+                    )
+                    .first()
+                )
+
+                if duplicate:
+                    continue
+
+                notification = Notification(
+                    user_id=recipient_id,
+                    item_id=item_id,
+                    title=title,
+                    message=message,
+                    notification_type="match",
+                    is_read=0
+                )
+
+                db.add(notification)
+                created.append({
+                    "user_id": recipient_id,
+                    "item_id": item_id,
+                    "match_score": score
+                })
+
+    db.commit()
+
+    return {
+        "status": "success",
+        "created_count": len(created),
+        "notifications": created
     }
