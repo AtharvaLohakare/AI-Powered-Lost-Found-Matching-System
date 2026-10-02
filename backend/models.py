@@ -1,3 +1,4 @@
+
 from sqlalchemy import (
     Column,
     Integer,
@@ -16,9 +17,7 @@ from .database import Base
 # =========================================================
 
 class Item(Base):
-
     __tablename__ = "items"
-
 
     id = Column(
         Integer,
@@ -26,55 +25,46 @@ class Item(Base):
         index=True
     )
 
-
     user_id = Column(
         Integer,
         nullable=True,
         index=True
     )
 
-
     item_type = Column(
         String(20),
         nullable=False
     )
-
 
     item_name = Column(
         String(100),
         nullable=False
     )
 
-
     category = Column(
         String(50),
         nullable=False
     )
-
 
     description = Column(
         Text,
         nullable=False
     )
 
-
     color = Column(
         String(50),
         nullable=True
     )
-
 
     brand = Column(
         String(100),
         nullable=True
     )
 
-
     location = Column(
         String(200),
         nullable=False
     )
-
 
     # =====================================================
     # GPS LOCATION
@@ -85,24 +75,20 @@ class Item(Base):
         nullable=True
     )
 
-
     longitude = Column(
         Float,
         nullable=True
     )
-
 
     item_date = Column(
         Date,
         nullable=False
     )
 
-
     image_name = Column(
         String(255),
         nullable=True
     )
-
 
     created_at = Column(
         TIMESTAMP
@@ -114,9 +100,7 @@ class Item(Base):
 # =========================================================
 
 class User(Base):
-
     __tablename__ = "users"
-
 
     id = Column(
         Integer,
@@ -124,12 +108,10 @@ class User(Base):
         index=True
     )
 
-
     name = Column(
         String(100),
         nullable=False
     )
-
 
     email = Column(
         String(150),
@@ -138,12 +120,10 @@ class User(Base):
         index=True
     )
 
-
     password_hash = Column(
         String(255),
         nullable=False
     )
-
 
     created_at = Column(
         TIMESTAMP
@@ -155,9 +135,7 @@ class User(Base):
 # =========================================================
 
 class Message(Base):
-
     __tablename__ = "messages"
-
 
     id = Column(
         Integer,
@@ -165,13 +143,11 @@ class Message(Base):
         index=True
     )
 
-
     sender_id = Column(
         Integer,
         nullable=False,
         index=True
     )
-
 
     receiver_id = Column(
         Integer,
@@ -179,24 +155,20 @@ class Message(Base):
         index=True
     )
 
-
     item_id = Column(
         Integer,
         nullable=False,
         index=True
     )
 
-
     message = Column(
         Text,
         nullable=False
     )
 
-
     created_at = Column(
         TIMESTAMP
     )
-
 
 
 # =========================================================
@@ -204,7 +176,6 @@ class Message(Base):
 # =========================================================
 
 class Notification(Base):
-
     __tablename__ = "notifications"
 
     id = Column(
@@ -252,11 +223,10 @@ class Notification(Base):
 
 
 # =========================================================
-# OWNERSHIP VERIFICATION MODEL
+# OWNERSHIP VERIFICATION REQUEST MODEL
 # =========================================================
 
 class VerificationRequest(Base):
-
     __tablename__ = "verification_requests"
 
     id = Column(

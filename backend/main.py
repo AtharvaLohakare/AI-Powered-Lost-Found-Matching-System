@@ -20,10 +20,21 @@ from math import radians, sin, cos, sqrt, atan2
 import bcrypt
 
 from .database import SessionLocal
-from .models import Item, User, Message
+
+from .models import (
+    Item,
+    User,
+    Message,
+    Notification,
+    VerificationRequest
+)
+
+
 from .text_matcher import calculate_text_similarity
 from .image_matcher import calculate_image_similarity
 from math import radians, sin, cos, sqrt, atan2
+
+
 
 # =========================================================
 # FASTAPI APP
@@ -1272,8 +1283,10 @@ def match_item(
         "matches":
             strong_matches
     }
+
 # =========================================================
-# SEND MESSAGE
+# FEATURE 3
+# SEND MESSAGE TO ITEM REPORTER
 # =========================================================
 
 @app.post("/messages/send")
@@ -1283,6 +1296,10 @@ def send_message(
     message: str = Form(...),
     db: Session = Depends(get_db)
 ):
+
+    # -----------------------------------------------------
+    # CLEAN MESSAGE
+    # -----------------------------------------------------
 
     message = message.strip()
 
@@ -1339,7 +1356,7 @@ def send_message(
         )
 
     # -----------------------------------------------------
-    # GET REPORTER
+    # GET ITEM REPORTER
     # -----------------------------------------------------
 
     receiver_id = item.user_id
@@ -1348,10 +1365,7 @@ def send_message(
 
         raise HTTPException(
             status_code=400,
-            detail=(
-                "Reporter information "
-                "is not available."
-            )
+            detail="Reporter information is not available."
         )
 
     # -----------------------------------------------------
@@ -1398,9 +1412,7 @@ def send_message(
     try:
 
         db.add(new_message)
-
         db.commit()
-
         db.refresh(new_message)
 
     except Exception as e:
@@ -1412,19 +1424,71 @@ def send_message(
             detail=f"Unable to send message: {str(e)}"
         )
 
+    # -----------------------------------------------------
+    # CREATE NOTIFICATION FOR REPORTER
+    # -----------------------------------------------------
+
+    notification = Notification(
+
+        user_id=receiver_id,
+
+        item_id=item_id,
+
+        title="New Message",
+
+        message=(
+            f"{sender.name} sent you a message "
+            f"about your reported item."
+        ),
+
+        notification_type="message",
+
+        is_read=0
+    )
+
+    try:
+
+        db.add(notification)
+        db.commit()
+
+    except Exception:
+
+        db.rollback()
+
+        # Message was already successfully saved.
+        # Notification failure should not delete the message.
+
+    # -----------------------------------------------------
+    # RESPONSE
+    # -----------------------------------------------------
+
     return {
+
         "status": "success",
-        "message": "Message sent successfully.",
-        "message_id": new_message.id,
-        "item_id": item_id,
-        "sender_id": sender_id,
-        "receiver_id": receiver_id,
-        "created_at": (
-            str(new_message.created_at)
-            if new_message.created_at
-            else None
-        )
+
+        "message":
+            "Message sent successfully.",
+
+        "message_id":
+            new_message.id,
+
+        "item_id":
+            item_id,
+
+        "sender_id":
+            sender_id,
+
+        "receiver_id":
+            receiver_id,
+
+        "created_at":
+            (
+                str(new_message.created_at)
+                if new_message.created_at
+                else None
+            )
     }
+
 
 
 # =========================================================
@@ -1539,4 +1603,697 @@ def get_messages(
     return {
         "status": "success",
         "messages": result
+    }
+
+
+
+
+# =========================================================
+# FEATURE 4
+# OWNERSHIP VERIFICATION REQUEST
+# =========================================================
+
+@app.post("/verification/request")
+def create_verification_request(
+    item_id: int,
+    claimant_id: int,
+    proof: str,
+    db: Session = Depends(get_db)
+):
+
+    # -----------------------------------------------------
+    # CLEAN PROOF
+    # -----------------------------------------------------
+
+    proof = proof.strip()
+
+    if not proof:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Verification proof is required."
+        )
+
+    if len(proof) > 5000:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Verification proof is too long."
+        )
+
+    # -----------------------------------------------------
+    # FIND ITEM
+    # -----------------------------------------------------
+
+    item = (
+        db.query(Item)
+        .filter(
+            Item.id == item_id
+        )
+        .first()
+    )
+
+    if not item:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Item not found."
+        )
+
+    # -----------------------------------------------------
+    # ONLY FOUND ITEMS CAN RECEIVE OWNERSHIP CLAIMS
+    # -----------------------------------------------------
+
+    if item.item_type.lower() != "found":
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Ownership claims can only be "
+                "submitted for found items."
+            )
+        )
+
+    # -----------------------------------------------------
+    # FOUND ITEM MUST HAVE REPORTER
+    # -----------------------------------------------------
+
+    if not item.user_id:
+
+        raise HTTPException(
+            status_code=400,
+            detail="This item has no reporter account."
+        )
+
+    # -----------------------------------------------------
+    # CHECK CLAIMANT
+    # -----------------------------------------------------
+
+    claimant = (
+        db.query(User)
+        .filter(
+            User.id == claimant_id
+        )
+        .first()
+    )
+
+    if not claimant:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Claimant account not found."
+        )
+
+    # -----------------------------------------------------
+    # PREVENT OWNER CLAIMING THEIR OWN FOUND ITEM
+    # -----------------------------------------------------
+
+    if claimant_id == item.user_id:
+
+        raise HTTPException(
+            status_code=400,
+            detail="You cannot claim your own found item."
+        )
+
+    # -----------------------------------------------------
+    # CHECK DUPLICATE PENDING REQUEST
+    # -----------------------------------------------------
+
+    existing_request = (
+
+        db.query(
+            VerificationRequest
+        )
+
+        .filter(
+
+            VerificationRequest.item_id
+            == item_id,
+
+            VerificationRequest.claimant_id
+            == claimant_id,
+
+            VerificationRequest.status
+            == "pending"
+
+        )
+
+        .first()
+    )
+
+    if existing_request:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "A verification request is "
+                "already pending."
+            )
+        )
+
+    # -----------------------------------------------------
+    # REPORTER = PERSON WHO FOUND THE ITEM
+    # -----------------------------------------------------
+
+    reporter_id = item.user_id
+
+    # -----------------------------------------------------
+    # CREATE VERIFICATION REQUEST
+    # -----------------------------------------------------
+
+    request = VerificationRequest(
+
+        item_id=item_id,
+
+        claimant_id=claimant_id,
+
+        reporter_id=reporter_id,
+
+        proof=proof,
+
+        status="pending"
+    )
+
+    try:
+
+        db.add(request)
+
+        db.commit()
+
+        db.refresh(request)
+
+    except Exception as e:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unable to create verification request: "
+                f"{str(e)}"
+            )
+        )
+
+    # -----------------------------------------------------
+    # NOTIFY FOUND-ITEM REPORTER
+    # -----------------------------------------------------
+
+    notification = Notification(
+
+        user_id=reporter_id,
+
+        item_id=item_id,
+
+        title="New Ownership Claim",
+
+        message=(
+            f"{claimant.name} has submitted "
+            f"an ownership claim for your found item "
+            f"'{item.item_name}'."
+        ),
+
+        notification_type="verification",
+
+        is_read=0
+    )
+
+    try:
+
+        db.add(notification)
+
+        db.commit()
+
+    except Exception:
+
+        db.rollback()
+
+    # -----------------------------------------------------
+    # RESPONSE
+    # -----------------------------------------------------
+
+    return {
+
+        "status": "success",
+
+        "message":
+            "Ownership verification request submitted.",
+
+        "request_id":
+            request.id,
+
+        "item_id":
+            request.item_id,
+
+        "claimant_id":
+            request.claimant_id,
+
+        "reporter_id":
+            request.reporter_id,
+
+        "status":
+            request.status
+    }
+
+
+# =========================================================
+# GET VERIFICATION REQUESTS FOR USER
+# =========================================================
+
+@app.get("/verification/user/{user_id}")
+def get_verification_requests(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+
+    requests = (
+
+        db.query(
+            VerificationRequest
+        )
+
+        .filter(
+
+            (
+                VerificationRequest.claimant_id
+                == user_id
+            )
+
+            |
+
+            (
+                VerificationRequest.reporter_id
+                == user_id
+            )
+
+        )
+
+        .order_by(
+            VerificationRequest.id.desc()
+        )
+
+        .all()
+    )
+
+    result = []
+
+    for request in requests:
+
+        item = (
+            db.query(Item)
+            .filter(
+                Item.id == request.item_id
+            )
+            .first()
+        )
+
+        claimant = (
+            db.query(User)
+            .filter(
+                User.id == request.claimant_id
+            )
+            .first()
+        )
+
+        reporter = (
+            db.query(User)
+            .filter(
+                User.id == request.reporter_id
+            )
+            .first()
+        )
+
+        result.append({
+
+            "id":
+                request.id,
+
+            "item_id":
+                request.item_id,
+
+            "item_name":
+                (
+                    item.item_name
+                    if item
+                    else "Unknown Item"
+                ),
+
+            "item_type":
+                (
+                    item.item_type
+                    if item
+                    else None
+                ),
+
+            "claimant_id":
+                request.claimant_id,
+
+            "claimant_name":
+                (
+                    claimant.name
+                    if claimant
+                    else "Unknown User"
+                ),
+
+            "claimant_email":
+                (
+                    claimant.email
+                    if claimant
+                    else None
+                ),
+
+            "reporter_id":
+                request.reporter_id,
+
+            "reporter_name":
+                (
+                    reporter.name
+                    if reporter
+                    else "Unknown User"
+                ),
+
+            "proof":
+                request.proof,
+
+            "status":
+                request.status,
+
+            "response_message":
+                request.response_message,
+
+            "created_at":
+                (
+                    str(request.created_at)
+                    if request.created_at
+                    else None
+                )
+        })
+
+    return {
+
+        "status": "success",
+
+        "requests":
+            result
+    }
+
+
+# =========================================================
+# RESPOND TO OWNERSHIP CLAIM
+# =========================================================
+
+@app.put("/verification/{request_id}/respond")
+def respond_to_verification(
+    request_id: int,
+    reporter_id: int,
+    status: str,
+    response_message: str = "",
+    db: Session = Depends(get_db)
+):
+
+    status = status.strip().lower()
+
+    response_message = (
+        response_message.strip()
+    )
+
+    # -----------------------------------------------------
+    # VALID STATUS
+    # -----------------------------------------------------
+
+    if status not in [
+        "approved",
+        "rejected"
+    ]:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Status must be approved "
+                "or rejected."
+            )
+        )
+
+    # -----------------------------------------------------
+    # FIND REQUEST
+    # -----------------------------------------------------
+
+    request = (
+
+        db.query(
+            VerificationRequest
+        )
+
+        .filter(
+
+            VerificationRequest.id
+            == request_id,
+
+            VerificationRequest.reporter_id
+            == reporter_id
+
+        )
+
+        .first()
+    )
+
+    if not request:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Verification request not found."
+        )
+
+    # -----------------------------------------------------
+    # ONLY PENDING REQUESTS
+    # -----------------------------------------------------
+
+    if request.status != "pending":
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "This verification request "
+                "has already been processed."
+            )
+        )
+
+    # -----------------------------------------------------
+    # UPDATE REQUEST
+    # -----------------------------------------------------
+
+    request.status = status
+
+    request.response_message = (
+        response_message
+        if response_message
+        else (
+            "Your ownership verification "
+            "was approved."
+            if status == "approved"
+            else
+            "Your ownership verification "
+            "was rejected."
+        )
+    )
+
+    try:
+
+        db.commit()
+
+        db.refresh(request)
+
+    except Exception as e:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unable to process verification: "
+                f"{str(e)}"
+            )
+        )
+
+    # -----------------------------------------------------
+    # NOTIFY CLAIMANT
+    # -----------------------------------------------------
+
+    notification = Notification(
+
+        user_id=request.claimant_id,
+
+        item_id=request.item_id,
+
+        title=(
+            "Ownership Claim Approved"
+            if status == "approved"
+            else
+            "Ownership Claim Rejected"
+        ),
+
+        message=request.response_message,
+
+        notification_type=
+            "verification_response",
+
+        is_read=0
+    )
+
+    try:
+
+        db.add(notification)
+
+        db.commit()
+
+    except Exception:
+
+        db.rollback()
+
+    # -----------------------------------------------------
+    # IMPORTANT:
+    #
+    # DO NOT CHANGE item.user_id
+    #
+    # The found-item reporter remains the
+    # reporter/owner of the found report.
+    # -----------------------------------------------------
+
+    return {
+
+        "status": "success",
+
+        "message":
+            "Verification response saved.",
+
+        "request_id":
+            request.id,
+
+        "item_id":
+            request.item_id,
+
+        "claimant_id":
+            request.claimant_id,
+
+        "reporter_id":
+            request.reporter_id,
+
+        "status":
+            request.status,
+
+        "response_message":
+            request.response_message
+    }
+
+
+
+# =========================================================
+# GET USER NOTIFICATIONS
+# =========================================================
+
+@app.get("/notifications/{user_id}")
+def get_notifications(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+
+    notifications = (
+
+        db.query(Notification)
+
+        .filter(
+            Notification.user_id == user_id
+        )
+
+        .order_by(
+            Notification.id.desc()
+        )
+
+        .all()
+    )
+
+    return {
+
+        "status": "success",
+
+        "notifications": [
+
+            {
+                "id": notification.id,
+
+                "user_id":
+                    notification.user_id,
+
+                "item_id":
+                    notification.item_id,
+
+                "title":
+                    notification.title,
+
+                "message":
+                    notification.message,
+
+                "notification_type":
+                    notification.notification_type,
+
+                "is_read":
+                    notification.is_read,
+
+                "created_at":
+                    (
+                        str(notification.created_at)
+                        if notification.created_at
+                        else None
+                    )
+            }
+
+            for notification in notifications
+        ]
+    }
+
+
+# =========================================================
+# MARK NOTIFICATION AS READ
+# =========================================================
+
+@app.put("/notifications/{notification_id}/read")
+def mark_notification_read(
+    notification_id: int,
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+
+    notification = (
+
+        db.query(Notification)
+
+        .filter(
+
+            Notification.id
+            == notification_id,
+
+            Notification.user_id
+            == user_id
+
+        )
+
+        .first()
+    )
+
+    if not notification:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Notification not found."
+        )
+
+    notification.is_read = 1
+
+    db.commit()
+
+    return {
+
+        "status": "success",
+
+        "message":
+            "Notification marked as read."
     }

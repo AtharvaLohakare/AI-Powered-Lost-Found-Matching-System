@@ -8,3 +8,4 @@ pillow
 numpy
 ImageHash
 bcrypt
+cloudinary
