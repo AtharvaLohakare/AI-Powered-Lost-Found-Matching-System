@@ -5,532 +5,440 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>My Reports - Lost & Found AI</title>
+    <title>My Reports | Lost & Found AI</title>
 
     <link rel="stylesheet" href="style.css">
 
     <style>
-
-        /* =====================================================
+        /* =========================================================
            MY REPORTS PAGE
-        ===================================================== */
+        ========================================================= */
 
-        .reports-page {
-            padding: 120px 8% 60px;
-            min-height: 100vh;
+        .my-reports-page {
+            min-height: calc(100vh - 80px);
+            padding: 50px 30px 70px;
+            background: #f5f7fb;
         }
 
         .reports-header {
+            max-width: 1200px;
+            margin: 0 auto 35px;
             text-align: center;
-            margin-bottom: 40px;
         }
 
         .reports-header h1 {
-            font-size: 42px;
-            margin-bottom: 10px;
+            margin: 0;
+            color: #1f2937;
+            font-size: 36px;
+            font-weight: 700;
         }
 
         .reports-header p {
-            color: #777;
-            font-size: 17px;
+            margin: 10px 0 18px;
+            color: #6b7280;
+            font-size: 16px;
         }
 
         .reports-count {
-            display: inline-block;
-            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             padding: 8px 18px;
             border-radius: 20px;
-            background: #f1f5ff;
-            color: #3157d5;
+            background: #e8edff;
+            color: #3155d4;
+            font-size: 14px;
             font-weight: 600;
         }
 
-
-        /* =====================================================
-           REPORT GRID
-        ===================================================== */
-
-        .reports-grid {
-            max-width: 1100px;
-            margin: auto;
-
-            display: grid;
-
-            grid-template-columns:
-                repeat(auto-fit, minmax(320px, 1fr));
-
-            gap: 25px;
+        .reports-container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+            gap: 24px;
+        }
 
-        /* =====================================================
+        /* =========================================================
            REPORT CARD
-        ===================================================== */
+        ========================================================= */
 
         .report-card {
             background: #ffffff;
-
             border-radius: 18px;
-
             overflow: hidden;
-
-            box-shadow:
-                0 8px 30px rgba(0, 0, 0, 0.08);
-
-            border: 1px solid #eeeeee;
-
-            transition: 0.25s ease;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.07);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .report-card:hover {
-            transform: translateY(-5px);
-
-            box-shadow:
-                0 14px 35px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 14px 32px rgba(15, 23, 42, 0.11);
         }
 
-        .report-image-container {
+        .report-image-wrapper {
+            position: relative;
             width: 100%;
-            height: 220px;
-
-            background: #f4f4f4;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            height: 230px;
+            background: #eef1f5;
+            overflow: hidden;
         }
 
         .report-image {
             width: 100%;
-            height: 220px;
-
+            height: 100%;
             object-fit: cover;
-
             display: block;
         }
 
-        .image-placeholder {
+        .report-image-placeholder {
             width: 100%;
-            height: 220px;
-
+            height: 100%;
             display: flex;
-            flex-direction: column;
-
             align-items: center;
             justify-content: center;
-
-            gap: 8px;
-
-            font-size: 50px;
-
-            background: #f5f6f8;
-            color: #777;
+            font-size: 55px;
+            color: #9ca3af;
         }
 
-        .image-placeholder span {
-            font-size: 13px;
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-lost {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status-found {
+            background: #dcfce7;
+            color: #15803d;
         }
 
         .report-content {
             padding: 22px;
         }
 
-        .report-top {
+        .report-title-row {
             display: flex;
-
             justify-content: space-between;
-            align-items: center;
-
-            gap: 10px;
-
-            margin-bottom: 12px;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
         }
 
         .report-title {
-            font-size: 23px;
             margin: 0;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-
-            border-radius: 20px;
-
-            font-size: 12px;
-
+            color: #1f2937;
+            font-size: 22px;
             font-weight: 700;
-
-            text-transform: uppercase;
-
-            white-space: nowrap;
-        }
-
-        .status-lost {
-            background: #ffe8e8;
-            color: #d63031;
-        }
-
-        .status-found {
-            background: #e5f8ed;
-            color: #16804b;
         }
 
         .report-description {
-            color: #666;
-
+            margin: 0 0 20px;
+            color: #6b7280;
+            font-size: 14px;
             line-height: 1.6;
-
-            margin: 12px 0 18px;
         }
 
-        .report-info {
+        .report-info-grid {
             display: grid;
-
             grid-template-columns: 1fr 1fr;
-
-            gap: 12px;
-
-            margin-top: 15px;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .info-box {
-            background: #f8f9fb;
-
-            padding: 12px;
-
+            padding: 11px 12px;
             border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #edf0f4;
         }
 
         .info-label {
             display: block;
-
-            font-size: 12px;
-
-            color: #888;
-
             margin-bottom: 4px;
+            color: #9ca3af;
+            font-size: 11px;
+            font-weight: 600;
         }
 
         .info-value {
-            font-size: 14px;
-
+            display: block;
+            color: #374151;
+            font-size: 13px;
             font-weight: 600;
-
-            color: #333;
+            word-break: break-word;
         }
 
-
-        /* =====================================================
-           AI MATCH BUTTON
-        ===================================================== */
-
-        .match-button {
+        .find-match-button {
             width: 100%;
-
-            margin-top: 18px;
-
-            padding: 13px 18px;
-
             border: none;
-
             border-radius: 10px;
-
-            background: linear-gradient(
-                135deg,
-                #3157d5,
-                #4f73e8
-            );
-
+            padding: 13px 18px;
+            background: #3155d4;
             color: white;
-
-            font-size: 15px;
-
+            font-size: 14px;
             font-weight: 700;
-
             cursor: pointer;
-
-            transition: 0.2s ease;
+            transition: background 0.2s ease, transform 0.2s ease;
         }
 
-        .match-button:hover {
-            transform: translateY(-2px);
-
-            box-shadow:
-                0 8px 20px rgba(49, 87, 213, 0.25);
+        .find-match-button:hover {
+            background: #2444ba;
+            transform: translateY(-1px);
         }
 
-        .match-button:disabled {
+        .find-match-button:disabled {
             opacity: 0.65;
-
-            cursor: not-allowed;
-
+            cursor: wait;
             transform: none;
         }
 
-        .click-hint {
-            margin-top: 14px;
-
-            padding-top: 14px;
-
-            border-top: 1px solid #eeeeee;
-
-            color: #888;
-
+        .report-click-hint {
+            margin: 13px 0 0;
+            text-align: center;
+            color: #9ca3af;
             font-size: 12px;
-
-            text-align: center;
         }
 
+        /* =========================================================
+           EMPTY / ERROR STATES
+        ========================================================= */
 
-        /* =====================================================
-           EMPTY STATE
-        ===================================================== */
-
-        .empty-state {
-            max-width: 600px;
-
-            margin: 60px auto;
-
-            text-align: center;
-
+        .empty-reports {
+            padding: 70px 25px;
             background: white;
-
-            padding: 50px 30px;
-
-            border-radius: 20px;
-
-            box-shadow:
-                0 8px 30px rgba(0, 0, 0, 0.07);
+            border-radius: 18px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
         }
 
-        .empty-icon {
+        .empty-reports-icon {
             font-size: 55px;
-
             margin-bottom: 15px;
         }
 
-        .empty-state h2 {
-            margin-bottom: 10px;
+        .empty-reports h3 {
+            margin: 0 0 8px;
+            color: #1f2937;
+            font-size: 22px;
         }
 
-        .empty-state p {
-            color: #777;
-
-            margin-bottom: 25px;
+        .empty-reports p {
+            margin: 0;
+            color: #6b7280;
         }
 
-        .report-button {
-            display: inline-block;
-
-            padding: 12px 22px;
-
-            border-radius: 10px;
-
-            text-decoration: none;
-
-            background: #3157d5;
-
-            color: white;
-
-            font-weight: 600;
-
-            border: none;
-
-            cursor: pointer;
-        }
-
-
-        /* =====================================================
-           LOADING
-        ===================================================== */
-
-        .loading-state {
-            max-width: 600px;
-
-            margin: 60px auto;
-
-            text-align: center;
-
-            padding: 40px;
-        }
-
-        .loading-state h2 {
-            margin-bottom: 10px;
-        }
-
-        .loading-state p {
-            color: #777;
-        }
-
-
-        /* =====================================================
+        /* =========================================================
            AI MATCH MODAL
-        ===================================================== */
+        ========================================================= */
 
         .match-modal {
             position: fixed;
-
             inset: 0;
-
-            background: rgba(0, 0, 0, 0.55);
+            z-index: 9999;
 
             display: none;
-
             align-items: center;
             justify-content: center;
 
-            padding: 20px;
+            padding: 25px;
 
-            z-index: 9999;
+            background: rgba(15, 23, 42, 0.62);
+            backdrop-filter: blur(3px);
         }
 
-        .match-modal.show {
+        .match-modal.active {
             display: flex;
         }
 
         .match-modal-content {
-            width: 100%;
-
-            max-width: 900px;
-
+            width: min(1050px, 100%);
             max-height: 90vh;
-
             overflow-y: auto;
 
-            background: white;
-
+            background: #ffffff;
             border-radius: 20px;
 
-            padding: 30px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
 
-            box-shadow:
-                0 20px 60px rgba(0, 0, 0, 0.25);
+            animation: matchModalIn 0.2s ease;
+        }
 
-            position: relative;
+        @keyframes matchModalIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .match-modal-header {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+
             display: flex;
-
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
 
-            gap: 20px;
+            padding: 25px 30px;
 
-            margin-bottom: 25px;
+            background: #ffffff;
+            border-bottom: 1px solid #edf0f4;
         }
 
-        .match-modal-header h2 {
+        .match-modal-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
             margin: 0;
 
+            color: #25324a;
             font-size: 28px;
+            font-weight: 700;
         }
 
-        .close-modal {
-            border: none;
-
-            background: #f1f2f5;
-
+        .close-match-modal {
             width: 40px;
             height: 40px;
 
+            border: none;
             border-radius: 50%;
 
-            font-size: 22px;
+            background: #f1f3f6;
+            color: #111827;
+
+            font-size: 18px;
+            font-weight: 700;
 
             cursor: pointer;
+
+            transition: background 0.2s ease;
         }
 
-        .close-modal:hover {
-            background: #e5e7eb;
+        .close-match-modal:hover {
+            background: #e4e7eb;
         }
 
+        .match-content {
+            padding: 25px 30px 32px;
+        }
 
-        /* =====================================================
-           MATCH SEARCH LOADING
-        ===================================================== */
+        .match-results-info {
+            margin-bottom: 25px;
+            padding: 14px 18px;
+
+            border-radius: 12px;
+
+            background: #eef3ff;
+            color: #3155d4;
+
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        /* =========================================================
+           MATCH LOADING
+        ========================================================= */
 
         .match-loading {
+            padding: 65px 20px;
             text-align: center;
-
-            padding: 50px 20px;
-
-            color: #666;
         }
 
         .match-loading-icon {
-            font-size: 45px;
-
+            font-size: 55px;
             margin-bottom: 15px;
+            animation: robotPulse 1.3s infinite ease-in-out;
         }
 
+        @keyframes robotPulse {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
 
-        /* =====================================================
-           MATCH RESULT
-        ===================================================== */
-
-        .match-results-info {
-            background: #f5f7ff;
-
-            border-radius: 12px;
-
-            padding: 15px 18px;
-
-            margin-bottom: 20px;
-
-            color: #3157d5;
-
-            font-size: 14px;
-
-            font-weight: 600;
+            50% {
+                transform: translateY(-7px);
+            }
         }
+
+        .match-loading h3 {
+            margin: 0 0 8px;
+            color: #1f2937;
+        }
+
+        .match-loading p {
+            max-width: 520px;
+            margin: 0 auto;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* =========================================================
+           MATCH CARD - IMPROVED
+        ========================================================= */
 
         .match-results {
-            display: grid;
-
-            gap: 18px;
-        }
-
-        .match-card {
-            border: 1px solid #e5e7eb;
-
-            border-radius: 16px;
-
-            padding: 18px;
-
-            background: white;
-
-            transition: 0.2s ease;
-        }
-
-        .match-card:hover {
-            box-shadow:
-                0 8px 25px rgba(0, 0, 0, 0.08);
-        }
-
-        .match-card-main {
-            display: grid;
-
-            grid-template-columns: 160px 1fr;
-
+            display: flex;
+            flex-direction: column;
             gap: 20px;
         }
 
+        .match-card {
+            overflow: hidden;
+
+            background: #ffffff;
+
+            border: 1px solid #dfe4ec;
+            border-radius: 18px;
+
+            box-shadow: 0 7px 24px rgba(15, 23, 42, 0.07);
+        }
+
+        /*
+            TOP AREA:
+            Image + details
+        */
+
+        .match-card-main {
+            display: grid;
+            grid-template-columns: 180px minmax(0, 1fr);
+
+            gap: 24px;
+
+            padding: 22px;
+        }
+
         .match-image-container {
-            width: 160px;
-
-            height: 140px;
-
-            border-radius: 12px;
+            width: 180px;
+            height: 180px;
 
             overflow: hidden;
 
-            background: #f4f5f7;
+            border-radius: 14px;
 
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
+            background: #f1f3f6;
         }
 
         .match-image {
@@ -538,324 +446,363 @@
             height: 100%;
 
             object-fit: cover;
+            display: block;
         }
 
         .match-image-placeholder {
-            font-size: 40px;
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 55px;
+            color: #9ca3af;
+        }
+
+        .match-details {
+            min-width: 0;
         }
 
         .match-details h3 {
-            margin: 0 0 8px;
+            margin: 0 0 7px;
 
-            font-size: 21px;
+            color: #1f2937;
+
+            font-size: 23px;
+            font-weight: 700;
         }
 
         .match-description {
-            color: #666;
+            margin: 0 0 16px;
 
-            line-height: 1.5;
+            color: #6b7280;
 
-            margin: 5px 0 12px;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
         .match-meta {
             display: flex;
-
             flex-wrap: wrap;
-
             gap: 8px;
         }
 
         .match-meta span {
-            background: #f5f6f8;
+            display: inline-flex;
+            align-items: center;
 
-            padding: 6px 9px;
+            padding: 7px 10px;
 
             border-radius: 8px;
 
-            font-size: 12px;
+            background: #f5f7fa;
 
-            color: #555;
+            color: #5b6472;
+
+            font-size: 12px;
+            font-weight: 600;
         }
 
+        /* =========================================================
+           SCORE SECTION
+        ========================================================= */
 
-        /* =====================================================
-           MATCH SCORE
-        ===================================================== */
+        .match-score-section {
+            padding: 20px 22px;
 
-        .match-score-box {
-            margin-top: 15px;
+            border-top: 1px solid #edf0f4;
+            border-bottom: 1px solid #edf0f4;
 
-            padding-top: 15px;
-
-            border-top: 1px solid #eeeeee;
+            background: #fafbfc;
         }
 
         .match-score-top {
             display: flex;
-
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
 
-            margin-bottom: 8px;
+            gap: 15px;
+
+            margin-bottom: 10px;
         }
 
         .match-score-label {
-            font-size: 13px;
+            color: #4b5563;
 
+            font-size: 14px;
             font-weight: 700;
-
-            color: #555;
         }
 
         .match-score {
-            font-size: 20px;
+            color: #3155d4;
 
+            font-size: 25px;
             font-weight: 800;
 
-            color: #3157d5;
+            white-space: nowrap;
         }
 
         .score-bar {
+            width: 100%;
             height: 9px;
 
-            width: 100%;
-
-            background: #edf0f5;
+            overflow: hidden;
 
             border-radius: 20px;
 
-            overflow: hidden;
+            background: #e4e8ef;
         }
 
         .score-fill {
             height: 100%;
 
+            border-radius: inherit;
+
             background: linear-gradient(
                 90deg,
-                #3157d5,
-                #5b7ff0
+                #3155d4,
+                #5577e8
             );
 
-            border-radius: 20px;
+            transition: width 0.5s ease;
         }
-
-
-        /* =====================================================
-           MATCH LEVEL
-        ===================================================== */
 
         .match-level {
             display: inline-block;
 
-            margin-top: 10px;
+            margin-top: 11px;
 
-            padding: 6px 10px;
+            padding: 6px 11px;
 
             border-radius: 20px;
 
-            background: #e8efff;
-
-            color: #3157d5;
+            background: #e9f0ff;
+            color: #3155d4;
 
             font-size: 12px;
-
             font-weight: 700;
         }
 
-
-        /* =====================================================
-           MATCH REASONS
-        ===================================================== */
+        /* =========================================================
+           REASONS SECTION
+        ========================================================= */
 
         .match-reasons {
-            margin-top: 14px;
-
-            padding: 13px;
-
-            background: #f8fafc;
-
-            border-radius: 10px;
+            padding: 20px 22px;
         }
 
-        .match-reasons strong {
+        .match-reasons-title {
             display: block;
 
-            font-size: 13px;
+            margin-bottom: 12px;
 
-            margin-bottom: 7px;
+            color: #25324a;
+
+            font-size: 14px;
+            font-weight: 700;
         }
 
         .match-reasons ul {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            gap: 9px 25px;
+
             margin: 0;
+            padding: 0;
 
-            padding-left: 20px;
-
-            color: #666;
-
-            font-size: 13px;
-
-            line-height: 1.6;
+            list-style: none;
         }
 
         .match-reasons li {
-            margin-bottom: 5px;
+            position: relative;
+
+            padding-left: 22px;
+
+            color: #5b6472;
+
+            font-size: 13px;
+            line-height: 1.5;
         }
 
+        .match-reasons li::before {
+            content: "✓";
 
-        /* =====================================================
-           CONTACT REPORTER
-        ===================================================== */
+            position: absolute;
+            left: 0;
+            top: 0;
+
+            color: #15945a;
+
+            font-weight: 800;
+        }
+
+        /* =========================================================
+           CONTACT BUTTON
+        ========================================================= */
+
+        .match-actions {
+            padding: 0 22px 22px;
+        }
 
         .contact-reporter-button {
             width: 100%;
 
-            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-            padding: 12px 18px;
+            gap: 8px;
+
+            padding: 14px 20px;
 
             border: none;
+            border-radius: 11px;
 
-            border-radius: 10px;
-
-            background: #16804b;
-
-            color: white;
+            background: #168a50;
+            color: #ffffff;
 
             font-size: 14px;
-
             font-weight: 700;
 
             cursor: pointer;
 
-            transition: 0.2s ease;
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
         }
 
         .contact-reporter-button:hover {
-            background: #11663d;
-
+            background: #117443;
             transform: translateY(-1px);
         }
 
-        .match-actions {
-            margin-top: 10px;
-        }
-
-
-        /* =====================================================
+        /* =========================================================
            NO MATCH
-        ===================================================== */
+        ========================================================= */
 
         .no-match {
+            padding: 65px 25px;
             text-align: center;
-
-            padding: 45px 20px;
-
-            color: #666;
         }
 
         .no-match-icon {
-            font-size: 55px;
-
             margin-bottom: 15px;
+            font-size: 55px;
         }
 
         .no-match h3 {
-            margin-bottom: 8px;
-
-            color: #333;
+            margin: 0 0 10px;
+            color: #1f2937;
         }
 
+        .no-match p {
+            max-width: 600px;
+            margin: 7px auto;
+            color: #6b7280;
+            line-height: 1.6;
+        }
 
-        /* =====================================================
+        /* =========================================================
            NAVBAR USER
-        ===================================================== */
+        ========================================================= */
 
         .user-welcome {
-            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
 
+            color: #374151;
+            font-size: 14px;
             font-weight: 600;
-
-            color: #1e3a8a;
-
-            white-space: nowrap;
         }
 
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
 
-        /* =====================================================
-           MOBILE
-        ===================================================== */
+        @media (max-width: 800px) {
 
-        @media (max-width: 900px) {
-
-            .user-welcome {
-                font-size: 14px;
-            }
-
-            .match-modal-content {
-                padding: 22px;
-            }
-
-        }
-
-
-        @media (max-width: 600px) {
-
-            .reports-page {
-                padding: 100px 20px 40px;
+            .my-reports-page {
+                padding: 35px 16px 55px;
             }
 
             .reports-header h1 {
-                font-size: 32px;
+                font-size: 30px;
             }
 
-            .report-info {
+            .reports-grid {
                 grid-template-columns: 1fr;
             }
 
-            .report-top {
-                align-items: flex-start;
-
-                flex-direction: column;
+            .match-modal {
+                padding: 10px;
             }
 
-            .user-welcome {
-                font-size: 14px;
+            .match-modal-content {
+                max-height: 94vh;
+                border-radius: 16px;
+            }
+
+            .match-modal-header {
+                padding: 20px;
+            }
+
+            .match-modal-title {
+                font-size: 22px;
+            }
+
+            .match-content {
+                padding: 18px;
             }
 
             .match-card-main {
                 grid-template-columns: 1fr;
+                gap: 18px;
             }
 
             .match-image-container {
                 width: 100%;
+                height: 220px;
+            }
 
+            .match-reasons ul {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .report-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-image-wrapper {
                 height: 200px;
             }
 
-            .match-modal-content {
-                max-height: 92vh;
-
-                padding: 18px;
+            .match-image-container {
+                height: 190px;
             }
 
-            .match-modal-header h2 {
-                font-size: 22px;
+            .match-score-top {
+                align-items: flex-start;
+                flex-direction: column;
             }
 
+            .match-score {
+                font-size: 23px;
+            }
         }
-
     </style>
-
 </head>
-
 
 <body>
 
-
-    <!-- =====================================================
+    <!-- =========================================================
          NAVBAR
-    ===================================================== -->
+    ========================================================= -->
 
     <nav class="navbar">
 
@@ -863,51 +810,31 @@
             Lost & Found AI
         </div>
 
-
         <div class="nav-links">
 
-            <a href="index.html">
-                Home
-            </a>
+            <a href="index.html">Home</a>
 
-            <a href="items.html">
-                Items
-            </a>
+            <a href="items.html">Items</a>
 
-            <a href="report-lost.html">
-                Report Lost
-            </a>
+            <a href="report-lost.html">Report Lost</a>
 
-            <a href="report-found.html">
-                Report Found
-            </a>
+            <a href="report-found.html">Report Found</a>
 
-            <a href="notifications.html">
+            <a href="notifications.html" class="notification-link">
                 🔔 Notifications
-                <span id="navBadge">0</span>
+                <span id="navBadge" style="display:none;"></span>
             </a>
 
         </div>
 
+        <div class="nav-buttons" id="navButtons">
 
-        <div class="nav-buttons">
-
-            <span
-                class="user-welcome"
-                id="userWelcome">
-            </span>
-
-            <a
-                href="my-reports.html"
-                class="login-btn">
-                My Reports
+            <a href="login.html" class="login-btn">
+                Login
             </a>
 
-            <a
-                href="#"
-                class="signup-btn"
-                id="logoutBtn">
-                Logout
+            <a href="signup.html" class="signup-btn">
+                Sign Up
             </a>
 
         </div>
@@ -915,55 +842,42 @@
     </nav>
 
 
-    <!-- =====================================================
+    <!-- =========================================================
          MAIN
-    ===================================================== -->
+    ========================================================= -->
 
-    <main class="reports-page">
+    <main class="my-reports-page">
 
-        <div class="reports-header">
+        <header class="reports-header">
 
-            <h1>
-                My Reports
-            </h1>
+            <h1>My Reports</h1>
 
             <p>
                 Manage and track the items you have reported.
             </p>
 
-            <span
-                class="reports-count"
-                id="reportsCount">
-                Loading reports...
+            <span class="reports-count" id="reportsCount">
+                0 Reports
             </span>
 
-        </div>
+        </header>
 
 
-        <div
-            id="reports-container"
-            class="reports-grid">
+        <section class="reports-container">
 
-            <div class="loading-state">
-
-                <h2>
-                    Loading...
-                </h2>
-
-                <p>
-                    Fetching your reports.
-                </p>
-
+            <div
+                class="reports-grid"
+                id="reportsContainer">
             </div>
 
-        </div>
+        </section>
 
     </main>
 
 
-    <!-- =====================================================
+    <!-- =========================================================
          AI MATCH MODAL
-    ===================================================== -->
+    ========================================================= -->
 
     <div
         class="match-modal"
@@ -973,21 +887,26 @@
 
             <div class="match-modal-header">
 
-                <h2>
+                <h2 class="match-modal-title">
                     🤖 AI Match Results
                 </h2>
 
                 <button
-                    class="close-modal"
-                    id="closeMatchModal">
+                    type="button"
+                    class="close-match-modal"
+                    id="closeMatchModal"
+                    aria-label="Close">
                     ×
                 </button>
 
             </div>
 
+            <div
+                class="match-content"
+                id="matchContent">
 
-            <div id="matchContent">
-                <!-- AI match results will appear here -->
+                <!-- Results inserted here -->
+
             </div>
 
         </div>
@@ -995,186 +914,160 @@
     </div>
 
 
-    <!-- =====================================================
-         CONFIG
-    ===================================================== -->
+    <!-- =========================================================
+         SCRIPTS
+    ========================================================= -->
 
     <script src="config.js"></script>
+    <script src="script.js"></script>
 
 
     <script>
 
-        /* =====================================================
-           ESCAPE HTML
-        ===================================================== */
+        /* =========================================================
+           BASIC HELPERS
+        ========================================================= */
 
         function escapeHtml(value) {
 
-            if (
-                value === null ||
-                value === undefined
-            ) {
+            if (value === null || value === undefined) {
                 return "";
             }
 
-            const div =
-                document.createElement("div");
-
-            div.textContent =
-                String(value);
-
-            return div.innerHTML;
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
 
-
-        /* =====================================================
-           IMAGE URL
-        ===================================================== */
 
         function getImageUrl(item) {
 
-            if (
-                item &&
-                item.image_url
-            ) {
-
-                let url =
-                    item.image_url;
-
-                if (
-                    url.startsWith("/")
-                ) {
-
-                    return `${API_URL}${url}`;
-
-                }
-
-                return url;
-            }
-
-
-            if (
-                !item ||
-                !item.image_name
-            ) {
-
+            if (!item || !item.image_url) {
                 return "";
             }
 
+            const imageUrl = String(item.image_url);
 
-            return `${API_URL}/uploads/${encodeURIComponent(
-                item.image_name
-            )}`;
+            if (
+                imageUrl.startsWith("http://") ||
+                imageUrl.startsWith("https://")
+            ) {
+                return imageUrl;
+            }
+
+            return `${API_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
         }
 
-
-        /* =====================================================
-           IMAGE ERROR
-        ===================================================== */
 
         function handleImageError(img) {
 
-            img.onerror = null;
-
-            const container =
-                img.parentElement;
-
-            if (!container) {
+            if (!img) {
                 return;
             }
 
-            container.innerHTML = `
-                <div class="image-placeholder">
-                    📦
-                    <span>
-                        Image unavailable
-                    </span>
-                </div>
-            `;
+            img.style.display = "none";
+
+            const parent = img.parentElement;
+
+            if (parent && !parent.querySelector(".report-image-placeholder")) {
+
+                const placeholder = document.createElement("div");
+
+                placeholder.className = "report-image-placeholder";
+
+                placeholder.innerHTML = "📦";
+
+                parent.appendChild(placeholder);
+            }
         }
 
 
-        /* =====================================================
-           GET LOGGED-IN USER
-        ===================================================== */
+        /* =========================================================
+           USER
+        ========================================================= */
 
         function getLoggedInUser() {
 
-            const storedUser =
-                localStorage.getItem("user");
-
+            const storedUser = localStorage.getItem("user");
 
             if (!storedUser) {
 
-                window.location.href =
-                    "login.html";
+                window.location.href = "login.html";
 
                 return null;
             }
 
-
             try {
 
-                const user =
-                    JSON.parse(storedUser);
+                const user = JSON.parse(storedUser);
 
+                if (!user || !user.id) {
 
-                if (
-                    !user ||
-                    !user.id
-                ) {
+                    localStorage.removeItem("user");
 
-                    throw new Error(
-                        "Invalid user information."
-                    );
+                    window.location.href = "login.html";
+
+                    return null;
                 }
-
 
                 return user;
 
-            }
-            catch (error) {
+            } catch (error) {
 
                 console.error(
                     "Invalid user data:",
                     error
                 );
 
-                localStorage.removeItem(
-                    "user"
-                );
+                localStorage.removeItem("user");
 
-                window.location.href =
-                    "login.html";
+                window.location.href = "login.html";
 
                 return null;
             }
         }
 
 
-        /* =====================================================
-           SET USER NAVBAR
-        ===================================================== */
+        /* =========================================================
+           NAVBAR
+        ========================================================= */
 
         function setupNavbar(user) {
 
-            const userWelcome =
-                document.getElementById(
-                    "userWelcome"
-                );
+            const navButtons =
+                document.getElementById("navButtons");
 
-            const logoutBtn =
-                document.getElementById(
-                    "logoutBtn"
-                );
-
-
-            if (userWelcome) {
-
-                userWelcome.textContent =
-                    `Hi, ${user.name || "User"} 👋`;
+            if (!navButtons || !user) {
+                return;
             }
 
+            navButtons.innerHTML = `
+
+                <span class="user-welcome">
+                    Hi, ${escapeHtml(user.name || "User")} 👋
+                </span>
+
+                <a
+                    href="my-reports.html"
+                    class="login-btn">
+                    My Reports
+                </a>
+
+                <a
+                    href="#"
+                    class="signup-btn"
+                    id="logoutBtn">
+                    Logout
+                </a>
+
+            `;
+
+
+            const logoutBtn =
+                document.getElementById("logoutBtn");
 
             if (logoutBtn) {
 
@@ -1184,9 +1077,7 @@
 
                         event.preventDefault();
 
-                        localStorage.removeItem(
-                            "user"
-                        );
+                        localStorage.removeItem("user");
 
                         window.location.href =
                             "index.html";
@@ -1196,55 +1087,52 @@
         }
 
 
-        /* =====================================================
-           OPEN MATCH MODAL
-        ===================================================== */
+        /* =========================================================
+           MODAL
+        ========================================================= */
 
         function openMatchModal() {
 
             const modal =
-                document.getElementById(
-                    "matchModal"
-                );
+                document.getElementById("matchModal");
 
-            modal.classList.add("show");
+            if (!modal) {
+                return;
+            }
 
-            document.body.style.overflow =
-                "hidden";
+            modal.classList.add("active");
+
+            document.body.style.overflow = "hidden";
         }
 
-
-        /* =====================================================
-           CLOSE MATCH MODAL
-        ===================================================== */
 
         function closeMatchModal() {
 
             const modal =
-                document.getElementById(
-                    "matchModal"
-                );
+                document.getElementById("matchModal");
 
-            modal.classList.remove("show");
+            if (!modal) {
+                return;
+            }
 
-            document.body.style.overflow =
-                "";
+            modal.classList.remove("active");
+
+            document.body.style.overflow = "";
         }
 
 
-        /* =====================================================
+        /* =========================================================
            FIND AI MATCH
-        ===================================================== */
+        ========================================================= */
 
-        async function findAIMatch(
-            itemId,
-            button
-        ) {
+        async function findAIMatch(itemId, button) {
 
             const matchContent =
-                document.getElementById(
-                    "matchContent"
-                );
+                document.getElementById("matchContent");
+
+            if (!matchContent) {
+                return;
+            }
 
 
             openMatchModal();
@@ -1274,41 +1162,43 @@
 
 
             if (button) {
-
                 button.disabled = true;
-
-                button.dataset.originalText =
-                    button.innerHTML;
-
-                button.innerHTML =
-                    "🤖 Searching...";
+                button.textContent = "🤖 Finding Matches...";
             }
 
 
             try {
 
-                const response =
-                    await fetch(
-                        `${API_URL}/match/${encodeURIComponent(
-                            itemId
-                        )}`
-                    );
+                const response = await fetch(
+                    `${API_URL}/match/${encodeURIComponent(itemId)}`
+                );
 
 
-                let data = null;
+                if (!response.ok) {
 
+                    let errorMessage =
+                        `Unable to find matches. Server returned ${response.status}.`;
 
-                try {
+                    try {
 
-                    data =
-                        await response.json();
+                        const errorData =
+                            await response.json();
 
+                        if (errorData.detail) {
+                            errorMessage =
+                                errorData.detail;
+                        }
+
+                    } catch (error) {
+                        // Ignore JSON parsing error
+                    }
+
+                    throw new Error(errorMessage);
                 }
-                catch {
 
-                    data = null;
 
-                }
+                const data =
+                    await response.json();
 
 
                 console.log(
@@ -1317,22 +1207,10 @@
                 );
 
 
-                if (!response.ok) {
-
-                    throw new Error(
-                        data?.detail ||
-                        data?.message ||
-                        "Unable to find AI matches."
-                    );
-                }
+                displayMatchResults(data);
 
 
-                displayMatchResults(
-                    data
-                );
-
-            }
-            catch (error) {
+            } catch (error) {
 
                 console.error(
                     "AI Match Error:",
@@ -1349,46 +1227,49 @@
                         </div>
 
                         <h3>
-                            Could Not Find Matches
+                            Unable to Find Matches
                         </h3>
 
                         <p>
                             ${escapeHtml(
                                 error.message ||
-                                "Something went wrong."
+                                "Something went wrong while searching for matches."
                             )}
+                        </p>
+
+                        <p>
+                            Please try again later.
                         </p>
 
                     </div>
 
                 `;
 
-            }
-            finally {
+            } finally {
 
                 if (button) {
 
-                    button.disabled =
-                        false;
+                    button.disabled = false;
 
-                    button.innerHTML =
-                        button.dataset.originalText ||
-                        "🔍 Find AI Match";
+                    button.textContent =
+                        "🤖 Find AI Match";
                 }
             }
         }
 
 
-        /* =====================================================
-           DISPLAY MATCH RESULTS
-        ===================================================== */
+        /* =========================================================
+           DISPLAY AI MATCH RESULTS
+        ========================================================= */
 
         function displayMatchResults(data) {
 
             const matchContent =
-                document.getElementById(
-                    "matchContent"
-                );
+                document.getElementById("matchContent");
+
+            if (!matchContent) {
+                return;
+            }
 
 
             const matches =
@@ -1435,19 +1316,17 @@
 
                 <div class="match-results-info">
 
-                    🤖 Found ${matches.length}
+                    🤖 Found
+                    ${matches.length}
                     possible
                     ${escapeHtml(
                         data?.searching_for ||
-                        "item"
+                        "lost item"
                     )}
                     match${matches.length === 1 ? "" : "es"}.
-
-                    Results are sorted by
-                    AI match score.
+                    Results are sorted by AI match score.
 
                 </div>
-
 
                 <div
                     class="match-results"
@@ -1463,62 +1342,77 @@
                 );
 
 
-            matches.forEach(function(match) {
+            if (!resultsContainer) {
+                return;
+            }
+
+
+            matches.forEach(function (match) {
 
                 const card =
                     createMatchCard(match);
 
-                resultsContainer.appendChild(
-                    card
-                );
+                resultsContainer.appendChild(card);
 
             });
         }
 
 
-        /* =====================================================
+        /* =========================================================
            CREATE MATCH CARD
-        ===================================================== */
+        ========================================================= */
 
         function createMatchCard(match) {
 
             const score =
-                Number(
-                    match.match_score || 0
+                Number(match?.match_score || 0);
+
+
+            const safeScore =
+                Math.max(
+                    0,
+                    Math.min(
+                        score,
+                        100
+                    )
                 );
 
 
-            /*
-             * IMPORTANT:
-             * Backend returns matched item
-             * ID as "item_id".
-             */
-
             const matchedItemId =
-                match.item_id;
+                match?.item_id;
 
 
-            const imageUrl =
-                match.image_url
-                    ? (
-                        match.image_url.startsWith("http")
-                            ? match.image_url
-                            : `${API_URL}${match.image_url}`
-                    )
-                    : "";
+            let imageUrl = "";
+
+            if (match?.image_url) {
+
+                const rawImageUrl =
+                    String(match.image_url);
+
+                if (
+                    rawImageUrl.startsWith("http://") ||
+                    rawImageUrl.startsWith("https://")
+                ) {
+
+                    imageUrl =
+                        rawImageUrl;
+
+                } else {
+
+                    imageUrl =
+                        `${API_URL}${rawImageUrl.startsWith("/") ? "" : "/"}${rawImageUrl}`;
+                }
+            }
 
 
             const reasons =
-                Array.isArray(match.reasons)
+                Array.isArray(match?.reasons)
                     ? match.reasons
                     : [];
 
 
             const card =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             card.className =
                 "match-card";
@@ -1528,13 +1422,11 @@
                 reasons.length
 
                     ? reasons
-                        .map(function(reason) {
+                        .map(function (reason) {
 
                             return `
                                 <li>
-                                    ${escapeHtml(
-                                        reason
-                                    )}
+                                    ${escapeHtml(reason)}
                                 </li>
                             `;
 
@@ -1550,6 +1442,8 @@
 
             card.innerHTML = `
 
+                <!-- ITEM INFORMATION -->
+
                 <div class="match-card-main">
 
                     <div class="match-image-container">
@@ -1560,12 +1454,10 @@
                                 ? `
 
                                     <img
-                                        src="${escapeHtml(
-                                            imageUrl
-                                        )}"
+                                        src="${escapeHtml(imageUrl)}"
                                         class="match-image"
                                         alt="Matched item"
-                                        onerror="this.style.display='none'"
+                                        onerror="this.style.display='none';"
                                     >
 
                                 `
@@ -1586,7 +1478,7 @@
 
                         <h3>
                             ${escapeHtml(
-                                match.item_name ||
+                                match?.item_name ||
                                 "Matched Item"
                             )}
                         </h3>
@@ -1595,7 +1487,7 @@
                         <p class="match-description">
 
                             ${escapeHtml(
-                                match.description ||
+                                match?.description ||
                                 "No description available."
                             )}
 
@@ -1607,42 +1499,38 @@
                             <span>
                                 📂
                                 ${escapeHtml(
-                                    match.category ||
+                                    match?.category ||
                                     "N/A"
                                 )}
                             </span>
-
 
                             <span>
                                 🎨
                                 ${escapeHtml(
-                                    match.color ||
+                                    match?.color ||
                                     "N/A"
                                 )}
                             </span>
-
 
                             <span>
                                 🏷️
                                 ${escapeHtml(
-                                    match.brand ||
+                                    match?.brand ||
                                     "N/A"
                                 )}
                             </span>
-
 
                             <span>
                                 📍
                                 ${escapeHtml(
-                                    match.location ||
+                                    match?.location ||
                                     "N/A"
                                 )}
                             </span>
 
-
                             ${
-                                match.distance_km !== null &&
-                                match.distance_km !== undefined
+                                match?.distance_km !== null &&
+                                match?.distance_km !== undefined
 
                                     ? `
 
@@ -1666,9 +1554,9 @@
                 </div>
 
 
-                <!-- MATCH SCORE -->
+                <!-- SCORE -->
 
-                <div class="match-score-box">
+                <div class="match-score-section">
 
                     <div class="match-score-top">
 
@@ -1676,9 +1564,8 @@
                             AI Match Score
                         </span>
 
-
                         <span class="match-score">
-                            ${score}%
+                            ${safeScore.toFixed(2)}%
                         </span>
 
                     </div>
@@ -1688,30 +1575,26 @@
 
                         <div
                             class="score-fill"
-                            style="width: ${Math.min(
-                                score,
-                                100
-                            )}%">
+                            style="width: ${safeScore}%">
                         </div>
 
                     </div>
 
 
                     <span class="match-level">
-                        ${getMatchLevel(score)}
+                        ${getMatchLevel(safeScore)}
                     </span>
 
                 </div>
 
 
-                <!-- MATCH REASONS -->
+                <!-- REASONS -->
 
                 <div class="match-reasons">
 
-                    <strong>
+                    <span class="match-reasons-title">
                         Why this may be a match:
-                    </strong>
-
+                    </span>
 
                     <ul>
                         ${reasonsHTML}
@@ -1720,7 +1603,7 @@
                 </div>
 
 
-                <!-- CONTACT REPORTER -->
+                <!-- CONTACT -->
 
                 <div class="match-actions">
 
@@ -1737,9 +1620,9 @@
             `;
 
 
-            /* =================================================
-               CONTACT REPORTER BUTTON
-            ================================================= */
+            /* =====================================================
+               CONTACT REPORTER
+            ===================================================== */
 
             const contactButton =
                 card.querySelector(
@@ -1758,7 +1641,6 @@
                             match
                         );
 
-
                         console.log(
                             "Matched item ID:",
                             matchedItemId
@@ -1776,9 +1658,15 @@
 
 
                         /*
-                         * Open the communication page
-                         * using the MATCHED ITEM ID.
-                         */
+                            IMPORTANT:
+
+                            The matched item's ID is passed to
+                            the communication page.
+
+                            Example:
+
+                            messages.html?item_id=2
+                        */
 
                         window.location.href =
                             `messages.html?item_id=${encodeURIComponent(
@@ -1794,9 +1682,9 @@
         }
 
 
-        /* =====================================================
-           MATCH LEVEL FALLBACK
-        ===================================================== */
+        /* =========================================================
+           MATCH LEVEL
+        ========================================================= */
 
         function getMatchLevel(score) {
 
@@ -1816,72 +1704,89 @@
         }
 
 
-        /* =====================================================
+        /* =========================================================
            LOAD MY REPORTS
-        ===================================================== */
+        ========================================================= */
 
         async function loadMyReports(user) {
 
-            const container =
+            const reportsContainer =
                 document.getElementById(
-                    "reports-container"
+                    "reportsContainer"
                 );
 
 
-            const count =
+            const reportsCount =
                 document.getElementById(
                     "reportsCount"
                 );
 
 
+            if (!reportsContainer) {
+                return;
+            }
+
+
+            reportsContainer.innerHTML = `
+
+                <div class="empty-reports">
+
+                    <div class="empty-reports-icon">
+                        ⏳
+                    </div>
+
+                    <h3>
+                        Loading your reports...
+                    </h3>
+
+                    <p>
+                        Please wait.
+                    </p>
+
+                </div>
+
+            `;
+
+
             try {
 
-                const url =
-                    `${API_URL}/my-items/${encodeURIComponent(
-                        user.id
-                    )}`;
-
-
-                console.log(
-                    "Fetching:",
-                    url
-                );
-
-
                 const response =
-                    await fetch(url);
-
-
-                let items = null;
-
-
-                try {
-
-                    items =
-                        await response.json();
-
-                }
-                catch {
-
-                    items = null;
-
-                }
-
-
-                console.log(
-                    "Reports received:",
-                    items
-                );
+                    await fetch(
+                        `${API_URL}/my-items/${encodeURIComponent(user.id)}`
+                    );
 
 
                 if (!response.ok) {
 
-                    throw new Error(
-                        items?.detail ||
-                        items?.message ||
-                        "Could not load reports."
-                    );
+                    let errorMessage =
+                        `Unable to load reports. Server returned ${response.status}.`;
+
+                    try {
+
+                        const errorData =
+                            await response.json();
+
+                        if (errorData.detail) {
+                            errorMessage =
+                                errorData.detail;
+                        }
+
+                    } catch (error) {
+                        // Ignore JSON parsing error
+                    }
+
+                    throw new Error(errorMessage);
                 }
+
+
+                const items =
+                    await response.json();
+
+
+                console.log(
+                    "My Reports:",
+                    items
+                );
 
 
                 if (!Array.isArray(items)) {
@@ -1892,44 +1797,28 @@
                 }
 
 
-                count.textContent =
-                    `${items.length} Report${
-                        items.length === 1
-                            ? ""
-                            : "s"
-                    }`;
+                reportsCount.textContent =
+                    `${items.length} Report${items.length === 1 ? "" : "s"}`;
 
-
-                /* =================================================
-                   EMPTY
-                ================================================= */
 
                 if (items.length === 0) {
 
-                    container.innerHTML = `
+                    reportsContainer.innerHTML = `
 
-                        <div class="empty-state">
+                        <div class="empty-reports">
 
-                            <div class="empty-icon">
+                            <div class="empty-reports-icon">
                                 📦
                             </div>
 
-                            <h2>
+                            <h3>
                                 No Reports Yet
-                            </h2>
+                            </h3>
 
                             <p>
-                                You haven't reported
-                                any lost or found items yet.
+                                You have not reported any
+                                lost or found items yet.
                             </p>
-
-                            <a
-                                href="report-lost.html"
-                                class="report-button">
-
-                                Report an Item
-
-                            </a>
 
                         </div>
 
@@ -1939,340 +1828,272 @@
                 }
 
 
-                container.innerHTML = "";
+                reportsContainer.innerHTML = "";
 
 
-                /* =================================================
-                   CREATE REPORT CARDS
-                ================================================= */
+                items.forEach(function (item) {
 
-                items.forEach(
-                    function (item) {
+                    const article =
+                        document.createElement(
+                            "article"
+                        );
 
-                        const card =
-                            document.createElement(
-                                "article"
-                            );
+                    article.className =
+                        "report-card";
 
 
-                        card.className =
-                            "report-card";
+                    const isLost =
+                        String(
+                            item.item_type || ""
+                        ).toLowerCase() === "lost";
 
 
-                        const isLost =
-                            String(
-                                item.item_type || ""
-                            ).toLowerCase() ===
-                            "lost";
+                    const imageUrl =
+                        getImageUrl(item);
 
 
-                        const status =
-                            isLost
-                                ? "Lost"
-                                : "Found";
+                    article.innerHTML = `
+
+                        <div class="report-image-wrapper">
+
+                            ${
+                                imageUrl
+
+                                    ? `
+
+                                        <img
+                                            src="${escapeHtml(imageUrl)}"
+                                            class="report-image"
+                                            alt="${escapeHtml(
+                                                item.item_name ||
+                                                "Reported item"
+                                            )}"
+                                        >
+
+                                    `
+
+                                    : `
+
+                                        <div class="report-image-placeholder">
+                                            📦
+                                        </div>
+
+                                    `
+                            }
 
 
-                        const statusClass =
-                            isLost
-                                ? "status-lost"
-                                : "status-found";
+                            <span
+                                class="
+                                    status-badge
+                                    ${
+                                        isLost
+                                            ? "status-lost"
+                                            : "status-found"
+                                    }
+                                ">
+
+                                ${
+                                    isLost
+                                        ? "LOST"
+                                        : "FOUND"
+                                }
+
+                            </span>
+
+                        </div>
 
 
-                        /* =================================================
-                           IMAGE
-                        ================================================= */
+                        <div class="report-content">
 
-                        const imageUrl =
-                            getImageUrl(item);
+                            <div class="report-title-row">
 
+                                <h2 class="report-title">
 
-                        let imageHTML;
+                                    ${escapeHtml(
+                                        item.item_name ||
+                                        "Unnamed Item"
+                                    )}
 
+                                </h2>
 
-                        if (imageUrl) {
-
-                            imageHTML = `
-
-                                <div
-                                    class="report-image-container">
-
-                                    <img
-                                        class="report-image"
-
-                                        src="${escapeHtml(
-                                            imageUrl
-                                        )}"
-
-                                        alt="${escapeHtml(
-                                            item.item_name
-                                        )}"
-
-                                        onerror="handleImageError(this)"
-                                    >
-
-                                </div>
-
-                            `;
-
-                        }
-
-                        else {
-
-                            imageHTML = `
-
-                                <div
-                                    class="report-image-container">
-
-                                    <div
-                                        class="image-placeholder">
-
-                                        📦
-
-                                        <span>
-                                            No image available
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            `;
-
-                        }
+                            </div>
 
 
-                        /* =================================================
-                           CARD HTML
-                        ================================================= */
+                            <p class="report-description">
 
-                        card.innerHTML = `
+                                ${escapeHtml(
+                                    item.description ||
+                                    "No description available."
+                                )}
 
-                            ${imageHTML}
-
-
-                            <div class="report-content">
+                            </p>
 
 
-                                <div class="report-top">
+                            <div class="report-info-grid">
 
-                                    <h2 class="report-title">
+                                <div class="info-box">
+
+                                    <span class="info-label">
+                                        📍 Location
+                                    </span>
+
+                                    <span class="info-value">
 
                                         ${escapeHtml(
-                                            item.item_name ||
-                                            "Unnamed Item"
+                                            item.location ||
+                                            "N/A"
                                         )}
-
-                                    </h2>
-
-
-                                    <span
-                                        class="status-badge ${statusClass}">
-
-                                        ${status}
 
                                     </span>
 
                                 </div>
 
 
-                                <p
-                                    class="report-description">
+                                <div class="info-box">
 
-                                    ${escapeHtml(
-                                        item.description ||
-                                        "No description"
-                                    )}
+                                    <span class="info-label">
+                                        📅 Date
+                                    </span>
 
-                                </p>
+                                    <span class="info-value">
 
+                                        ${escapeHtml(
+                                            item.item_date ||
+                                            "N/A"
+                                        )}
 
-                                <div class="report-info">
-
-
-                                    <div class="info-box">
-
-                                        <span
-                                            class="info-label">
-
-                                            📍 Location
-
-                                        </span>
-
-
-                                        <span
-                                            class="info-value">
-
-                                            ${escapeHtml(
-                                                item.location ||
-                                                "Not specified"
-                                            )}
-
-                                        </span>
-
-                                    </div>
-
-
-                                    <div class="info-box">
-
-                                        <span
-                                            class="info-label">
-
-                                            📅 Date
-
-                                        </span>
-
-
-                                        <span
-                                            class="info-value">
-
-                                            ${escapeHtml(
-                                                item.item_date ||
-                                                "Not specified"
-                                            )}
-
-                                        </span>
-
-                                    </div>
-
-
-                                    <div class="info-box">
-
-                                        <span
-                                            class="info-label">
-
-                                            🎨 Color
-
-                                        </span>
-
-
-                                        <span
-                                            class="info-value">
-
-                                            ${escapeHtml(
-                                                item.color ||
-                                                "Not specified"
-                                            )}
-
-                                        </span>
-
-                                    </div>
-
-
-                                    <div class="info-box">
-
-                                        <span
-                                            class="info-label">
-
-                                            🏷️ Brand
-
-                                        </span>
-
-
-                                        <span
-                                            class="info-value">
-
-                                            ${escapeHtml(
-                                                item.brand ||
-                                                "Not specified"
-                                            )}
-
-                                        </span>
-
-                                    </div>
-
+                                    </span>
 
                                 </div>
 
 
-                                <!-- AI MATCH BUTTON -->
+                                <div class="info-box">
 
-                                <button
-                                    class="match-button"
-                                    type="button">
+                                    <span class="info-label">
+                                        🎨 Color
+                                    </span>
 
-                                    🤖 Find AI Match
+                                    <span class="info-value">
 
-                                </button>
+                                        ${escapeHtml(
+                                            item.color ||
+                                            "N/A"
+                                        )}
 
-
-                                <div class="click-hint">
-
-                                    Click the button to find
-                                    possible matching reports.
+                                    </span>
 
                                 </div>
 
+
+                                <div class="info-box">
+
+                                    <span class="info-label">
+                                        🏷️ Brand
+                                    </span>
+
+                                    <span class="info-value">
+
+                                        ${escapeHtml(
+                                            item.brand ||
+                                            "N/A"
+                                        )}
+
+                                    </span>
+
+                                </div>
 
                             </div>
 
-                        `;
+
+                            <button
+                                type="button"
+                                class="find-match-button">
+
+                                🤖 Find AI Match
+
+                            </button>
 
 
-                        /* =================================================
-                           AI MATCH BUTTON EVENT
-                        ================================================= */
+                            <p class="report-click-hint">
 
-                        const matchButton =
-                            card.querySelector(
-                                ".match-button"
-                            );
+                                Click the button to find possible matching reports.
 
+                            </p>
 
-                        if (matchButton) {
+                        </div>
 
-                            matchButton.addEventListener(
-                                "click",
-                                function (event) {
-
-                                    event.preventDefault();
-
-                                    event.stopPropagation();
+                    `;
 
 
-                                    findAIMatch(
-                                        item.id,
-                                        matchButton
-                                    );
-
-                                }
-                            );
-                        }
-
-
-                        container.appendChild(
-                            card
+                    const image =
+                        article.querySelector(
+                            ".report-image"
                         );
 
+
+                    if (image) {
+
+                        image.addEventListener(
+                            "error",
+                            function () {
+
+                                handleImageError(
+                                    image
+                                );
+
+                            }
+                        );
                     }
-                );
 
-            }
 
-            catch (error) {
+                    const matchButton =
+                        article.querySelector(
+                            ".find-match-button"
+                        );
+
+
+                    if (matchButton) {
+
+                        matchButton.addEventListener(
+                            "click",
+                            function () {
+
+                                findAIMatch(
+                                    item.id,
+                                    matchButton
+                                );
+
+                            }
+                        );
+                    }
+
+
+                    reportsContainer.appendChild(
+                        article
+                    );
+
+                });
+
+
+            } catch (error) {
 
                 console.error(
-                    "My Reports Error:",
+                    "Load My Reports Error:",
                     error
                 );
 
 
-                count.textContent =
-                    "Error";
+                reportsContainer.innerHTML = `
 
+                    <div class="empty-reports">
 
-                container.innerHTML = `
-
-                    <div class="empty-state">
-
-                        <div class="empty-icon">
+                        <div class="empty-reports-icon">
                             ⚠️
                         </div>
 
-
-                        <h2>
-                            Could Not Load Reports
-                        </h2>
-
+                        <h3>
+                            Unable to Load Reports
+                        </h3>
 
                         <p>
                             ${escapeHtml(
@@ -2281,26 +2102,20 @@
                             )}
                         </p>
 
-
-                        <button
-                            class="report-button"
-                            onclick="location.reload()">
-
-                            Try Again
-
-                        </button>
-
                     </div>
 
                 `;
 
+
+                reportsCount.textContent =
+                    "0 Reports";
             }
         }
 
 
-        /* =====================================================
-           MODAL EVENTS
-        ===================================================== */
+        /* =========================================================
+           DOM READY
+        ========================================================= */
 
         document.addEventListener(
             "DOMContentLoaded",
@@ -2315,17 +2130,12 @@
                 }
 
 
-                setupNavbar(
-                    user
-                );
+                setupNavbar(user);
+
+                loadMyReports(user);
 
 
-                loadMyReports(
-                    user
-                );
-
-
-                /* CLOSE BUTTON */
+                /* Close button */
 
                 const closeButton =
                     document.getElementById(
@@ -2339,11 +2149,10 @@
                         "click",
                         closeMatchModal
                     );
-
                 }
 
 
-                /* CLICK OUTSIDE MODAL */
+                /* Click outside modal */
 
                 const modal =
                     document.getElementById(
@@ -2358,8 +2167,7 @@
                         function (event) {
 
                             if (
-                                event.target ===
-                                modal
+                                event.target === modal
                             ) {
 
                                 closeMatchModal();
@@ -2368,19 +2176,17 @@
 
                         }
                     );
-
                 }
 
 
-                /* ESCAPE KEY */
+                /* ESC key */
 
                 document.addEventListener(
                     "keydown",
                     function (event) {
 
                         if (
-                            event.key ===
-                            "Escape"
+                            event.key === "Escape"
                         ) {
 
                             closeMatchModal();
