@@ -758,6 +758,43 @@
             white-space: nowrap;
         }
 
+
+        .contact-reporter-btn {
+            width: 100%;
+            padding: 13px 18px;
+            margin-top: 15px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: #2563eb;
+            color: white;
+
+            font-size: 15px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+        }
+
+        .contact-reporter-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .match-actions {
+            margin-top: 10px;
+        }
+
+        .match-reasons {
+            margin: 8px 0 0;
+            padding-left: 20px;
+        }
+
+        .match-reasons li {
+            margin-bottom: 5px;
+        }
         /* =====================================================
            MOBILE
         ===================================================== */
@@ -1362,21 +1399,16 @@
         function displayMatchResults(data) {
 
             const matchContent =
-                document.getElementById(
-                    "matchContent"
-                );
-
+                document.getElementById("matchContent");
 
             const matches =
                 Array.isArray(data?.matches)
                     ? data.matches
                     : [];
 
-
             if (matches.length === 0) {
 
                 matchContent.innerHTML = `
-
                     <div class="no-match">
 
                         <div class="no-match-icon">
@@ -1400,19 +1432,18 @@
                         </p>
 
                     </div>
-
                 `;
 
                 return;
             }
-
 
             matchContent.innerHTML = `
 
                 <div class="match-results-info">
 
                     🤖 Found ${matches.length}
-                    possible ${escapeHtml(
+                    possible
+                    ${escapeHtml(
                         data?.searching_for || "item"
                     )}
                     match${matches.length === 1 ? "" : "es"}.
@@ -1422,34 +1453,25 @@
 
                 </div>
 
-
                 <div
                     class="match-results"
                     id="matchResultsContainer">
                 </div>
-
             `;
-
 
             const resultsContainer =
                 document.getElementById(
                     "matchResultsContainer"
                 );
 
+            matches.forEach(function(match) {
 
-            matches.forEach(
-                function (match) {
+                const card =
+                    createMatchCard(match);
 
-                    const card =
-                        createMatchCard(
-                            match
-                        );
+                resultsContainer.appendChild(card);
 
-                    resultsContainer.appendChild(
-                        card
-                    );
-                }
-            );
+            });
         }
 
 
@@ -1459,122 +1481,69 @@
 
         function createMatchCard(match) {
 
+            const score =
+                Number(match.match_score || 0);
+
+            const matchedItemId =
+                match.item_id;
+
+            const imageUrl =
+                match.image_url
+                    ? (
+                        match.image_url.startsWith("http")
+                            ? match.image_url
+                            : `${API_URL}${match.image_url}`
+                    )
+                    : "";
+
+            const reasons =
+                Array.isArray(match.reasons)
+                    ? match.reasons
+                    : [];
+
             const card =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             card.className =
                 "match-card";
 
-
-            const imageUrl =
-                getImageUrl(match);
-
-
-            let imageHTML = "";
-
-
-            if (imageUrl) {
-
-                imageHTML = `
-
-                    <img
-                        class="match-image"
-                        src="${escapeHtml(
-                            imageUrl
-                        )}"
-                        alt="${escapeHtml(
-                            match.item_name ||
-                            "Matched item"
-                        )}"
-                        onerror="this.style.display='none';"
-                    >
-
-                `;
-
-            }
-            else {
-
-                imageHTML = `
-
-                    <div class="match-image-placeholder">
-                        📦
-                    </div>
-
-                `;
-            }
-
-
-            const score =
-                Number(
-                    match.match_score || 0
-                );
-
-
-            const safeScore =
-                Math.max(
-                    0,
-                    Math.min(
-                        100,
-                        score
-                    )
-                );
-
-
-            const level =
-                match.match_level ||
-                getMatchLevel(
-                    safeScore
-                );
-
-
-            const reasons =
-                Array.isArray(
-                    match.reasons
-                )
-                    ? match.reasons
-                    : [];
-
-
             const reasonsHTML =
-                reasons.length > 0
-                    ? `
-
-                        <div class="match-reasons">
-
-                            <strong>
-                                Why this may be a match:
-                            </strong>
-
-                            <ul>
-
-                                ${reasons
-                                    .map(
-                                        reason =>
-                                            `<li>${escapeHtml(
-                                                reason
-                                            )}</li>`
-                                    )
-                                    .join("")
-                                }
-
-                            </ul>
-
-                        </div>
-
-                    `
-                    : "";
-
+                reasons.length
+                    ? reasons.map(function(reason) {
+                        return `
+                            <li>
+                                ${escapeHtml(reason)}
+                            </li>
+                        `;
+                    }).join("")
+                    : `
+                        <li>
+                            Possible match based on item details.
+                        </li>
+                    `;
 
             card.innerHTML = `
 
                 <div class="match-card-main">
 
-
                     <div class="match-image-container">
 
-                        ${imageHTML}
+                        ${
+                            imageUrl
+                                ? `
+                                    <img
+                                        src="${escapeHtml(imageUrl)}"
+                                        class="match-image"
+                                        alt="Matched item"
+                                        onerror="this.style.display='none'"
+                                    >
+                                `
+                                : `
+                                    <div class="match-image-placeholder">
+                                        📦
+                                    </div>
+                                `
+                        }
 
                     </div>
 
@@ -1584,10 +1553,9 @@
                         <h3>
                             ${escapeHtml(
                                 match.item_name ||
-                                "Unnamed Item"
+                                "Matched Item"
                             )}
                         </h3>
-
 
                         <p class="match-description">
 
@@ -1602,39 +1570,44 @@
                         <div class="match-meta">
 
                             <span>
-                                📂 ${escapeHtml(
-                                    match.category ||
-                                    "Unknown"
+                                📂
+                                ${escapeHtml(
+                                    match.category || "N/A"
                                 )}
                             </span>
 
                             <span>
-                                🎨 ${escapeHtml(
-                                    match.color ||
-                                    "Not specified"
+                                🎨
+                                ${escapeHtml(
+                                    match.color || "N/A"
                                 )}
                             </span>
 
                             <span>
-                                🏷️ ${escapeHtml(
-                                    match.brand ||
-                                    "Not specified"
+                                🏷️
+                                ${escapeHtml(
+                                    match.brand || "N/A"
                                 )}
                             </span>
 
                             <span>
-                                📍 ${escapeHtml(
-                                    match.location ||
-                                    "Not specified"
+                                📍
+                                ${escapeHtml(
+                                    match.location || "N/A"
                                 )}
                             </span>
 
-                            <span>
-                                📅 ${escapeHtml(
-                                    match.item_date ||
-                                    "Not specified"
-                                )}
-                            </span>
+                            ${
+                                match.distance_km !== null &&
+                                match.distance_km !== undefined
+                                    ? `
+                                        <span>
+                                            📏
+                                            ${match.distance_km} km
+                                        </span>
+                                    `
+                                    : ""
+                            }
 
                         </div>
 
@@ -1642,6 +1615,8 @@
 
                 </div>
 
+
+                <!-- MATCH SCORE -->
 
                 <div class="match-score-box">
 
@@ -1652,40 +1627,51 @@
                         </span>
 
                         <span class="match-score">
-                            ${safeScore.toFixed(1)}%
+                            ${score}%
                         </span>
 
                     </div>
-
 
                     <div class="score-bar">
 
                         <div
                             class="score-fill"
-                            style="width:${safeScore}%">
+                            style="width: ${Math.min(score, 100)}%">
                         </div>
 
                     </div>
 
-
                     <span class="match-level">
-
-                        ${escapeHtml(
-                            level
-                        )}
-
+                        ${getMatchLevel(score)}
                     </span>
 
+                </div>
 
-                    ${reasonsHTML}
 
+                <!-- MATCH REASONS -->
+
+                <div class="match-reasons">
+
+                    <strong>
+                        Why this may be a match:
+                    </strong>
+
+                    <ul>
+                        ${reasonsHTML}
+                    </ul>
+
+                </div>
+
+
+                <!-- CONTACT REPORTER -->
+
+                <div class="match-actions">
 
                     <button
+                        type="button"
                         class="contact-reporter-button"
-                        type="button">
-
+                    >
                         💬 Contact Reporter
-
                     </button>
 
                 </div>
@@ -1693,24 +1679,50 @@
             `;
 
 
+            /* =========================================
+            CONTACT REPORTER BUTTON
+            ========================================= */
+
             const contactButton =
                 card.querySelector(
                     ".contact-reporter-button"
                 );
 
-
             if (contactButton) {
 
                 contactButton.addEventListener(
                     "click",
-                    function () {
+                    function() {
 
-                        contactReporter(
+                        console.log(
+                            "Matched item:",
                             match
                         );
 
+                        console.log(
+                            "Matched item ID:",
+                            matchedItemId
+                        );
+
+
+                        if (!matchedItemId) {
+
+                            alert(
+                                "Unable to contact the reporter because the matched item ID is missing."
+                            );
+
+                            return;
+                        }
+
+
+                        window.location.href =
+                            `messages.html?item_id=${encodeURIComponent(
+                                matchedItemId
+                            )}`;
+
                     }
                 );
+
             }
 
 
@@ -1749,40 +1761,17 @@
 
         function contactReporter(match) {
 
-            if (
-                !match ||
-                !match.id
-            ) {
+            // Backend returns the matched item's ID as "item_id"
+            const matchedItemId = match.item_id;
 
-                alert(
-                    "Unable to contact the reporter because the matched item ID is missing."
-                );
-
+            if (!matchedItemId) {
+                alert("Unable to contact the reporter because the matched item ID is missing.");
                 return;
             }
 
-
-            /*
-             * IMPORTANT:
-             *
-             * messages.html uses:
-             *
-             * messages.html?item_id=ITEM_ID
-             *
-             * We pass the MATCHED ITEM ID.
-             *
-             * The backend can then identify
-             * the reporter of that matched item.
-             */
-
-            const itemId =
-                encodeURIComponent(
-                    match.id
-                );
-
-
+            // Open communication page using the matched FOUND/LOST item ID
             window.location.href =
-                `messages.html?item_id=${itemId}`;
+                `messages.html?item_id=${encodeURIComponent(matchedItemId)}`;
         }
 
 
