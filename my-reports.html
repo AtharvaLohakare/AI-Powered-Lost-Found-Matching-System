@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>My Reports - Lost & Found AI</title>
@@ -11,6 +10,10 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
+        /* =====================================================
+           MY REPORTS PAGE
+        ===================================================== */
+
         .reports-page {
             padding: 120px 8% 60px;
             min-height: 100vh;
@@ -41,6 +44,10 @@
             font-weight: 600;
         }
 
+        /* =====================================================
+           REPORT GRID
+        ===================================================== */
+
         .reports-grid {
             max-width: 1100px;
             margin: auto;
@@ -48,15 +55,20 @@
             display: grid;
 
             grid-template-columns:
-                repeat(auto-fit,
-                    minmax(320px, 1fr));
+                repeat(auto-fit, minmax(320px, 1fr));
 
             gap: 25px;
         }
 
+        /* =====================================================
+           REPORT CARD
+        ===================================================== */
+
         .report-card {
             background: #ffffff;
+
             border-radius: 18px;
+
             overflow: hidden;
 
             box-shadow:
@@ -65,8 +77,6 @@
             border: 1px solid #eeeeee;
 
             transition: 0.25s ease;
-
-            cursor: pointer;
         }
 
         .report-card:hover {
@@ -147,6 +157,8 @@
             font-weight: 700;
 
             text-transform: uppercase;
+
+            white-space: nowrap;
         }
 
         .status-lost {
@@ -203,21 +215,70 @@
             color: #333;
         }
 
-        .click-hint {
+        /* =====================================================
+           AI MATCH BUTTON
+        ===================================================== */
+
+        .match-button {
+            width: 100%;
+
             margin-top: 18px;
+
+            padding: 13px 18px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: linear-gradient(
+                135deg,
+                #3157d5,
+                #4f73e8
+            );
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+        }
+
+        .match-button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 8px 20px rgba(49, 87, 213, 0.25);
+        }
+
+        .match-button:disabled {
+            opacity: 0.65;
+
+            cursor: not-allowed;
+
+            transform: none;
+        }
+
+        .click-hint {
+            margin-top: 14px;
 
             padding-top: 14px;
 
             border-top: 1px solid #eeeeee;
 
-            color: #3157d5;
+            color: #888;
 
-            font-size: 13px;
-
-            font-weight: 600;
+            font-size: 12px;
 
             text-align: center;
         }
+
+        /* =====================================================
+           EMPTY STATE
+        ===================================================== */
 
         .empty-state {
             max-width: 600px;
@@ -238,6 +299,7 @@
 
         .empty-icon {
             font-size: 55px;
+
             margin-bottom: 15px;
         }
 
@@ -247,6 +309,7 @@
 
         .empty-state p {
             color: #777;
+
             margin-bottom: 25px;
         }
 
@@ -260,6 +323,7 @@
             text-decoration: none;
 
             background: #3157d5;
+
             color: white;
 
             font-weight: 600;
@@ -268,6 +332,10 @@
 
             cursor: pointer;
         }
+
+        /* =====================================================
+           LOADING
+        ===================================================== */
 
         .loading-state {
             max-width: 600px;
@@ -288,20 +356,420 @@
         }
 
         /* =====================================================
+           AI MATCH MODAL
+        ===================================================== */
+
+        .match-modal {
+            position: fixed;
+
+            inset: 0;
+
+            background: rgba(0, 0, 0, 0.55);
+
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            z-index: 9999;
+        }
+
+        .match-modal.show {
+            display: flex;
+        }
+
+        .match-modal-content {
+            width: 100%;
+
+            max-width: 900px;
+
+            max-height: 90vh;
+
+            overflow-y: auto;
+
+            background: white;
+
+            border-radius: 20px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.25);
+
+            position: relative;
+        }
+
+        .match-modal-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+
+            margin-bottom: 25px;
+        }
+
+        .match-modal-header h2 {
+            margin: 0;
+
+            font-size: 28px;
+        }
+
+        .close-modal {
+            border: none;
+
+            background: #f1f2f5;
+
+            width: 40px;
+            height: 40px;
+
+            border-radius: 50%;
+
+            font-size: 22px;
+
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            background: #e5e7eb;
+        }
+
+        /* =====================================================
+           MATCH SEARCH LOADING
+        ===================================================== */
+
+        .match-loading {
+            text-align: center;
+
+            padding: 50px 20px;
+
+            color: #666;
+        }
+
+        .match-loading-icon {
+            font-size: 45px;
+
+            margin-bottom: 15px;
+        }
+
+        /* =====================================================
+           MATCH RESULT
+        ===================================================== */
+
+        .match-results-info {
+            background: #f5f7ff;
+
+            border-radius: 12px;
+
+            padding: 15px 18px;
+
+            margin-bottom: 20px;
+
+            color: #3157d5;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+        .match-results {
+            display: grid;
+
+            gap: 18px;
+        }
+
+        .match-card {
+            border: 1px solid #e5e7eb;
+
+            border-radius: 16px;
+
+            padding: 18px;
+
+            background: white;
+
+            transition: 0.2s ease;
+        }
+
+        .match-card:hover {
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .match-card-main {
+            display: grid;
+
+            grid-template-columns: 160px 1fr;
+
+            gap: 20px;
+        }
+
+        .match-image-container {
+            width: 160px;
+            height: 140px;
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            background: #f4f5f7;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+        }
+
+        .match-image {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+        }
+
+        .match-image-placeholder {
+            font-size: 40px;
+        }
+
+        .match-details h3 {
+            margin: 0 0 8px;
+
+            font-size: 21px;
+        }
+
+        .match-description {
+            color: #666;
+
+            line-height: 1.5;
+
+            margin: 5px 0 12px;
+        }
+
+        .match-meta {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 8px;
+        }
+
+        .match-meta span {
+            background: #f5f6f8;
+
+            padding: 6px 9px;
+
+            border-radius: 8px;
+
+            font-size: 12px;
+
+            color: #555;
+        }
+
+        /* =====================================================
+           MATCH SCORE
+        ===================================================== */
+
+        .match-score-box {
+            margin-top: 15px;
+
+            padding-top: 15px;
+
+            border-top: 1px solid #eeeeee;
+        }
+
+        .match-score-top {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 8px;
+        }
+
+        .match-score-label {
+            font-size: 13px;
+
+            font-weight: 700;
+
+            color: #555;
+        }
+
+        .match-score {
+            font-size: 20px;
+
+            font-weight: 800;
+
+            color: #3157d5;
+        }
+
+        .score-bar {
+            height: 9px;
+
+            width: 100%;
+
+            background: #edf0f5;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+
+            background: linear-gradient(
+                90deg,
+                #3157d5,
+                #5b7ff0
+            );
+
+            border-radius: 20px;
+        }
+
+        /* =====================================================
+           MATCH LEVEL
+        ===================================================== */
+
+        .match-level {
+            display: inline-block;
+
+            margin-top: 10px;
+
+            padding: 6px 10px;
+
+            border-radius: 20px;
+
+            background: #e8efff;
+
+            color: #3157d5;
+
+            font-size: 12px;
+
+            font-weight: 700;
+        }
+
+        /* =====================================================
+           MATCH REASONS
+        ===================================================== */
+
+        .match-reasons {
+            margin-top: 14px;
+
+            padding: 13px;
+
+            background: #f8fafc;
+
+            border-radius: 10px;
+        }
+
+        .match-reasons strong {
+            display: block;
+
+            font-size: 13px;
+
+            margin-bottom: 7px;
+        }
+
+        .match-reasons ul {
+            margin: 0;
+
+            padding-left: 20px;
+
+            color: #666;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+        }
+
+        /* =====================================================
+           CONTACT REPORTER
+        ===================================================== */
+
+        .contact-reporter-button {
+            width: 100%;
+
+            margin-top: 16px;
+
+            padding: 12px 18px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #16804b;
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+        }
+
+        .contact-reporter-button:hover {
+            background: #11663d;
+
+            transform: translateY(-1px);
+        }
+
+        /* =====================================================
+           NO MATCH
+        ===================================================== */
+
+        .no-match {
+            text-align: center;
+
+            padding: 45px 20px;
+
+            color: #666;
+        }
+
+        .no-match-icon {
+            font-size: 55px;
+
+            margin-bottom: 15px;
+        }
+
+        .no-match h3 {
+            margin-bottom: 8px;
+
+            color: #333;
+        }
+
+        /* =====================================================
            NAVBAR USER
         ===================================================== */
 
         .user-welcome {
             font-size: 15px;
+
             font-weight: 600;
+
             color: #1e3a8a;
+
             white-space: nowrap;
         }
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
 
         @media (max-width: 900px) {
 
             .user-welcome {
                 font-size: 14px;
+            }
+
+            .match-modal-content {
+                padding: 22px;
             }
         }
 
@@ -321,11 +789,31 @@
 
             .report-top {
                 align-items: flex-start;
+
                 flex-direction: column;
             }
 
             .user-welcome {
                 font-size: 14px;
+            }
+
+            .match-card-main {
+                grid-template-columns: 1fr;
+            }
+
+            .match-image-container {
+                width: 100%;
+                height: 200px;
+            }
+
+            .match-modal-content {
+                max-height: 92vh;
+
+                padding: 18px;
+            }
+
+            .match-modal-header h2 {
+                font-size: 22px;
             }
         }
     </style>
@@ -335,15 +823,14 @@
 <body>
 
     <!-- =====================================================
-     NAVBAR
-===================================================== -->
+         NAVBAR
+    ===================================================== -->
 
     <nav class="navbar">
 
         <div class="logo">
             Lost & Found AI
         </div>
-
 
         <div class="nav-links">
 
@@ -367,20 +854,26 @@
                 🔔 Notifications
                 <span id="navBadge">0</span>
             </a>
-        </div>
 
+        </div>
 
         <div class="nav-buttons">
 
-            <span class="user-welcome" id="userWelcome"></span>
+            <span
+                class="user-welcome"
+                id="userWelcome">
+            </span>
 
-
-            <a href="my-reports.html" class="login-btn">
+            <a
+                href="my-reports.html"
+                class="login-btn">
                 My Reports
             </a>
 
-
-            <a href="#" class="signup-btn" id="logoutBtn">
+            <a
+                href="#"
+                class="signup-btn"
+                id="logoutBtn">
                 Logout
             </a>
 
@@ -390,11 +883,10 @@
 
 
     <!-- =====================================================
-     MAIN
-===================================================== -->
+         MAIN
+    ===================================================== -->
 
     <main class="reports-page">
-
 
         <div class="reports-header">
 
@@ -406,14 +898,20 @@
                 Manage and track the items you have reported.
             </p>
 
-            <span class="reports-count" id="reportsCount">
+            <span
+                class="reports-count"
+                id="reportsCount">
+
                 Loading reports...
+
             </span>
 
         </div>
 
 
-        <div id="reports-container" class="reports-grid">
+        <div
+            id="reports-container"
+            class="reports-grid">
 
             <div class="loading-state">
 
@@ -433,17 +931,55 @@
 
 
     <!-- =====================================================
-     CONFIG
-===================================================== -->
+         AI MATCH MODAL
+    ===================================================== -->
+
+    <div
+        class="match-modal"
+        id="matchModal">
+
+        <div class="match-modal-content">
+
+            <div class="match-modal-header">
+
+                <h2>
+                    🤖 AI Match Results
+                </h2>
+
+                <button
+                    class="close-modal"
+                    id="closeMatchModal">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+            <div id="matchContent">
+
+                <!-- AI match results will appear here -->
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONFIG
+    ===================================================== -->
 
     <script src="config.js"></script>
 
 
     <script>
 
-        // =====================================================
-        // ESCAPE HTML
-        // =====================================================
+        /* =====================================================
+           ESCAPE HTML
+        ===================================================== */
 
         function escapeHtml(value) {
 
@@ -464,9 +1000,9 @@
         }
 
 
-        // =====================================================
-        // IMAGE URL
-        // =====================================================
+        /* =====================================================
+           IMAGE URL
+        ===================================================== */
 
         function getImageUrl(item) {
 
@@ -475,18 +1011,15 @@
                 item.image_url
             ) {
 
-                let url = item.image_url;
-
-                /*
-                 * If backend returns a relative URL,
-                 * convert it to the Render backend URL.
-                 */
+                let url =
+                    item.image_url;
 
                 if (
                     url.startsWith("/")
                 ) {
 
                     return `${API_URL}${url}`;
+
                 }
 
                 return url;
@@ -508,9 +1041,9 @@
         }
 
 
-        // =====================================================
-        // IMAGE ERROR
-        // =====================================================
+        /* =====================================================
+           IMAGE ERROR
+        ===================================================== */
 
         function handleImageError(img) {
 
@@ -524,22 +1057,24 @@
             }
 
             container.innerHTML = `
-            <div class="image-placeholder">
 
-                📦
+                <div class="image-placeholder">
 
-                <span>
-                    Image unavailable
-                </span>
+                    📦
 
-            </div>
-        `;
+                    <span>
+                        Image unavailable
+                    </span>
+
+                </div>
+
+            `;
         }
 
 
-        // =====================================================
-        // GET LOGGED-IN USER
-        // =====================================================
+        /* =====================================================
+           GET LOGGED-IN USER
+        ===================================================== */
 
         function getLoggedInUser() {
 
@@ -595,9 +1130,9 @@
         }
 
 
-        // =====================================================
-        // SET USER NAVBAR
-        // =====================================================
+        /* =====================================================
+           SET USER NAVBAR
+        ===================================================== */
 
         function setupNavbar(user) {
 
@@ -627,11 +1162,9 @@
 
                         event.preventDefault();
 
-
                         localStorage.removeItem(
                             "user"
                         );
-
 
                         window.location.href =
                             "index.html";
@@ -641,9 +1174,621 @@
         }
 
 
-        // =====================================================
-        // LOAD MY REPORTS
-        // =====================================================
+        /* =====================================================
+           OPEN MATCH MODAL
+        ===================================================== */
+
+        function openMatchModal() {
+
+            const modal =
+                document.getElementById(
+                    "matchModal"
+                );
+
+            modal.classList.add("show");
+
+            document.body.style.overflow =
+                "hidden";
+        }
+
+
+        /* =====================================================
+           CLOSE MATCH MODAL
+        ===================================================== */
+
+        function closeMatchModal() {
+
+            const modal =
+                document.getElementById(
+                    "matchModal"
+                );
+
+            modal.classList.remove("show");
+
+            document.body.style.overflow =
+                "";
+        }
+
+
+        /* =====================================================
+           FIND AI MATCH
+        ===================================================== */
+
+        async function findAIMatch(
+            itemId,
+            button
+        ) {
+
+            const matchContent =
+                document.getElementById(
+                    "matchContent"
+                );
+
+
+            openMatchModal();
+
+
+            matchContent.innerHTML = `
+
+                <div class="match-loading">
+
+                    <div class="match-loading-icon">
+                        🤖
+                    </div>
+
+                    <h3>
+                        AI is searching for matches...
+                    </h3>
+
+                    <p>
+                        Comparing descriptions, images,
+                        category, color, brand,
+                        location and date.
+                    </p>
+
+                </div>
+
+            `;
+
+
+            if (button) {
+
+                button.disabled = true;
+
+                button.dataset.originalText =
+                    button.innerHTML;
+
+                button.innerHTML =
+                    "🤖 Searching...";
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/match/${encodeURIComponent(
+                            itemId
+                        )}`
+                    );
+
+
+                let data = null;
+
+
+                try {
+
+                    data =
+                        await response.json();
+
+                }
+                catch {
+
+                    data = null;
+                }
+
+
+                console.log(
+                    "AI Match Response:",
+                    data
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data?.detail ||
+                        data?.message ||
+                        "Unable to find AI matches."
+                    );
+                }
+
+
+                displayMatchResults(
+                    data
+                );
+
+            }
+            catch (error) {
+
+                console.error(
+                    "AI Match Error:",
+                    error
+                );
+
+
+                matchContent.innerHTML = `
+
+                    <div class="no-match">
+
+                        <div class="no-match-icon">
+                            ⚠️
+                        </div>
+
+                        <h3>
+                            Could Not Find Matches
+                        </h3>
+
+                        <p>
+                            ${escapeHtml(
+                                error.message ||
+                                "Something went wrong."
+                            )}
+                        </p>
+
+                    </div>
+
+                `;
+            }
+            finally {
+
+                if (button) {
+
+                    button.disabled =
+                        false;
+
+                    button.innerHTML =
+                        button.dataset.originalText ||
+                        "🔍 Find AI Match";
+                }
+            }
+        }
+
+
+        /* =====================================================
+           DISPLAY MATCH RESULTS
+        ===================================================== */
+
+        function displayMatchResults(data) {
+
+            const matchContent =
+                document.getElementById(
+                    "matchContent"
+                );
+
+
+            const matches =
+                Array.isArray(data?.matches)
+                    ? data.matches
+                    : [];
+
+
+            if (matches.length === 0) {
+
+                matchContent.innerHTML = `
+
+                    <div class="no-match">
+
+                        <div class="no-match-icon">
+                            🔎
+                        </div>
+
+                        <h3>
+                            No Strong Match Found
+                        </h3>
+
+                        <p>
+                            ${escapeHtml(
+                                data?.message ||
+                                "The AI could not find a strong matching item yet."
+                            )}
+                        </p>
+
+                        <p>
+                            You can check again later
+                            when more reports are added.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return;
+            }
+
+
+            matchContent.innerHTML = `
+
+                <div class="match-results-info">
+
+                    🤖 Found ${matches.length}
+                    possible ${escapeHtml(
+                        data?.searching_for || "item"
+                    )}
+                    match${matches.length === 1 ? "" : "es"}.
+
+                    Results are sorted by
+                    AI match score.
+
+                </div>
+
+
+                <div
+                    class="match-results"
+                    id="matchResultsContainer">
+                </div>
+
+            `;
+
+
+            const resultsContainer =
+                document.getElementById(
+                    "matchResultsContainer"
+                );
+
+
+            matches.forEach(
+                function (match) {
+
+                    const card =
+                        createMatchCard(
+                            match
+                        );
+
+                    resultsContainer.appendChild(
+                        card
+                    );
+                }
+            );
+        }
+
+
+        /* =====================================================
+           CREATE MATCH CARD
+        ===================================================== */
+
+        function createMatchCard(match) {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "match-card";
+
+
+            const imageUrl =
+                getImageUrl(match);
+
+
+            let imageHTML = "";
+
+
+            if (imageUrl) {
+
+                imageHTML = `
+
+                    <img
+                        class="match-image"
+                        src="${escapeHtml(
+                            imageUrl
+                        )}"
+                        alt="${escapeHtml(
+                            match.item_name ||
+                            "Matched item"
+                        )}"
+                        onerror="this.style.display='none';"
+                    >
+
+                `;
+
+            }
+            else {
+
+                imageHTML = `
+
+                    <div class="match-image-placeholder">
+                        📦
+                    </div>
+
+                `;
+            }
+
+
+            const score =
+                Number(
+                    match.match_score || 0
+                );
+
+
+            const safeScore =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        score
+                    )
+                );
+
+
+            const level =
+                match.match_level ||
+                getMatchLevel(
+                    safeScore
+                );
+
+
+            const reasons =
+                Array.isArray(
+                    match.reasons
+                )
+                    ? match.reasons
+                    : [];
+
+
+            const reasonsHTML =
+                reasons.length > 0
+                    ? `
+
+                        <div class="match-reasons">
+
+                            <strong>
+                                Why this may be a match:
+                            </strong>
+
+                            <ul>
+
+                                ${reasons
+                                    .map(
+                                        reason =>
+                                            `<li>${escapeHtml(
+                                                reason
+                                            )}</li>`
+                                    )
+                                    .join("")
+                                }
+
+                            </ul>
+
+                        </div>
+
+                    `
+                    : "";
+
+
+            card.innerHTML = `
+
+                <div class="match-card-main">
+
+
+                    <div class="match-image-container">
+
+                        ${imageHTML}
+
+                    </div>
+
+
+                    <div class="match-details">
+
+                        <h3>
+                            ${escapeHtml(
+                                match.item_name ||
+                                "Unnamed Item"
+                            )}
+                        </h3>
+
+
+                        <p class="match-description">
+
+                            ${escapeHtml(
+                                match.description ||
+                                "No description available."
+                            )}
+
+                        </p>
+
+
+                        <div class="match-meta">
+
+                            <span>
+                                📂 ${escapeHtml(
+                                    match.category ||
+                                    "Unknown"
+                                )}
+                            </span>
+
+                            <span>
+                                🎨 ${escapeHtml(
+                                    match.color ||
+                                    "Not specified"
+                                )}
+                            </span>
+
+                            <span>
+                                🏷️ ${escapeHtml(
+                                    match.brand ||
+                                    "Not specified"
+                                )}
+                            </span>
+
+                            <span>
+                                📍 ${escapeHtml(
+                                    match.location ||
+                                    "Not specified"
+                                )}
+                            </span>
+
+                            <span>
+                                📅 ${escapeHtml(
+                                    match.item_date ||
+                                    "Not specified"
+                                )}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="match-score-box">
+
+                    <div class="match-score-top">
+
+                        <span class="match-score-label">
+                            AI Match Score
+                        </span>
+
+                        <span class="match-score">
+                            ${safeScore.toFixed(1)}%
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-bar">
+
+                        <div
+                            class="score-fill"
+                            style="width:${safeScore}%">
+                        </div>
+
+                    </div>
+
+
+                    <span class="match-level">
+
+                        ${escapeHtml(
+                            level
+                        )}
+
+                    </span>
+
+
+                    ${reasonsHTML}
+
+
+                    <button
+                        class="contact-reporter-button"
+                        type="button">
+
+                        💬 Contact Reporter
+
+                    </button>
+
+                </div>
+
+            `;
+
+
+            const contactButton =
+                card.querySelector(
+                    ".contact-reporter-button"
+                );
+
+
+            if (contactButton) {
+
+                contactButton.addEventListener(
+                    "click",
+                    function () {
+
+                        contactReporter(
+                            match
+                        );
+
+                    }
+                );
+            }
+
+
+            return card;
+        }
+
+
+        /* =====================================================
+           MATCH LEVEL FALLBACK
+        ===================================================== */
+
+        function getMatchLevel(score) {
+
+            if (score >= 80) {
+
+                return "Very High Match";
+            }
+
+            if (score >= 65) {
+
+                return "High Match";
+            }
+
+            if (score >= 50) {
+
+                return "Possible Match";
+            }
+
+            return "Low Match";
+        }
+
+
+        /* =====================================================
+           CONTACT REPORTER
+        ===================================================== */
+
+        function contactReporter(match) {
+
+            if (
+                !match ||
+                !match.id
+            ) {
+
+                alert(
+                    "Unable to contact the reporter because the matched item ID is missing."
+                );
+
+                return;
+            }
+
+
+            /*
+             * IMPORTANT:
+             *
+             * messages.html uses:
+             *
+             * messages.html?item_id=ITEM_ID
+             *
+             * We pass the MATCHED ITEM ID.
+             *
+             * The backend can then identify
+             * the reporter of that matched item.
+             */
+
+            const itemId =
+                encodeURIComponent(
+                    match.id
+                );
+
+
+            window.location.href =
+                `messages.html?item_id=${itemId}`;
+        }
+
+
+        /* =====================================================
+           LOAD MY REPORTS
+        ===================================================== */
 
         async function loadMyReports(user) {
 
@@ -719,15 +1864,16 @@
 
 
                 count.textContent =
-                    `${items.length} Report${items.length === 1
-                        ? ""
-                        : "s"
+                    `${items.length} Report${
+                        items.length === 1
+                            ? ""
+                            : "s"
                     }`;
 
 
-                // =================================================
-                // EMPTY
-                // =================================================
+                /* =================================================
+                   EMPTY
+                ================================================= */
 
                 if (
                     items.length === 0
@@ -735,31 +1881,32 @@
 
                     container.innerHTML = `
 
-                    <div class="empty-state">
+                        <div class="empty-state">
 
-                        <div class="empty-icon">
-                            📦
+                            <div class="empty-icon">
+                                📦
+                            </div>
+
+                            <h2>
+                                No Reports Yet
+                            </h2>
+
+                            <p>
+                                You haven't reported
+                                any lost or found items yet.
+                            </p>
+
+                            <a
+                                href="report-lost.html"
+                                class="report-button">
+
+                                Report an Item
+
+                            </a>
+
                         </div>
 
-                        <h2>
-                            No Reports Yet
-                        </h2>
-
-                        <p>
-                            You haven't reported
-                            any lost or found items yet.
-                        </p>
-
-                        <a
-                            href="report-lost.html"
-                            class="report-button"
-                        >
-                            Report an Item
-                        </a>
-
-                    </div>
-
-                `;
+                    `;
 
                     return;
                 }
@@ -768,257 +1915,304 @@
                 container.innerHTML = "";
 
 
-                // =================================================
-                // CREATE REPORT CARDS
-                // =================================================
+                /* =================================================
+                   CREATE REPORT CARDS
+                ================================================= */
 
-                items.forEach(function (item) {
+                items.forEach(
+                    function (item) {
 
-                    const card =
-                        document.createElement(
-                            "article"
+                        const card =
+                            document.createElement(
+                                "article"
+                            );
+
+
+                        card.className =
+                            "report-card";
+
+
+                        const isLost =
+                            String(
+                                item.item_type || ""
+                            ).toLowerCase() ===
+                            "lost";
+
+
+                        const status =
+                            isLost
+                                ? "Lost"
+                                : "Found";
+
+
+                        const statusClass =
+                            isLost
+                                ? "status-lost"
+                                : "status-found";
+
+
+                        /* =================================================
+                           IMAGE
+                        ================================================= */
+
+                        const imageUrl =
+                            getImageUrl(
+                                item
+                            );
+
+
+                        let imageHTML;
+
+
+                        if (imageUrl) {
+
+                            imageHTML = `
+
+                                <div
+                                    class="report-image-container">
+
+                                    <img
+                                        class="report-image"
+                                        src="${escapeHtml(
+                                            imageUrl
+                                        )}"
+                                        alt="${escapeHtml(
+                                            item.item_name
+                                        )}"
+                                        onerror="handleImageError(this)"
+                                    >
+
+                                </div>
+
+                            `;
+
+                        }
+                        else {
+
+                            imageHTML = `
+
+                                <div
+                                    class="report-image-container">
+
+                                    <div
+                                        class="image-placeholder">
+
+                                        📦
+
+                                        <span>
+                                            No image available
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            `;
+                        }
+
+
+                        /* =================================================
+                           CARD HTML
+                        ================================================= */
+
+                        card.innerHTML = `
+
+                            ${imageHTML}
+
+
+                            <div class="report-content">
+
+
+                                <div class="report-top">
+
+                                    <h2 class="report-title">
+
+                                        ${escapeHtml(
+                                            item.item_name ||
+                                            "Unnamed Item"
+                                        )}
+
+                                    </h2>
+
+
+                                    <span
+                                        class="status-badge ${statusClass}">
+
+                                        ${status}
+
+                                    </span>
+
+                                </div>
+
+
+                                <p
+                                    class="report-description">
+
+                                    ${escapeHtml(
+                                        item.description ||
+                                        "No description"
+                                    )}
+
+                                </p>
+
+
+                                <div class="report-info">
+
+
+                                    <div class="info-box">
+
+                                        <span
+                                            class="info-label">
+
+                                            📍 Location
+
+                                        </span>
+
+                                        <span
+                                            class="info-value">
+
+                                            ${escapeHtml(
+                                                item.location ||
+                                                "Not specified"
+                                            )}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="info-box">
+
+                                        <span
+                                            class="info-label">
+
+                                            📅 Date
+
+                                        </span>
+
+                                        <span
+                                            class="info-value">
+
+                                            ${escapeHtml(
+                                                item.item_date ||
+                                                "Not specified"
+                                            )}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="info-box">
+
+                                        <span
+                                            class="info-label">
+
+                                            🎨 Color
+
+                                        </span>
+
+                                        <span
+                                            class="info-value">
+
+                                            ${escapeHtml(
+                                                item.color ||
+                                                "Not specified"
+                                            )}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="info-box">
+
+                                        <span
+                                            class="info-label">
+
+                                            🏷️ Brand
+
+                                        </span>
+
+                                        <span
+                                            class="info-value">
+
+                                            ${escapeHtml(
+                                                item.brand ||
+                                                "Not specified"
+                                            )}
+
+                                        </span>
+
+                                    </div>
+
+
+                                </div>
+
+
+                                <!-- AI MATCH BUTTON -->
+
+                                <button
+                                    class="match-button"
+                                    type="button">
+
+                                    🤖 Find AI Match
+
+                                </button>
+
+
+                                <div class="click-hint">
+
+                                    Click the button to find
+                                    possible matching reports.
+
+                                </div>
+
+
+                            </div>
+
+                        `;
+
+
+                        /* =================================================
+                           AI MATCH BUTTON EVENT
+                        ================================================= */
+
+                        const matchButton =
+                            card.querySelector(
+                                ".match-button"
+                            );
+
+
+                        if (matchButton) {
+
+                            matchButton.addEventListener(
+                                "click",
+                                function (event) {
+
+                                    event.preventDefault();
+
+                                    event.stopPropagation();
+
+
+                                    findAIMatch(
+                                        item.id,
+                                        matchButton
+                                    );
+
+                                }
+                            );
+                        }
+
+
+                        container.appendChild(
+                            card
                         );
 
-
-                    card.className =
-                        "report-card";
-
-
-                    card.addEventListener(
-                        "click",
-                        function () {
-
-                            window.location.href =
-                                `item-detail.html?id=${encodeURIComponent(
-                                    item.id
-                                )}`;
-                        }
-                    );
-
-
-                    const isLost =
-                        String(
-                            item.item_type || ""
-                        ).toLowerCase() === "lost";
-
-
-                    const status =
-                        isLost
-                            ? "Lost"
-                            : "Found";
-
-
-                    const statusClass =
-                        isLost
-                            ? "status-lost"
-                            : "status-found";
-
-
-                    // =================================================
-                    // IMAGE
-                    // =================================================
-
-                    const imageUrl =
-                        getImageUrl(item);
-
-
-                    let imageHTML;
-
-
-                    if (imageUrl) {
-
-                        imageHTML = `
-
-                        <div
-                            class="report-image-container"
-                        >
-
-                            <img
-                                class="report-image"
-                                src="${escapeHtml(
-                            imageUrl
-                        )}"
-                                alt="${escapeHtml(
-                            item.item_name
-                        )}"
-                                onerror="handleImageError(this)"
-                            >
-
-                        </div>
-
-                    `;
-
                     }
-                    else {
-
-                        imageHTML = `
-
-                        <div
-                            class="report-image-container"
-                        >
-
-                            <div
-                                class="image-placeholder"
-                            >
-
-                                📦
-
-                                <span>
-                                    No image available
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    `;
-                    }
-
-
-                    // =================================================
-                    // CARD
-                    // =================================================
-
-                    card.innerHTML = `
-
-                    ${imageHTML}
-
-
-                    <div class="report-content">
-
-
-                        <div class="report-top">
-
-                            <h2 class="report-title">
-
-                                ${escapeHtml(
-                        item.item_name ||
-                        "Unnamed Item"
-                    )}
-
-                            </h2>
-
-
-                            <span
-                                class="status-badge ${statusClass}"
-                            >
-
-                                ${status}
-
-                            </span>
-
-                        </div>
-
-
-                        <p class="report-description">
-
-                            ${escapeHtml(
-                        item.description ||
-                        "No description"
-                    )}
-
-                        </p>
-
-
-                        <div class="report-info">
-
-
-                            <div class="info-box">
-
-                                <span class="info-label">
-                                    📍 Location
-                                </span>
-
-                                <span class="info-value">
-
-                                    ${escapeHtml(
-                        item.location ||
-                        "Not specified"
-                    )}
-
-                                </span>
-
-                            </div>
-
-
-                            <div class="info-box">
-
-                                <span class="info-label">
-                                    📅 Date
-                                </span>
-
-                                <span class="info-value">
-
-                                    ${escapeHtml(
-                        item.item_date ||
-                        "Not specified"
-                    )}
-
-                                </span>
-
-                            </div>
-
-
-                            <div class="info-box">
-
-                                <span class="info-label">
-                                    🎨 Color
-                                </span>
-
-                                <span class="info-value">
-
-                                    ${escapeHtml(
-                        item.color ||
-                        "Not specified"
-                    )}
-
-                                </span>
-
-                            </div>
-
-
-                            <div class="info-box">
-
-                                <span class="info-label">
-                                    🏷️ Brand
-                                </span>
-
-                                <span class="info-value">
-
-                                    ${escapeHtml(
-                        item.brand ||
-                        "Not specified"
-                    )}
-
-                                </span>
-
-                            </div>
-
-
-                        </div>
-
-
-                        <div class="click-hint">
-
-                            Click to view full details →
-
-                        </div>
-
-
-                    </div>
-
-                `;
-
-
-                    container.appendChild(
-                        card
-                    );
-
-                });
+                );
 
             }
-
-
             catch (error) {
 
                 console.error(
@@ -1033,40 +2227,44 @@
 
                 container.innerHTML = `
 
-                <div class="empty-state">
+                    <div class="empty-state">
 
-                    <div class="empty-icon">
-                        ⚠️
+                        <div class="empty-icon">
+                            ⚠️
+                        </div>
+
+                        <h2>
+                            Could Not Load Reports
+                        </h2>
+
+                        <p>
+
+                            ${escapeHtml(
+                                error.message ||
+                                "Something went wrong while loading your reports."
+                            )}
+
+                        </p>
+
+
+                        <button
+                            class="report-button"
+                            onclick="location.reload()">
+
+                            Try Again
+
+                        </button>
+
                     </div>
 
-                    <h2>
-                        Could Not Load Reports
-                    </h2>
-
-                    <p>
-                        ${escapeHtml(
-                    error.message ||
-                    "Something went wrong while loading your reports."
-                )}
-                    </p>
-
-                    <button
-                        class="report-button"
-                        onclick="location.reload()"
-                    >
-                        Try Again
-                    </button>
-
-                </div>
-
-            `;
+                `;
             }
         }
 
 
-        // =====================================================
-        // PAGE START
-        // =====================================================
+        /* =====================================================
+           MODAL EVENTS
+        ===================================================== */
 
         document.addEventListener(
             "DOMContentLoaded",
@@ -1081,10 +2279,75 @@
                 }
 
 
-                setupNavbar(user);
+                setupNavbar(
+                    user
+                );
 
 
-                loadMyReports(user);
+                loadMyReports(
+                    user
+                );
+
+
+                /* CLOSE BUTTON */
+
+                const closeButton =
+                    document.getElementById(
+                        "closeMatchModal"
+                    );
+
+
+                if (closeButton) {
+
+                    closeButton.addEventListener(
+                        "click",
+                        closeMatchModal
+                    );
+                }
+
+
+                /* CLICK OUTSIDE MODAL */
+
+                const modal =
+                    document.getElementById(
+                        "matchModal"
+                    );
+
+
+                if (modal) {
+
+                    modal.addEventListener(
+                        "click",
+                        function (event) {
+
+                            if (
+                                event.target ===
+                                modal
+                            ) {
+
+                                closeMatchModal();
+                            }
+
+                        }
+                    );
+                }
+
+
+                /* ESCAPE KEY */
+
+                document.addEventListener(
+                    "keydown",
+                    function (event) {
+
+                        if (
+                            event.key === "Escape"
+                        ) {
+
+                            closeMatchModal();
+                        }
+
+                    }
+                );
 
             }
         );
