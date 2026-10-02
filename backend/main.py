@@ -1563,6 +1563,10 @@ def send_message(
 # GET MESSAGES
 # =========================================================
 
+# =========================================================
+# GET MESSAGES - TWO USER CONVERSATION
+# =========================================================
+
 @app.get("/messages/{user_id}/{item_id}")
 def get_messages(
     user_id: int,
@@ -1571,36 +1575,55 @@ def get_messages(
 ):
 
     # -----------------------------------------------------
-    # CHECK ITEM
+    # CHECK CURRENT ITEM
     # -----------------------------------------------------
 
     item = (
         db.query(Item)
-        .filter(
-            Item.id == item_id
-        )
+        .filter(Item.id == item_id)
         .first()
     )
 
     if not item:
-
         raise HTTPException(
             status_code=404,
             detail="Item not found."
         )
 
     # -----------------------------------------------------
-    # GET MESSAGES
+    # GET THE OTHER USER
     # -----------------------------------------------------
+
+    other_user_id = item.user_id
+
+    if not other_user_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Reporter information is not available."
+        )
+
+    # -----------------------------------------------------
+    # GET ALL MESSAGES BETWEEN THESE TWO USERS
+    # -----------------------------------------------------
+    # IMPORTANT:
+    # Do NOT filter only by item_id.
+    # The conversation belongs to the two users.
 
     messages = (
         db.query(Message)
         .filter(
-            Message.item_id == item_id,
             (
-                (Message.sender_id == user_id)
+                (
+                    (Message.sender_id == user_id)
+                    &
+                    (Message.receiver_id == other_user_id)
+                )
                 |
-                (Message.receiver_id == user_id)
+                (
+                    (Message.sender_id == other_user_id)
+                    &
+                    (Message.receiver_id == user_id)
+                )
             )
         )
         .order_by(
@@ -1611,12 +1634,12 @@ def get_messages(
 
     result = []
 
-    for msg in messages:
+    for message in messages:
 
         sender = (
             db.query(User)
             .filter(
-                User.id == msg.sender_id
+                User.id == message.sender_id
             )
             .first()
         )
@@ -1624,46 +1647,41 @@ def get_messages(
         receiver = (
             db.query(User)
             .filter(
-                User.id == msg.receiver_id
+                User.id == message.receiver_id
             )
             .first()
         )
 
         result.append({
 
-            "id":
-                msg.id,
+            "id": message.id,
 
             "sender_id":
-                msg.sender_id,
+                message.sender_id,
 
             "sender_name":
-                (
-                    sender.name
-                    if sender
-                    else "Unknown User"
-                ),
+                sender.name
+                if sender
+                else "Unknown",
 
             "receiver_id":
-                msg.receiver_id,
+                message.receiver_id,
 
             "receiver_name":
-                (
-                    receiver.name
-                    if receiver
-                    else "Unknown User"
-                ),
+                receiver.name
+                if receiver
+                else "Unknown",
 
             "item_id":
-                msg.item_id,
+                message.item_id,
 
             "message":
-                msg.message,
+                message.message,
 
             "created_at":
                 (
-                    str(msg.created_at)
-                    if msg.created_at
+                    str(message.created_at)
+                    if message.created_at
                     else None
                 )
         })
@@ -1672,9 +1690,6 @@ def get_messages(
         "status": "success",
         "messages": result
     }
-
-
-
 
 # =========================================================
 # FEATURE 4
