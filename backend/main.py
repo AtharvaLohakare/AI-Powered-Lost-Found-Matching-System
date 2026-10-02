@@ -7,7 +7,7 @@ from fastapi import (
     HTTPException
 )
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, RedirectResponse
 
 from sqlalchemy.orm import Session
 
@@ -16,8 +16,14 @@ import shutil
 import uuid
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
+from urllib.request import urlopen
 
 import bcrypt
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from cloudinary import CloudinaryImage
 
 from .database import SessionLocal
 
@@ -59,6 +65,18 @@ app.add_middleware(
 
 
 # =========================================================
+# CLOUDINARY
+# =========================================================
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True
+)
+
+
+# =========================================================
 # PATHS
 # =========================================================
 
@@ -77,12 +95,8 @@ os.makedirs(
 )
 
 
-# Serve uploaded images
-app.mount(
-    "/uploads",
-    StaticFiles(directory=UPLOAD_DIR),
-    name="uploads"
-)
+# Images are served by the explicit /uploads/{filename} route below.
+# Local files are used when available; otherwise Cloudinary is used.
 
 
 # =========================================================
@@ -104,28 +118,166 @@ def get_db():
 
 def image_url(filename):
     """
-    Returns the API-relative URL for an uploaded image.
+    Keep the same API-relative URL used by the existing frontend.
     """
     if not filename:
         return None
 
+    filename = os.path.basename(filename)
+
     return f"/uploads/{filename}"
+
+
+def get_cloudinary_public_id(filename):
+    """
+    Convert the stored UUID filename into the Cloudinary public ID.
+    Example:
+        abc123.jpg -> lost_found/abc123
+    """
+    if not filename:
+        return None
+
+    filename = os.path.basename(filename)
+    stem = os.path.splitext(filename)[0]
+
+    return f"lost_found/{stem}"
+
+
+def get_cloudinary_url(filename):
+    """
+    Build a secure Cloudinary URL from the stored filename.
+    """
+    public_id = get_cloudinary_public_id(filename)
+
+    if not public_id:
+        return None
+
+    try:
+        return CloudinaryImage(
+            public_id
+        ).build_url(
+            secure=True
+        )
+    except Exception:
+        return None
 
 
 def image_exists(filename):
     """
-    Checks whether an image physically exists on the
-    current server.
+    Check local storage first, then Cloudinary.
     """
     if not filename:
         return False
 
-    path = os.path.join(
+    filename = os.path.basename(filename)
+
+    local_path = os.path.join(
         UPLOAD_DIR,
         filename
     )
 
-    return os.path.isfile(path)
+    if os.path.isfile(local_path):
+        return True
+
+    public_id = get_cloudinary_public_id(filename)
+
+    if not public_id:
+        return False
+
+    try:
+        cloudinary.api.resource(
+            public_id,
+            resource_type="image",
+            type="upload"
+        )
+        return True
+    except Exception:
+        return False
+
+
+def ensure_local_image(filename):
+    """
+    Return a local path for image matching.
+
+    If Render's temporary filesystem no longer contains
+    the image, download it from Cloudinary and recreate
+    the local cache.
+    """
+    if not filename:
+        return None
+
+    filename = os.path.basename(filename)
+
+    local_path = os.path.join(
+        UPLOAD_DIR,
+        filename
+    )
+
+    if os.path.isfile(local_path):
+        return local_path
+
+    cloudinary_url = get_cloudinary_url(filename)
+
+    if not cloudinary_url:
+        return None
+
+    try:
+        with urlopen(
+            cloudinary_url,
+            timeout=20
+        ) as response:
+            image_data = response.read()
+
+        if not image_data:
+            return None
+
+        with open(
+            local_path,
+            "wb"
+        ) as file:
+            file.write(image_data)
+
+        return local_path
+
+    except Exception as e:
+        print(
+            "Unable to download image from Cloudinary:",
+            e
+        )
+        return None
+
+
+@app.get("/uploads/{filename}")
+def serve_upload(filename: str):
+    """
+    Preserve the existing /uploads/{filename} frontend URL.
+
+    Serve the local cached image when available.
+    Otherwise redirect to the permanent Cloudinary image.
+    """
+    filename = os.path.basename(filename)
+
+    local_path = os.path.join(
+        UPLOAD_DIR,
+        filename
+    )
+
+    if os.path.isfile(local_path):
+        return FileResponse(local_path)
+
+    cloudinary_url = get_cloudinary_url(filename)
+
+    if not cloudinary_url:
+        raise HTTPException(
+            status_code=404,
+            detail="Image not found."
+        )
+
+    return RedirectResponse(
+        url=cloudinary_url,
+        status_code=307
+    )
+
 
 
 def serialize_item(item):
@@ -564,6 +716,34 @@ async def report_item(
         await image.close()
 
     # -----------------------------------------------------
+    # UPLOAD IMAGE TO CLOUDINARY
+    # -----------------------------------------------------
+
+    try:
+
+        cloudinary.uploader.upload(
+            image_path,
+            public_id=get_cloudinary_public_id(
+                unique_filename
+            ),
+            resource_type="image",
+            overwrite=True
+        )
+
+    except Exception as e:
+
+        if os.path.exists(image_path):
+            os.remove(image_path)
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unable to upload image to Cloudinary: "
+                f"{str(e)}"
+            )
+        )
+
+    # -----------------------------------------------------
     # SAVE ITEM
     # -----------------------------------------------------
 
@@ -700,10 +880,6 @@ def get_item(
 # AI MATCHING
 # =========================================================
 
-# =========================================================
-# AI MATCHING
-# =========================================================
-
 @app.get("/match/{item_id}")
 def match_item(
     item_id: int,
@@ -824,34 +1000,19 @@ def match_item(
 
         image_score = 0.0
 
-        current_image_path = None
-        candidate_image_path = None
+        # Render's filesystem is temporary. Recover images
+        # from Cloudinary whenever the local cache is gone.
+        current_image_path = ensure_local_image(
+            current_item.image_name
+        )
 
-        if current_item.image_name:
+        candidate_image_path = ensure_local_image(
+            candidate_item.image_name
+        )
 
-            current_image_path = os.path.join(
-                UPLOAD_DIR,
-                current_item.image_name
-            )
-
-        if candidate_item.image_name:
-
-            candidate_image_path = os.path.join(
-                UPLOAD_DIR,
-                candidate_item.image_name
-            )
-
-        image_available = (
-            bool(
-                current_image_path
-                and candidate_image_path
-                and os.path.isfile(
-                    current_image_path
-                )
-                and os.path.isfile(
-                    candidate_image_path
-                )
-            )
+        image_available = bool(
+            current_image_path
+            and candidate_image_path
         )
 
         if image_available:

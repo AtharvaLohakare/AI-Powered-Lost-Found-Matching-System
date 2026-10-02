@@ -37,20 +37,29 @@ function escapeHtml(value) {
 // =========================================================
 
 function getImageUrl(item) {
-
     if (!item) {
         return "";
     }
 
+    // If backend gives a full URL, use it directly
     if (item.image_url) {
-        return item.image_url;
+        if (
+            item.image_url.startsWith("http://") ||
+            item.image_url.startsWith("https://")
+        ) {
+            return item.image_url;
+        }
+
+        // If backend gives relative URL like /uploads/file.jpg
+        return `${API_URL}${item.image_url}`;
     }
 
-    if (!item.image_name) {
-        return "";
+    // Fallback using image_name
+    if (item.image_name) {
+        return `${API_URL}/uploads/${encodeURIComponent(item.image_name)}`;
     }
 
-    return `${API_URL}/uploads/${encodeURIComponent(item.image_name)}`;
+    return "";
 }
 
 
