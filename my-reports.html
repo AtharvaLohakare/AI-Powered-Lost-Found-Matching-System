@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
+
         /* =====================================================
            MY REPORTS PAGE
         ===================================================== */
@@ -44,6 +45,7 @@
             font-weight: 600;
         }
 
+
         /* =====================================================
            REPORT GRID
         ===================================================== */
@@ -59,6 +61,7 @@
 
             gap: 25px;
         }
+
 
         /* =====================================================
            REPORT CARD
@@ -154,6 +157,7 @@
             border-radius: 20px;
 
             font-size: 12px;
+
             font-weight: 700;
 
             text-transform: uppercase;
@@ -214,6 +218,7 @@
 
             color: #333;
         }
+
 
         /* =====================================================
            AI MATCH BUTTON
@@ -276,6 +281,7 @@
             text-align: center;
         }
 
+
         /* =====================================================
            EMPTY STATE
         ===================================================== */
@@ -333,6 +339,7 @@
             cursor: pointer;
         }
 
+
         /* =====================================================
            LOADING
         ===================================================== */
@@ -354,6 +361,7 @@
         .loading-state p {
             color: #777;
         }
+
 
         /* =====================================================
            AI MATCH MODAL
@@ -405,7 +413,6 @@
             display: flex;
 
             justify-content: space-between;
-
             align-items: center;
 
             gap: 20px;
@@ -438,6 +445,7 @@
             background: #e5e7eb;
         }
 
+
         /* =====================================================
            MATCH SEARCH LOADING
         ===================================================== */
@@ -455,6 +463,7 @@
 
             margin-bottom: 15px;
         }
+
 
         /* =====================================================
            MATCH RESULT
@@ -509,6 +518,7 @@
 
         .match-image-container {
             width: 160px;
+
             height: 140px;
 
             border-radius: 12px;
@@ -568,6 +578,7 @@
             color: #555;
         }
 
+
         /* =====================================================
            MATCH SCORE
         ===================================================== */
@@ -584,7 +595,6 @@
             display: flex;
 
             justify-content: space-between;
-
             align-items: center;
 
             margin-bottom: 8px;
@@ -630,6 +640,7 @@
             border-radius: 20px;
         }
 
+
         /* =====================================================
            MATCH LEVEL
         ===================================================== */
@@ -651,6 +662,7 @@
 
             font-weight: 700;
         }
+
 
         /* =====================================================
            MATCH REASONS
@@ -686,6 +698,11 @@
             line-height: 1.6;
         }
 
+        .match-reasons li {
+            margin-bottom: 5px;
+        }
+
+
         /* =====================================================
            CONTACT REPORTER
         ===================================================== */
@@ -720,6 +737,11 @@
             transform: translateY(-1px);
         }
 
+        .match-actions {
+            margin-top: 10px;
+        }
+
+
         /* =====================================================
            NO MATCH
         ===================================================== */
@@ -744,6 +766,7 @@
             color: #333;
         }
 
+
         /* =====================================================
            NAVBAR USER
         ===================================================== */
@@ -759,42 +782,6 @@
         }
 
 
-        .contact-reporter-btn {
-            width: 100%;
-            padding: 13px 18px;
-            margin-top: 15px;
-
-            border: none;
-            border-radius: 10px;
-
-            background: #2563eb;
-            color: white;
-
-            font-size: 15px;
-            font-weight: 600;
-
-            cursor: pointer;
-
-            transition: 0.2s ease;
-        }
-
-        .contact-reporter-btn:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
-        }
-
-        .match-actions {
-            margin-top: 10px;
-        }
-
-        .match-reasons {
-            margin: 8px 0 0;
-            padding-left: 20px;
-        }
-
-        .match-reasons li {
-            margin-bottom: 5px;
-        }
         /* =====================================================
            MOBILE
         ===================================================== */
@@ -808,7 +795,9 @@
             .match-modal-content {
                 padding: 22px;
             }
+
         }
+
 
         @media (max-width: 600px) {
 
@@ -840,6 +829,7 @@
 
             .match-image-container {
                 width: 100%;
+
                 height: 200px;
             }
 
@@ -852,12 +842,16 @@
             .match-modal-header h2 {
                 font-size: 22px;
             }
+
         }
+
     </style>
+
 </head>
 
 
 <body>
+
 
     <!-- =====================================================
          NAVBAR
@@ -868,6 +862,7 @@
         <div class="logo">
             Lost & Found AI
         </div>
+
 
         <div class="nav-links">
 
@@ -893,6 +888,7 @@
             </a>
 
         </div>
+
 
         <div class="nav-buttons">
 
@@ -938,9 +934,7 @@
             <span
                 class="reports-count"
                 id="reportsCount">
-
                 Loading reports...
-
             </span>
 
         </div>
@@ -986,18 +980,14 @@
                 <button
                     class="close-modal"
                     id="closeMatchModal">
-
                     ×
-
                 </button>
 
             </div>
 
 
             <div id="matchContent">
-
                 <!-- AI match results will appear here -->
-
             </div>
 
         </div>
@@ -1094,17 +1084,12 @@
             }
 
             container.innerHTML = `
-
                 <div class="image-placeholder">
-
                     📦
-
                     <span>
                         Image unavailable
                     </span>
-
                 </div>
-
             `;
         }
 
@@ -1322,6 +1307,7 @@
                 catch {
 
                     data = null;
+
                 }
 
 
@@ -1376,6 +1362,7 @@
                     </div>
 
                 `;
+
             }
             finally {
 
@@ -1399,16 +1386,21 @@
         function displayMatchResults(data) {
 
             const matchContent =
-                document.getElementById("matchContent");
+                document.getElementById(
+                    "matchContent"
+                );
+
 
             const matches =
                 Array.isArray(data?.matches)
                     ? data.matches
                     : [];
 
+
             if (matches.length === 0) {
 
                 matchContent.innerHTML = `
+
                     <div class="no-match">
 
                         <div class="no-match-icon">
@@ -1432,10 +1424,12 @@
                         </p>
 
                     </div>
+
                 `;
 
                 return;
             }
+
 
             matchContent.innerHTML = `
 
@@ -1444,7 +1438,8 @@
                     🤖 Found ${matches.length}
                     possible
                     ${escapeHtml(
-                        data?.searching_for || "item"
+                        data?.searching_for ||
+                        "item"
                     )}
                     match${matches.length === 1 ? "" : "es"}.
 
@@ -1453,23 +1448,29 @@
 
                 </div>
 
+
                 <div
                     class="match-results"
                     id="matchResultsContainer">
                 </div>
+
             `;
+
 
             const resultsContainer =
                 document.getElementById(
                     "matchResultsContainer"
                 );
 
+
             matches.forEach(function(match) {
 
                 const card =
                     createMatchCard(match);
 
-                resultsContainer.appendChild(card);
+                resultsContainer.appendChild(
+                    card
+                );
 
             });
         }
@@ -1482,10 +1483,20 @@
         function createMatchCard(match) {
 
             const score =
-                Number(match.match_score || 0);
+                Number(
+                    match.match_score || 0
+                );
+
+
+            /*
+             * IMPORTANT:
+             * Backend returns matched item
+             * ID as "item_id".
+             */
 
             const matchedItemId =
                 match.item_id;
+
 
             const imageUrl =
                 match.image_url
@@ -1496,31 +1507,46 @@
                     )
                     : "";
 
+
             const reasons =
                 Array.isArray(match.reasons)
                     ? match.reasons
                     : [];
 
+
             const card =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
+
 
             card.className =
                 "match-card";
 
+
             const reasonsHTML =
                 reasons.length
-                    ? reasons.map(function(reason) {
-                        return `
-                            <li>
-                                ${escapeHtml(reason)}
-                            </li>
-                        `;
-                    }).join("")
+
+                    ? reasons
+                        .map(function(reason) {
+
+                            return `
+                                <li>
+                                    ${escapeHtml(
+                                        reason
+                                    )}
+                                </li>
+                            `;
+
+                        })
+                        .join("")
+
                     : `
                         <li>
                             Possible match based on item details.
                         </li>
                     `;
+
 
             card.innerHTML = `
 
@@ -1530,18 +1556,26 @@
 
                         ${
                             imageUrl
+
                                 ? `
+
                                     <img
-                                        src="${escapeHtml(imageUrl)}"
+                                        src="${escapeHtml(
+                                            imageUrl
+                                        )}"
                                         class="match-image"
                                         alt="Matched item"
                                         onerror="this.style.display='none'"
                                     >
+
                                 `
+
                                 : `
+
                                     <div class="match-image-placeholder">
                                         📦
                                     </div>
+
                                 `
                         }
 
@@ -1556,6 +1590,7 @@
                                 "Matched Item"
                             )}
                         </h3>
+
 
                         <p class="match-description">
 
@@ -1572,40 +1607,55 @@
                             <span>
                                 📂
                                 ${escapeHtml(
-                                    match.category || "N/A"
+                                    match.category ||
+                                    "N/A"
                                 )}
                             </span>
+
 
                             <span>
                                 🎨
                                 ${escapeHtml(
-                                    match.color || "N/A"
+                                    match.color ||
+                                    "N/A"
                                 )}
                             </span>
+
 
                             <span>
                                 🏷️
                                 ${escapeHtml(
-                                    match.brand || "N/A"
+                                    match.brand ||
+                                    "N/A"
                                 )}
                             </span>
+
 
                             <span>
                                 📍
                                 ${escapeHtml(
-                                    match.location || "N/A"
+                                    match.location ||
+                                    "N/A"
                                 )}
                             </span>
+
 
                             ${
                                 match.distance_km !== null &&
                                 match.distance_km !== undefined
+
                                     ? `
+
                                         <span>
                                             📏
-                                            ${match.distance_km} km
+                                            ${escapeHtml(
+                                                match.distance_km
+                                            )}
+                                            km
                                         </span>
+
                                     `
+
                                     : ""
                             }
 
@@ -1626,20 +1676,26 @@
                             AI Match Score
                         </span>
 
+
                         <span class="match-score">
                             ${score}%
                         </span>
 
                     </div>
 
+
                     <div class="score-bar">
 
                         <div
                             class="score-fill"
-                            style="width: ${Math.min(score, 100)}%">
+                            style="width: ${Math.min(
+                                score,
+                                100
+                            )}%">
                         </div>
 
                     </div>
+
 
                     <span class="match-level">
                         ${getMatchLevel(score)}
@@ -1656,6 +1712,7 @@
                         Why this may be a match:
                     </strong>
 
+
                     <ul>
                         ${reasonsHTML}
                     </ul>
@@ -1669,9 +1726,10 @@
 
                     <button
                         type="button"
-                        class="contact-reporter-button"
-                    >
+                        class="contact-reporter-button">
+
                         💬 Contact Reporter
+
                     </button>
 
                 </div>
@@ -1679,25 +1737,27 @@
             `;
 
 
-            /* =========================================
-            CONTACT REPORTER BUTTON
-            ========================================= */
+            /* =================================================
+               CONTACT REPORTER BUTTON
+            ================================================= */
 
             const contactButton =
                 card.querySelector(
                     ".contact-reporter-button"
                 );
 
+
             if (contactButton) {
 
                 contactButton.addEventListener(
                     "click",
-                    function() {
+                    function () {
 
                         console.log(
                             "Matched item:",
                             match
                         );
+
 
                         console.log(
                             "Matched item ID:",
@@ -1715,6 +1775,11 @@
                         }
 
 
+                        /*
+                         * Open the communication page
+                         * using the MATCHED ITEM ID.
+                         */
+
                         window.location.href =
                             `messages.html?item_id=${encodeURIComponent(
                                 matchedItemId
@@ -1722,7 +1787,6 @@
 
                     }
                 );
-
             }
 
 
@@ -1737,41 +1801,18 @@
         function getMatchLevel(score) {
 
             if (score >= 80) {
-
                 return "Very High Match";
             }
 
             if (score >= 65) {
-
                 return "High Match";
             }
 
             if (score >= 50) {
-
                 return "Possible Match";
             }
 
             return "Low Match";
-        }
-
-
-        /* =====================================================
-           CONTACT REPORTER
-        ===================================================== */
-
-        function contactReporter(match) {
-
-            // Backend returns the matched item's ID as "item_id"
-            const matchedItemId = match.item_id;
-
-            if (!matchedItemId) {
-                alert("Unable to contact the reporter because the matched item ID is missing.");
-                return;
-            }
-
-            // Open communication page using the matched FOUND/LOST item ID
-            window.location.href =
-                `messages.html?item_id=${encodeURIComponent(matchedItemId)}`;
         }
 
 
@@ -1823,6 +1864,7 @@
                 catch {
 
                     items = null;
+
                 }
 
 
@@ -1842,9 +1884,7 @@
                 }
 
 
-                if (
-                    !Array.isArray(items)
-                ) {
+                if (!Array.isArray(items)) {
 
                     throw new Error(
                         "Invalid reports data received from server."
@@ -1864,9 +1904,7 @@
                    EMPTY
                 ================================================= */
 
-                if (
-                    items.length === 0
-                ) {
+                if (items.length === 0) {
 
                     container.innerHTML = `
 
@@ -1945,9 +1983,7 @@
                         ================================================= */
 
                         const imageUrl =
-                            getImageUrl(
-                                item
-                            );
+                            getImageUrl(item);
 
 
                         let imageHTML;
@@ -1962,12 +1998,15 @@
 
                                     <img
                                         class="report-image"
+
                                         src="${escapeHtml(
                                             imageUrl
                                         )}"
+
                                         alt="${escapeHtml(
                                             item.item_name
                                         )}"
+
                                         onerror="handleImageError(this)"
                                     >
 
@@ -1976,6 +2015,7 @@
                             `;
 
                         }
+
                         else {
 
                             imageHTML = `
@@ -1997,6 +2037,7 @@
                                 </div>
 
                             `;
+
                         }
 
 
@@ -2057,6 +2098,7 @@
 
                                         </span>
 
+
                                         <span
                                             class="info-value">
 
@@ -2078,6 +2120,7 @@
                                             📅 Date
 
                                         </span>
+
 
                                         <span
                                             class="info-value">
@@ -2101,6 +2144,7 @@
 
                                         </span>
 
+
                                         <span
                                             class="info-value">
 
@@ -2122,6 +2166,7 @@
                                             🏷️ Brand
 
                                         </span>
+
 
                                         <span
                                             class="info-value">
@@ -2202,6 +2247,7 @@
                 );
 
             }
+
             catch (error) {
 
                 console.error(
@@ -2222,17 +2268,17 @@
                             ⚠️
                         </div>
 
+
                         <h2>
                             Could Not Load Reports
                         </h2>
 
-                        <p>
 
+                        <p>
                             ${escapeHtml(
                                 error.message ||
                                 "Something went wrong while loading your reports."
                             )}
-
                         </p>
 
 
@@ -2247,6 +2293,7 @@
                     </div>
 
                 `;
+
             }
         }
 
@@ -2292,6 +2339,7 @@
                         "click",
                         closeMatchModal
                     );
+
                 }
 
 
@@ -2315,10 +2363,12 @@
                             ) {
 
                                 closeMatchModal();
+
                             }
 
                         }
                     );
+
                 }
 
 
@@ -2329,10 +2379,12 @@
                     function (event) {
 
                         if (
-                            event.key === "Escape"
+                            event.key ===
+                            "Escape"
                         ) {
 
                             closeMatchModal();
+
                         }
 
                     }
