@@ -36,6 +36,11 @@ class Item(Base):
         nullable=False
     )
 
+    item_type = Column(
+        String(20),
+        nullable=False
+)
+
     item_name = Column(
         String(100),
         nullable=False

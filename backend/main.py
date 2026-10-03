@@ -286,11 +286,25 @@ def serialize_item(item):
     JSON-friendly dictionary.
     """
 
+    report_kind = getattr(
+        item,
+        "report_kind",
+        "item"
+    ) or "item"
+
+    # Exact coordinates of person reports should
+    # never be exposed publicly.
+    is_person_report = (
+        report_kind.lower() == "person"
+    )
+
     return {
         "id": item.id,
         "user_id": item.user_id,
 
         "item_type": item.item_type,
+        "report_kind": report_kind,
+
         "item_name": item.item_name,
         "category": item.category,
         "description": item.description,
@@ -298,8 +312,18 @@ def serialize_item(item):
         "color": item.color,
         "brand": item.brand,
         "location": item.location,
-        "latitude": item.latitude,
-        "longitude": item.longitude,
+
+        "latitude": (
+            None
+            if is_person_report
+            else item.latitude
+        ),
+
+        "longitude": (
+            None
+            if is_person_report
+            else item.longitude
+        ),
 
         "item_date": (
             str(item.item_date)
@@ -317,9 +341,11 @@ def serialize_item(item):
             item.image_name
         ),
 
-        "item_status": item.status or "active"
+        "item_status": (
+            item.status
+            or "active"
+        )
     }
-
 
 def normalize_text(value):
     """
@@ -543,7 +569,11 @@ def login(
 @app.post("/report-item")
 async def report_item(
     user_id: int = Form(...),
+
     item_type: str = Form(...),
+
+    report_kind: str = Form("item"),
+
     item_name: str = Form(...),
     category: str = Form(...),
     description: str = Form(...),
@@ -584,6 +614,32 @@ async def report_item(
         raise HTTPException(
             status_code=400,
             detail="Item type must be lost or found."
+        )
+
+    report_kind = (
+        report_kind
+        .strip()
+        .lower()
+    )
+
+    allowed_report_kinds = {
+        "item",
+        "pet",
+        "person",
+        "vehicle",
+        "document",
+        "sighting"
+    }
+
+    if report_kind not in allowed_report_kinds:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Invalid report type. "
+                "Allowed types: item, pet, person, "
+                "vehicle, document, sighting."
+            )
         )
 
     # -----------------------------------------------------
@@ -752,6 +808,7 @@ async def report_item(
     new_item = Item(
         user_id=user_id,
         item_type=item_type,
+        report_kind=report_kind,
         item_name=item_name,
         category=category,
         description=description,
@@ -773,6 +830,13 @@ async def report_item(
         db.commit()
 
         db.refresh(new_item)
+
+        # Automatically check this new report against
+        # existing opposite reports and notify users.
+        create_automatic_match_notifications(
+            db,
+            new_item
+        )
 
     except Exception as e:
 
@@ -831,6 +895,7 @@ def get_items(
 def search_items(
     q: str = "",
     item_type: str = "",
+    report_kind: str = "",
     category: str = "",
     color: str = "",
     brand: str = "",
@@ -851,6 +916,7 @@ def search_items(
     query = db.query(Item)
 
     item_type = normalize_text(item_type)
+    report_kind = normalize_text(report_kind)
     category = normalize_text(category)
     color = normalize_text(color)
     brand = normalize_text(brand)
@@ -859,6 +925,9 @@ def search_items(
 
     if item_type in ["lost", "found"]:
         query = query.filter(Item.item_type == item_type)
+
+    if report_kind:
+        query = query.filter(Item.report_kind == report_kind)
 
     if category:
         query = query.filter(Item.category.ilike(f"%{category}%"))
@@ -921,6 +990,7 @@ def search_items(
         "filters": {
             "q": q,
             "item_type": item_type or None,
+            "report_kind": report_kind or None,
             "category": category or None,
             "color": color or None,
             "brand": brand or None,
@@ -1177,6 +1247,70 @@ def get_item(
 
 
 # =========================================================
+# COMMUNITY REPORTS
+# =========================================================
+
+@app.get("/community/reports")
+def get_community_reports(
+    report_kind: str = "",
+    item_type: str = "",
+    db: Session = Depends(get_db)
+):
+    """
+    Public community feed for active lost/found reports.
+    Person report coordinates are hidden by serialize_item().
+    """
+
+    query = (
+        db.query(Item)
+        .filter(Item.status != "returned")
+    )
+
+    report_kind = normalize_text(report_kind)
+    item_type = normalize_text(item_type)
+
+    allowed_kinds = {
+        "item",
+        "pet",
+        "person",
+        "vehicle",
+        "document",
+        "sighting"
+    }
+
+    if report_kind:
+        if report_kind not in allowed_kinds:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid report kind."
+            )
+
+        query = query.filter(
+            Item.report_kind == report_kind
+        )
+
+    if item_type in ["lost", "found"]:
+        query = query.filter(
+            Item.item_type == item_type
+        )
+
+    reports = (
+        query
+        .order_by(Item.id.desc())
+        .all()
+    )
+
+    return {
+        "status": "success",
+        "count": len(reports),
+        "reports": [
+            serialize_item(report)
+            for report in reports
+        ]
+    }
+
+
+# =========================================================
 # =========================================================
 # AI MATCHING + LOCATION-BASED MATCHING
 # =========================================================
@@ -1278,9 +1412,24 @@ def match_item(
     else:
         raise HTTPException(status_code=400, detail="Item type must be lost or found.")
 
+    current_kind = (
+        getattr(
+            current_item,
+            "report_kind",
+            "item"
+        )
+        or "item"
+    ).lower()
+
     candidate_items = (
         db.query(Item)
         .filter(Item.item_type == target_type)
+        .filter(
+            Item.report_kind == current_kind
+        )
+        .filter(
+            Item.status != "returned"
+        )
         .all()
     )
 
@@ -2499,6 +2648,7 @@ def get_notifications(
     }
 
 
+
 # =========================================================
 # MARK NOTIFICATION AS READ
 # =========================================================
@@ -2680,3 +2830,315 @@ def create_match_notifications(
         "created_count": len(created),
         "notifications": created
     }
+
+
+# =========================================================
+# AUTOMATIC COMMUNITY MATCH NOTIFICATION
+# =========================================================
+
+def create_automatic_match_notifications(
+    db,
+    new_item
+):
+    """
+    When a new report is created, check opposite reports
+    of the same type and notify users when a strong
+    possible match is found.
+    """
+
+    try:
+
+        current_type = (
+            (new_item.item_type or "")
+            .strip()
+            .lower()
+        )
+
+        if current_type == "lost":
+            opposite_type = "found"
+
+        elif current_type == "found":
+            opposite_type = "lost"
+
+        else:
+            return
+
+        current_kind = (
+            getattr(
+                new_item,
+                "report_kind",
+                "item"
+            )
+            or "item"
+        ).lower()
+
+        candidates = (
+            db.query(Item)
+            .filter(
+                Item.item_type
+                == opposite_type
+            )
+            .filter(
+                Item.user_id
+                != new_item.user_id
+            )
+            .all()
+        )
+
+        current_text = " ".join([
+            new_item.item_name or "",
+            new_item.description or "",
+            new_item.category or "",
+            new_item.color or "",
+            new_item.brand or ""
+        ])
+
+        for candidate in candidates:
+
+            candidate_kind = (
+                getattr(
+                    candidate,
+                    "report_kind",
+                    "item"
+                )
+                or "item"
+            ).lower()
+
+            # Pet matches pet, vehicle matches vehicle,
+            # person matches person, etc.
+            if candidate_kind != current_kind:
+                continue
+
+            candidate_text = " ".join([
+                candidate.item_name or "",
+                candidate.description or "",
+                candidate.category or "",
+                candidate.color or "",
+                candidate.brand or ""
+            ])
+
+            # -------------------------------
+            # TEXT
+            # -------------------------------
+
+            try:
+
+                text_similarity = (
+                    calculate_text_similarity(
+                        current_text,
+                        candidate_text
+                    )
+                )
+
+                text_score = max(
+                    0.0,
+                    min(
+                        1.0,
+                        float(text_similarity)
+                    )
+                )
+
+            except Exception:
+
+                text_score = 0.0
+
+            # -------------------------------
+            # IMAGE
+            # -------------------------------
+
+            image_score = 0.0
+
+            try:
+
+                current_image = (
+                    ensure_local_image(
+                        new_item.image_name
+                    )
+                )
+
+                candidate_image = (
+                    ensure_local_image(
+                        candidate.image_name
+                    )
+                )
+
+                if (
+                    current_image
+                    and candidate_image
+                ):
+
+                    image_similarity = (
+                        calculate_image_similarity(
+                            current_image,
+                            candidate_image
+                        )
+                    )
+
+                    image_score = max(
+                        0.0,
+                        min(
+                            1.0,
+                            float(
+                                image_similarity
+                            )
+                        )
+                    )
+
+            except Exception:
+
+                image_score = 0.0
+
+            # -------------------------------
+            # LOCATION
+            # -------------------------------
+
+            location_score = 0.0
+
+            try:
+
+                distance = (
+                    calculate_distance_km(
+                        new_item.latitude,
+                        new_item.longitude,
+                        candidate.latitude,
+                        candidate.longitude
+                    )
+                )
+
+                if distance is not None:
+
+                    if distance <= 1:
+                        location_score = 1.0
+
+                    elif distance <= 3:
+                        location_score = 0.85
+
+                    elif distance <= 5:
+                        location_score = 0.70
+
+                    elif distance <= 10:
+                        location_score = 0.50
+
+                    else:
+                        location_score = 0.20
+
+            except Exception:
+
+                location_score = 0.0
+
+            # -------------------------------
+            # DATE
+            # -------------------------------
+
+            date_score = 0.0
+
+            try:
+
+                if (
+                    new_item.item_date
+                    and candidate.item_date
+                ):
+
+                    days = abs(
+                        (
+                            new_item.item_date
+                            - candidate.item_date
+                        ).days
+                    )
+
+                    if days == 0:
+                        date_score = 1.0
+
+                    elif days <= 1:
+                        date_score = 0.90
+
+                    elif days <= 3:
+                        date_score = 0.75
+
+                    elif days <= 7:
+                        date_score = 0.55
+
+                    else:
+                        date_score = 0.20
+
+            except Exception:
+
+                date_score = 0.0
+
+            # -------------------------------
+            # FINAL SCORE
+            # -------------------------------
+
+            final_score = (
+                (text_score * 0.40)
+                + (image_score * 0.35)
+                + (location_score * 0.15)
+                + (date_score * 0.10)
+            )
+
+            final_score = round(
+                final_score * 100,
+                2
+            )
+
+            if final_score < 65:
+                continue
+
+            # User who owns the opposite report
+            receiver_id = candidate.user_id
+
+            if not receiver_id:
+                continue
+
+            title = (
+                "🔎 Possible Match Found"
+            )
+
+            message = (
+                f"A possible match was found "
+                f"for your {current_kind} report "
+                f"'{candidate.item_name}'. "
+                f"Match score: {final_score}%."
+            )
+
+            duplicate = (
+                db.query(Notification)
+                .filter(
+                    Notification.user_id == receiver_id,
+                    Notification.item_id == new_item.id,
+                    Notification.notification_type == "match",
+                    Notification.message == message
+                )
+                .first()
+            )
+
+            if duplicate:
+                continue
+
+            notification = Notification(
+
+                user_id=receiver_id,
+
+                item_id=new_item.id,
+
+                title=title,
+
+                message=message,
+
+                notification_type="match",
+
+                is_read=0
+            )
+
+            db.add(notification)
+
+        db.commit()
+
+    except Exception as e:
+
+        db.rollback()
+
+        print(
+            "Automatic match notification error:",
+            e
+        )
