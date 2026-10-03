@@ -315,7 +315,9 @@ def serialize_item(item):
 
         "image_exists": image_exists(
             item.image_name
-        )
+        ),
+
+        "item_status": item.status or "active"
     }
 
 
@@ -937,28 +939,72 @@ def search_items(
 # ITEM STATUS
 # =========================================================
 
+# =========================================================
+# ITEM STATUS TRACKING
+# =========================================================
+
 def get_item_status(db, item):
-    """Derive a useful status without changing the existing DB schema."""
-    if item.item_type.lower() != "found":
-        return "lost"
+    """
+    Return the current lifecycle status of an item.
+
+    Status flow:
+
+        active
+            ↓
+        match_found
+            ↓
+        claim_pending
+            ↓
+        ownership_verified
+            ↓
+        returned
+    """
+
+    # -----------------------------------------------------
+    # RETURNED
+    # -----------------------------------------------------
+
+    if item.status == "returned":
+        return "returned"
+
+    # -----------------------------------------------------
+    # OWNERSHIP VERIFIED
+    # -----------------------------------------------------
+
+    if item.status == "ownership_verified":
+        return "ownership_verified"
+
+    # -----------------------------------------------------
+    # CHECK LATEST VERIFICATION REQUEST
+    # -----------------------------------------------------
 
     latest_request = (
         db.query(VerificationRequest)
-        .filter(VerificationRequest.item_id == item.id)
-        .order_by(VerificationRequest.id.desc())
+        .filter(
+            VerificationRequest.item_id == item.id
+        )
+        .order_by(
+            VerificationRequest.id.desc()
+        )
         .first()
     )
 
-    if not latest_request:
-        return "available"
+    if latest_request:
 
-    if latest_request.status == "pending":
-        return "claim_pending"
+        if latest_request.status == "pending":
+            return "claim_pending"
 
-    if latest_request.status == "approved":
-        return "verified"
+        if latest_request.status == "approved":
+            return "ownership_verified"
 
-    return "available"
+        if latest_request.status == "rejected":
+            return item.status or "active"
+
+    # -----------------------------------------------------
+    # NORMAL ITEM STATUS
+    # -----------------------------------------------------
+
+    return item.status or "active"
 
 
 @app.get("/items/{item_id}/status")
@@ -966,18 +1012,76 @@ def get_item_status_endpoint(
     item_id: int,
     db: Session = Depends(get_db)
 ):
-    item = db.query(Item).filter(Item.id == item_id).first()
+
+    item = (
+        db.query(Item)
+        .filter(Item.id == item_id)
+        .first()
+    )
+
     if not item:
-        raise HTTPException(status_code=404, detail="Item not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Item not found."
+        )
+
+    current_status = get_item_status(
+        db,
+        item
+    )
 
     return {
         "status": "success",
         "item_id": item.id,
         "item_type": item.item_type,
-        "item_status": get_item_status(db, item)
+        "item_status": current_status
     }
 
 
+
+@app.put("/items/{item_id}/returned")
+def mark_item_returned(
+    item_id: int,
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    item = (
+        db.query(Item)
+        .filter(Item.id == item_id)
+        .first()
+    )
+
+    if not item:
+        raise HTTPException(
+            status_code=404,
+            detail="Item not found."
+        )
+
+    if item.user_id != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not allowed to update this item."
+        )
+
+    current_status = get_item_status(db, item)
+
+    if current_status != "ownership_verified":
+        raise HTTPException(
+            status_code=400,
+            detail="Only an ownership-verified item can be marked as returned."
+        )
+
+    item.status = "returned"
+
+    db.commit()
+    db.refresh(item)
+
+    return {
+        "status": "success",
+        "message": "Item marked as returned successfully.",
+        "item_id": item.id,
+        "item_status": "returned"
+    }
 # =========================================================
 # GET MY ITEMS
 # =========================================================
@@ -1861,8 +1965,10 @@ def create_verification_request(
 
         db.add(request)
 
-        db.commit()
+        # Item is now waiting for ownership verification
+        item.status = "claim_pending"
 
+        db.commit()
         db.refresh(request)
 
     except Exception as e:
@@ -2165,6 +2271,26 @@ def respond_to_verification(
     # -----------------------------------------------------
 
     request.status = status
+
+    # -----------------------------------------------------
+    # UPDATE ITEM STATUS
+    # -----------------------------------------------------
+
+    item = (
+        db.query(Item)
+        .filter(
+            Item.id == request.item_id
+        )
+        .first()
+    )
+
+    if item:
+
+        if status == "approved":
+            item.status = "ownership_verified"
+
+        elif status == "rejected":
+            item.status = "active"
 
     request.response_message = (
         response_message

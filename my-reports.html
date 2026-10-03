@@ -203,6 +203,21 @@
         }
 
 
+        .status-pending {
+            background: #fff4d6;
+            color: #9a6700;
+        }
+
+        .status-verified {
+            background: #e5f8ed;
+            color: #16804b;
+        }
+
+        .status-returned {
+            background: #e8eefc;
+            color: #3157d5;
+        }
+
         .report-description {
 
             color: #666;
@@ -825,6 +840,20 @@
 
             cursor: default;
 
+        }
+
+        .returned-btn {
+            background: #3157d5;
+            color: white;
+        }
+
+        .returned-btn:hover {
+            background: #2446b8;
+        }
+
+        .returned-btn.returned {
+            background: #16804b;
+            cursor: default;
         }
 
 
@@ -1828,16 +1857,42 @@
                         "report-card";
 
 
-                    const status =
-                        item.item_type === "lost"
-                            ? "Lost"
-                            : "Found";
+                    const itemStatus =
+                        item.item_status ||
+                        item.status ||
+                        "active";
 
+                    let status;
+                    let statusClass;
 
-                    const statusClass =
-                        item.item_type === "lost"
-                            ? "status-lost"
-                            : "status-found";
+                    if (item.item_type === "lost") {
+
+                        status = "Lost";
+                        statusClass = "status-lost";
+
+                    } else if (itemStatus === "claim_pending") {
+
+                        status = "Claim Pending";
+                        statusClass = "status-pending";
+
+                    } else if (
+                        itemStatus === "ownership_verified" ||
+                        itemStatus === "verified"
+                    ) {
+
+                        status = "Ownership Verified";
+                        statusClass = "status-verified";
+
+                    } else if (itemStatus === "returned") {
+
+                        status = "Returned";
+                        statusClass = "status-returned";
+
+                    } else {
+
+                        status = "Found";
+                        statusClass = "status-found";
+                    }
 
 
                     const imageURL =
@@ -2000,6 +2055,36 @@
                                         : ""
                                 }
 
+                                ${
+                                    item.item_type === "found"
+                                        ? (
+                                            itemStatus === "ownership_verified" ||
+                                            itemStatus === "verified"
+                                        )
+                                            ? `
+                                                <button
+                                                    id="return-btn-${item.id}"
+                                                    class="returned-btn"
+                                                    onclick="
+                                                        event.stopPropagation();
+                                                        markItemReturned(${item.id});
+                                                    "
+                                                >
+                                                    📦 Mark Item Returned
+                                                </button>
+                                            `
+                                            : itemStatus === "returned"
+                                                ? `
+                                                    <button
+                                                        class="returned-btn returned"
+                                                        disabled
+                                                    >
+                                                        ✅ Item Returned
+                                                    </button>
+                                                `
+                                                : ""
+                                        : ""
+                                }
 
                                 <a
                                     href="item-detail.html?id=${encodeURIComponent(item.id)}"
@@ -2485,6 +2570,84 @@
     }
 
 
+
+    /* =====================================================
+    MARK ITEM RETURNED
+    ===================================================== */
+
+    async function markItemReturned(itemId) {
+
+        const button = document.getElementById(
+            `return-btn-${itemId}`
+        );
+
+        if (!button) {
+            return;
+        }
+
+        const confirmed = confirm(
+            "Have you received the item back from the claimant?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Updating...";
+
+        try {
+
+            const response = await fetch(
+                `${API_URL}/items/${encodeURIComponent(itemId)}/returned?user_id=${encodeURIComponent(user.id)}`,
+                {
+                    method: "PUT"
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.detail ||
+                    "Unable to mark item as returned."
+                );
+            }
+
+            button.textContent =
+                "✅ Item Returned";
+
+            button.classList.add(
+                "returned"
+            );
+
+            button.disabled = true;
+
+            alert(
+                "Item has been successfully marked as returned."
+            );
+
+            await loadMyReports();
+
+        } catch (error) {
+
+            console.error(
+                "Mark Returned Error:",
+                error
+            );
+
+            button.disabled = false;
+
+            button.textContent =
+                "📦 Mark Item Returned";
+
+            alert(
+                error.message
+            );
+        }
+    }
+
+
     /* =====================================================
        CONTACT REPORTER
     ===================================================== */
@@ -2575,8 +2738,10 @@
                 data.item_status;
 
 
-            if (status === "verified") {
-
+            if (
+                status === "ownership_verified" ||
+                status === "verified"
+            ) {
                 button.textContent =
                     "✓ Ownership Verified";
 
@@ -2585,11 +2750,9 @@
                 );
 
                 button.disabled = true;
-
                 button.onclick = null;
 
                 return;
-
             }
 
 
