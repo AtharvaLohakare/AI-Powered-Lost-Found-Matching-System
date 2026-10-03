@@ -2,910 +2,1380 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>My Reports | Lost & Found AI</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="style.css">
+    <title>My Reports - Lost & Found AI</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 
     <style>
-        /* =========================================================
-           MY REPORTS PAGE
-        ========================================================= */
 
-        .my-reports-page {
-            min-height: calc(100vh - 80px);
-            padding: 50px 30px 70px;
-            background: #f5f7fb;
+        /* =====================================================
+           MY REPORTS
+        ===================================================== */
+
+        .reports-page {
+
+            padding: 120px 7% 60px;
+
+            min-height: 100vh;
+
         }
+
 
         .reports-header {
-            max-width: 1200px;
-            margin: 0 auto 35px;
+
             text-align: center;
+
+            margin-bottom: 40px;
+
         }
+
 
         .reports-header h1 {
-            margin: 0;
-            color: #1f2937;
-            font-size: 36px;
-            font-weight: 700;
+
+            font-size: 42px;
+
+            margin-bottom: 10px;
+
         }
+
 
         .reports-header p {
-            margin: 10px 0 18px;
-            color: #6b7280;
-            font-size: 16px;
+
+            color: #777;
+
+            font-size: 17px;
+
         }
+
 
         .reports-count {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+
+            display: inline-block;
+
+            margin-top: 15px;
+
             padding: 8px 18px;
+
             border-radius: 20px;
-            background: #e8edff;
-            color: #3155d4;
-            font-size: 14px;
+
+            background: #f1f5ff;
+
+            color: #3157d5;
+
             font-weight: 600;
+
         }
 
-        .reports-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
 
         .reports-grid {
+
+            max-width: 1150px;
+
+            margin: auto;
+
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-            gap: 24px;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(320px, 1fr));
+
+            gap: 25px;
+
         }
 
-        /* =========================================================
-           REPORT CARD
-        ========================================================= */
 
         .report-card {
-            background: #ffffff;
+
+            background: #fff;
+
             border-radius: 18px;
+
             overflow: hidden;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.07);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+            box-shadow:
+                0 8px 30px rgba(0,0,0,0.08);
+
+            border: 1px solid #eee;
+
+            transition: 0.25s ease;
+
         }
+
 
         .report-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 14px 32px rgba(15, 23, 42, 0.11);
+
+            transform: translateY(-4px);
+
+            box-shadow:
+                0 14px 35px rgba(0,0,0,0.12);
+
         }
 
-        .report-image-wrapper {
-            position: relative;
-            width: 100%;
-            height: 230px;
-            background: #eef1f5;
-            overflow: hidden;
-        }
 
         .report-image {
+
             width: 100%;
-            height: 100%;
+
+            height: 220px;
+
             object-fit: cover;
+
             display: block;
+
+            background: #f3f4f7;
+
         }
 
-        .report-image-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 55px;
-            color: #9ca3af;
-        }
-
-        .status-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 7px 13px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .status-lost {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .status-found {
-            background: #dcfce7;
-            color: #15803d;
-        }
 
         .report-content {
+
             padding: 22px;
+
         }
 
-        .report-title-row {
+
+        .report-top {
+
             display: flex;
+
             justify-content: space-between;
-            align-items: flex-start;
+
+            align-items: center;
+
             gap: 12px;
-            margin-bottom: 8px;
+
+            margin-bottom: 12px;
+
         }
+
 
         .report-title {
+
+            font-size: 23px;
+
             margin: 0;
-            color: #1f2937;
-            font-size: 22px;
-            font-weight: 700;
+
         }
+
+
+        .status-badge {
+
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            white-space: nowrap;
+
+        }
+
+
+        .status-lost {
+
+            background: #ffe8e8;
+
+            color: #d63031;
+
+        }
+
+
+        .status-found {
+
+            background: #e5f8ed;
+
+            color: #16804b;
+
+        }
+
 
         .report-description {
-            margin: 0 0 20px;
-            color: #6b7280;
-            font-size: 14px;
+
+            color: #666;
+
             line-height: 1.6;
+
+            margin: 12px 0 18px;
+
         }
 
-        .report-info-grid {
+
+        .report-info {
+
             display: grid;
+
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
+
+            gap: 12px;
+
         }
+
 
         .info-box {
-            padding: 11px 12px;
+
+            background: #f8f9fb;
+
+            padding: 12px;
+
             border-radius: 10px;
-            background: #f8fafc;
-            border: 1px solid #edf0f4;
+
         }
+
 
         .info-label {
+
             display: block;
+
+            font-size: 12px;
+
+            color: #888;
+
             margin-bottom: 4px;
-            color: #9ca3af;
-            font-size: 11px;
-            font-weight: 600;
+
         }
+
 
         .info-value {
-            display: block;
-            color: #374151;
-            font-size: 13px;
-            font-weight: 600;
-            word-break: break-word;
-        }
 
-        .find-match-button {
-            width: 100%;
-            border: none;
-            border-radius: 10px;
-            padding: 13px 18px;
-            background: #3155d4;
-            color: white;
             font-size: 14px;
+
+            font-weight: 600;
+
+            color: #333;
+
+        }
+
+
+        /* =====================================================
+           REPORT ACTIONS
+        ===================================================== */
+
+        .report-actions {
+
+            margin-top: 22px;
+
+            padding-top: 18px;
+
+            border-top: 1px solid #eee;
+
+            display: flex;
+
+            gap: 10px;
+
+        }
+
+
+        .ai-match-btn {
+
+            flex: 1;
+
+            border: none;
+
+            border-radius: 10px;
+
+            padding: 13px 15px;
+
+            background: #3157d5;
+
+            color: white;
+
             font-weight: 700;
+
             cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
+
+            transition: 0.2s ease;
+
         }
 
-        .find-match-button:hover {
-            background: #2444ba;
-            transform: translateY(-1px);
+
+        .ai-match-btn:hover {
+
+            background: #2446b8;
+
         }
 
-        .find-match-button:disabled {
-            opacity: 0.65;
-            cursor: wait;
-            transform: none;
-        }
 
-        .report-click-hint {
-            margin: 13px 0 0;
+        .details-btn {
+
+            flex: 1;
+
+            border-radius: 10px;
+
+            padding: 12px 15px;
+
             text-align: center;
-            color: #9ca3af;
-            font-size: 12px;
+
+            text-decoration: none;
+
+            background: #f1f3f7;
+
+            color: #333;
+
+            font-weight: 700;
+
         }
 
-        /* =========================================================
-           EMPTY / ERROR STATES
-        ========================================================= */
 
-        .empty-reports {
-            padding: 70px 25px;
-            background: white;
-            border-radius: 18px;
-            border: 1px solid #e5e7eb;
-            text-align: center;
-        }
+        /* =====================================================
+           MODAL
+        ===================================================== */
 
-        .empty-reports-icon {
-            font-size: 55px;
-            margin-bottom: 15px;
-        }
+        .modal-overlay {
 
-        .empty-reports h3 {
-            margin: 0 0 8px;
-            color: #1f2937;
-            font-size: 22px;
-        }
-
-        .empty-reports p {
-            margin: 0;
-            color: #6b7280;
-        }
-
-        /* =========================================================
-           AI MATCH MODAL
-        ========================================================= */
-
-        .match-modal {
             position: fixed;
+
             inset: 0;
-            z-index: 9999;
+
+            background:
+                rgba(0,0,0,0.68);
 
             display: none;
+
             align-items: center;
+
             justify-content: center;
 
             padding: 25px;
 
-            background: rgba(15, 23, 42, 0.62);
-            backdrop-filter: blur(3px);
+            z-index: 9999;
+
         }
 
-        .match-modal.active {
+
+        .modal-overlay.active {
+
             display: flex;
+
         }
 
-        .match-modal-content {
+
+        .modal {
+
             width: min(1050px, 100%);
+
             max-height: 90vh;
+
             overflow-y: auto;
 
-            background: #ffffff;
+            background: white;
+
             border-radius: 20px;
 
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+            box-shadow:
+                0 25px 70px rgba(0,0,0,0.3);
 
-            animation: matchModalIn 0.2s ease;
         }
 
-        @keyframes matchModalIn {
-            from {
-                opacity: 0;
-                transform: translateY(15px) scale(0.98);
-            }
 
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
+        .modal-header {
 
-        .match-modal-header {
             position: sticky;
+
             top: 0;
+
             z-index: 2;
 
+            background: white;
+
+            padding: 25px 30px 20px;
+
+            border-bottom: 1px solid #eee;
+
             display: flex;
-            align-items: center;
+
             justify-content: space-between;
 
-            padding: 25px 30px;
+            align-items: center;
 
-            background: #ffffff;
-            border-bottom: 1px solid #edf0f4;
         }
 
-        .match-modal-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+
+        .modal-header h2 {
 
             margin: 0;
 
-            color: #25324a;
             font-size: 28px;
-            font-weight: 700;
+
+            color: #1d3557;
+
         }
 
-        .close-match-modal {
+
+        .modal-header p {
+
+            margin: 5px 0 0;
+
+            color: #777;
+
+        }
+
+
+        .close-btn {
+
             width: 40px;
+
             height: 40px;
 
             border: none;
+
             border-radius: 50%;
 
-            background: #f1f3f6;
-            color: #111827;
-
-            font-size: 18px;
-            font-weight: 700;
+            background: #f1f3f7;
 
             cursor: pointer;
 
-            transition: background 0.2s ease;
+            font-size: 20px;
+
+            font-weight: 700;
+
         }
 
-        .close-match-modal:hover {
-            background: #e4e7eb;
+
+        .close-btn:hover {
+
+            background: #e5e7eb;
+
         }
 
-        .match-content {
-            padding: 25px 30px 32px;
+
+        .modal-body {
+
+            padding: 25px 30px 30px;
+
         }
 
-        .match-results-info {
-            margin-bottom: 25px;
-            padding: 14px 18px;
+
+        /* =====================================================
+           MATCH CARD
+        ===================================================== */
+
+        .matches-container {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 20px;
+
+        }
+
+
+        .match-card {
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(280px, 1.35fr)
+                minmax(130px, 0.45fr)
+                minmax(260px, 1fr);
+
+            gap: 22px;
+
+            padding: 20px;
+
+            border: 1px solid #e4e7ec;
+
+            border-radius: 16px;
+
+            background: #fff;
+
+            box-shadow:
+                0 5px 18px rgba(0,0,0,0.05);
+
+        }
+
+
+        /* FOUND ITEM */
+
+        .match-item {
+
+            display: flex;
+
+            gap: 16px;
+
+            min-width: 0;
+
+        }
+
+
+        .match-image {
+
+            width: 145px;
+
+            height: 145px;
 
             border-radius: 12px;
 
-            background: #eef3ff;
-            color: #3155d4;
+            object-fit: cover;
+
+            background: #f1f3f6;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .match-image-placeholder {
+
+            width: 145px;
+
+            height: 145px;
+
+            border-radius: 12px;
+
+            background: #f1f3f6;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 45px;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .match-details {
+
+            min-width: 0;
+
+        }
+
+
+        .match-details h3 {
+
+            margin: 0 0 7px;
+
+            font-size: 21px;
+
+            color: #172033;
+
+        }
+
+
+        .match-description {
+
+            margin: 0 0 13px;
+
+            color: #666;
+
+            line-height: 1.45;
 
             font-size: 14px;
-            font-weight: 600;
-            line-height: 1.5;
+
         }
 
-        /* =========================================================
-           MATCH LOADING
-        ========================================================= */
 
-        .match-loading {
-            padding: 65px 20px;
-            text-align: center;
-        }
+        .match-meta {
 
-        .match-loading-icon {
-            font-size: 55px;
-            margin-bottom: 15px;
-            animation: robotPulse 1.3s infinite ease-in-out;
-        }
-
-        @keyframes robotPulse {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-7px);
-            }
-        }
-
-        .match-loading h3 {
-            margin: 0 0 8px;
-            color: #1f2937;
-        }
-
-        .match-loading p {
-            max-width: 520px;
-            margin: 0 auto;
-            color: #6b7280;
-            line-height: 1.6;
-        }
-
-        /* =========================================================
-           MATCH CARD - IMPROVED
-        ========================================================= */
-
-        .match-results {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .match-card {
-            overflow: hidden;
-
-            background: #ffffff;
-
-            border: 1px solid #dfe4ec;
-            border-radius: 18px;
-
-            box-shadow: 0 7px 24px rgba(15, 23, 42, 0.07);
-        }
-
-        /*
-            TOP AREA:
-            Image + details
-        */
-
-        .match-card-main {
             display: grid;
-            grid-template-columns: 180px minmax(0, 1fr);
 
-            gap: 24px;
+            grid-template-columns: 1fr 1fr;
 
-            padding: 22px;
+            gap: 7px;
+
         }
 
-        .match-image-container {
-            width: 180px;
-            height: 180px;
 
-            overflow: hidden;
+        .meta-item {
+
+            background: #f7f8fa;
+
+            padding: 8px;
+
+            border-radius: 7px;
+
+            font-size: 12px;
+
+        }
+
+
+        .meta-item strong {
+
+            display: block;
+
+            color: #888;
+
+            font-size: 11px;
+
+            margin-bottom: 2px;
+
+        }
+
+
+        /* SCORE */
+
+        .match-score-box {
+
+            background: #f4f7ff;
 
             border-radius: 14px;
 
-            background: #f1f3f6;
-        }
-
-        .match-image {
-            width: 100%;
-            height: 100%;
-
-            object-fit: cover;
-            display: block;
-        }
-
-        .match-image-placeholder {
-            width: 100%;
-            height: 100%;
-
             display: flex;
-            align-items: center;
+
+            flex-direction: column;
+
             justify-content: center;
 
-            font-size: 55px;
-            color: #9ca3af;
-        }
-
-        .match-details {
-            min-width: 0;
-        }
-
-        .match-details h3 {
-            margin: 0 0 7px;
-
-            color: #1f2937;
-
-            font-size: 23px;
-            font-weight: 700;
-        }
-
-        .match-description {
-            margin: 0 0 16px;
-
-            color: #6b7280;
-
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .match-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .match-meta span {
-            display: inline-flex;
             align-items: center;
 
-            padding: 7px 10px;
+            min-height: 145px;
 
-            border-radius: 8px;
+            padding: 15px;
 
-            background: #f5f7fa;
+            text-align: center;
 
-            color: #5b6472;
+        }
+
+
+        .score-label {
+
+            color: #68738a;
 
             font-size: 12px;
-            font-weight: 600;
-        }
 
-        /* =========================================================
-           SCORE SECTION
-        ========================================================= */
-
-        .match-score-section {
-            padding: 20px 22px;
-
-            border-top: 1px solid #edf0f4;
-            border-bottom: 1px solid #edf0f4;
-
-            background: #fafbfc;
-        }
-
-        .match-score-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            gap: 15px;
-
-            margin-bottom: 10px;
-        }
-
-        .match-score-label {
-            color: #4b5563;
-
-            font-size: 14px;
             font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: .5px;
+
         }
 
-        .match-score {
-            color: #3155d4;
 
-            font-size: 25px;
+        .score-number {
+
+            color: #3157d5;
+
+            font-size: 38px;
+
             font-weight: 800;
 
-            white-space: nowrap;
+            line-height: 1.1;
+
+            margin: 7px 0;
+
         }
 
-        .score-bar {
-            width: 100%;
-            height: 9px;
-
-            overflow: hidden;
-
-            border-radius: 20px;
-
-            background: #e4e8ef;
-        }
-
-        .score-fill {
-            height: 100%;
-
-            border-radius: inherit;
-
-            background: linear-gradient(
-                90deg,
-                #3155d4,
-                #5577e8
-            );
-
-            transition: width 0.5s ease;
-        }
 
         .match-level {
+
             display: inline-block;
 
-            margin-top: 11px;
-
-            padding: 6px 11px;
+            padding: 5px 11px;
 
             border-radius: 20px;
 
-            background: #e9f0ff;
-            color: #3155d4;
+            background: #e5ecff;
+
+            color: #3157d5;
 
             font-size: 12px;
+
             font-weight: 700;
+
         }
 
-        /* =========================================================
-           REASONS SECTION
-        ========================================================= */
 
-        .match-reasons {
-            padding: 20px 22px;
-        }
+        /* REASONS + ACTIONS */
 
-        .match-reasons-title {
-            display: block;
-
-            margin-bottom: 12px;
-
-            color: #25324a;
-
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .match-reasons ul {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-
-            gap: 9px 25px;
-
-            margin: 0;
-            padding: 0;
-
-            list-style: none;
-        }
-
-        .match-reasons li {
-            position: relative;
-
-            padding-left: 22px;
-
-            color: #5b6472;
-
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .match-reasons li::before {
-            content: "✓";
-
-            position: absolute;
-            left: 0;
-            top: 0;
-
-            color: #15945a;
-
-            font-weight: 800;
-        }
-
-        /* =========================================================
-           CONTACT BUTTON
-        ========================================================= */
-
-        .match-actions {
-            padding: 0 22px 22px;
-        }
-
-        .contact-reporter-button {
-            width: 100%;
+        .match-right {
 
             display: flex;
-            align-items: center;
-            justify-content: center;
 
-            gap: 8px;
+            flex-direction: column;
 
-            padding: 14px 20px;
+            min-width: 0;
 
-            border: none;
-            border-radius: 11px;
+        }
 
-            background: #168a50;
-            color: #ffffff;
+
+        .reasons-title {
 
             font-size: 14px;
+
+            font-weight: 800;
+
+            margin-bottom: 10px;
+
+            color: #222;
+
+        }
+
+
+        .match-reasons {
+
+            margin: 0;
+
+            padding-left: 18px;
+
+            color: #555;
+
+            font-size: 13px;
+
+            line-height: 1.55;
+
+            flex: 1;
+
+        }
+
+
+        .match-reasons li {
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .match-actions {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 10px;
+
+            margin-top: 16px;
+
+        }
+
+
+        .action-btn {
+
+            min-height: 46px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            padding: 10px 12px;
+
+            font-size: 13px;
+
             font-weight: 700;
 
             cursor: pointer;
 
-            transition:
-                background 0.2s ease,
-                transform 0.2s ease;
+            transition: .2s ease;
+
         }
 
-        .contact-reporter-button:hover {
-            background: #117443;
-            transform: translateY(-1px);
+
+        .contact-btn {
+
+            background: #3157d5;
+
+            color: white;
+
         }
 
-        /* =========================================================
-           NO MATCH
-        ========================================================= */
 
-        .no-match {
-            padding: 65px 25px;
-            text-align: center;
+        .contact-btn:hover {
+
+            background: #2446b8;
+
         }
 
-        .no-match-icon {
-            margin-bottom: 15px;
-            font-size: 55px;
+
+        .verify-btn {
+
+            background: #16804b;
+
+            color: white;
+
         }
 
-        .no-match h3 {
-            margin: 0 0 10px;
-            color: #1f2937;
+
+        .verify-btn:hover {
+
+            background: #116b3e;
+
         }
 
-        .no-match p {
-            max-width: 600px;
-            margin: 7px auto;
-            color: #6b7280;
-            line-height: 1.6;
+
+        .verify-btn.pending {
+
+            background: #9aa0a6;
+
+            cursor: default;
+
         }
 
-        /* =========================================================
-           NAVBAR USER
-        ========================================================= */
 
-        .user-welcome {
-            display: inline-flex;
-            align-items: center;
+        .verify-btn.verified {
 
-            color: #374151;
+            background: #16804b;
+
+            cursor: default;
+
+        }
+
+
+        /* =====================================================
+           VERIFICATION MODAL
+        ===================================================== */
+
+        .verification-modal {
+
+            width: min(600px, 100%);
+
+        }
+
+
+        .verification-content {
+
+            padding: 28px 30px 30px;
+
+        }
+
+
+        .verification-item {
+
+            background: #f6f8fc;
+
+            border-radius: 12px;
+
+            padding: 15px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .verification-item strong {
+
+            display: block;
+
+            font-size: 18px;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .verification-item span {
+
+            color: #777;
+
+            font-size: 13px;
+
+        }
+
+
+        .verification-label {
+
+            display: block;
+
+            font-weight: 700;
+
+            margin-bottom: 8px;
+
+        }
+
+
+        #proofInput {
+
+            width: 100%;
+
+            min-height: 150px;
+
+            resize: vertical;
+
+            border: 1px solid #d8dce5;
+
+            border-radius: 10px;
+
+            padding: 13px;
+
+            font-family: inherit;
+
             font-size: 14px;
-            font-weight: 600;
+
+            outline: none;
+
         }
 
-        /* =========================================================
+
+        #proofInput:focus {
+
+            border-color: #3157d5;
+
+            box-shadow:
+                0 0 0 3px rgba(49,87,213,.1);
+
+        }
+
+
+        .proof-help {
+
+            color: #777;
+
+            font-size: 12px;
+
+            margin-top: 7px;
+
+            line-height: 1.5;
+
+        }
+
+
+        .verification-actions {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 22px;
+
+        }
+
+
+        .cancel-btn {
+
+            flex: 1;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #eef0f3;
+
+            padding: 13px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        .submit-verification-btn {
+
+            flex: 2;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #16804b;
+
+            color: white;
+
+            padding: 13px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        .submit-verification-btn:hover {
+
+            background: #116b3e;
+
+        }
+
+
+        .submit-verification-btn:disabled {
+
+            opacity: .6;
+
+            cursor: not-allowed;
+
+        }
+
+
+        /* =====================================================
+           LOADING / EMPTY
+        ===================================================== */
+
+        .loading-state {
+
+            text-align: center;
+
+            padding: 50px 20px;
+
+            color: #777;
+
+        }
+
+
+        .empty-match {
+
+            text-align: center;
+
+            padding: 45px 20px;
+
+            color: #777;
+
+        }
+
+
+        .empty-match-icon {
+
+            font-size: 50px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .message-box {
+
+            margin-bottom: 18px;
+
+            padding: 12px 15px;
+
+            border-radius: 9px;
+
+            display: none;
+
+            font-size: 14px;
+
+        }
+
+
+        .message-box.show {
+
+            display: block;
+
+        }
+
+
+        .message-success {
+
+            background: #e7f7ee;
+
+            color: #12633b;
+
+        }
+
+
+        .message-error {
+
+            background: #ffe9e9;
+
+            color: #b42318;
+
+        }
+
+
+        /* =====================================================
            RESPONSIVE
-        ========================================================= */
+        ===================================================== */
 
-        @media (max-width: 800px) {
+        @media (max-width: 900px) {
 
-            .my-reports-page {
-                padding: 35px 16px 55px;
+            .match-card {
+
+                grid-template-columns: 1fr 1fr;
+
             }
+
+
+            .match-item {
+
+                grid-column: 1 / -1;
+
+            }
+
+
+            .match-right {
+
+                grid-column: 1 / -1;
+
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .reports-page {
+
+                padding: 100px 20px 40px;
+
+            }
+
 
             .reports-header h1 {
-                font-size: 30px;
+
+                font-size: 32px;
+
             }
 
-            .reports-grid {
+
+            .report-info {
+
                 grid-template-columns: 1fr;
+
             }
 
-            .match-modal {
-                padding: 10px;
-            }
 
-            .match-modal-content {
-                max-height: 94vh;
-                border-radius: 16px;
-            }
+            .report-actions {
 
-            .match-modal-header {
-                padding: 20px;
-            }
-
-            .match-modal-title {
-                font-size: 22px;
-            }
-
-            .match-content {
-                padding: 18px;
-            }
-
-            .match-card-main {
-                grid-template-columns: 1fr;
-                gap: 18px;
-            }
-
-            .match-image-container {
-                width: 100%;
-                height: 220px;
-            }
-
-            .match-reasons ul {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-
-            .report-info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .report-image-wrapper {
-                height: 200px;
-            }
-
-            .match-image-container {
-                height: 190px;
-            }
-
-            .match-score-top {
-                align-items: flex-start;
                 flex-direction: column;
+
             }
 
-            .match-score {
-                font-size: 23px;
+
+            .modal-overlay {
+
+                padding: 10px;
+
             }
+
+
+            .modal-header {
+
+                padding: 20px;
+
+            }
+
+
+            .modal-header h2 {
+
+                font-size: 22px;
+
+            }
+
+
+            .modal-body {
+
+                padding: 18px;
+
+            }
+
+
+            .match-card {
+
+                grid-template-columns: 1fr;
+
+                padding: 15px;
+
+            }
+
+
+            .match-item,
+            .match-right {
+
+                grid-column: auto;
+
+            }
+
+
+            .match-item {
+
+                flex-direction: column;
+
+            }
+
+
+            .match-image,
+            .match-image-placeholder {
+
+                width: 100%;
+
+                height: 190px;
+
+            }
+
+
+            .match-meta {
+
+                grid-template-columns: 1fr 1fr;
+
+            }
+
+
+            .match-actions {
+
+                grid-template-columns: 1fr;
+
+            }
+
+
+            .verification-content {
+
+                padding: 20px;
+
+            }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-    <!-- =========================================================
-         NAVBAR
-    ========================================================= -->
 
-    <nav class="navbar">
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
 
-        <div class="logo">
-            Lost & Found AI
-        </div>
+<nav class="navbar">
 
-        <div class="nav-links">
-
-            <a href="index.html">Home</a>
-
-            <a href="items.html">Items</a>
-
-            <a href="report-lost.html">Report Lost</a>
-
-            <a href="report-found.html">Report Found</a>
-
-            <a href="notifications.html" class="notification-link">
-                🔔 Notifications
-                <span id="navBadge" style="display:none;"></span>
-            </a>
-
-        </div>
-
-        <div class="nav-buttons" id="navButtons">
-
-            <a href="login.html" class="login-btn">
-                Login
-            </a>
-
-            <a href="signup.html" class="signup-btn">
-                Sign Up
-            </a>
-
-        </div>
-
-    </nav>
+    <div class="logo">
+        Lost & Found AI
+    </div>
 
 
-    <!-- =========================================================
-         MAIN
-    ========================================================= -->
+    <div class="nav-links">
 
-    <main class="my-reports-page">
+        <a href="index.html">
+            Home
+        </a>
 
-        <header class="reports-header">
+        <a href="items.html">
+            Items
+        </a>
 
-            <h1>My Reports</h1>
+        <a href="report-lost.html">
+            Report Lost
+        </a>
 
-            <p>
-                Manage and track the items you have reported.
-            </p>
+        <a href="report-found.html">
+            Report Found
+        </a>
 
-            <span class="reports-count" id="reportsCount">
-                0 Reports
-            </span>
-
-        </header>
-
-
-        <section class="reports-container">
-
-            <div
-                class="reports-grid"
-                id="reportsContainer">
-            </div>
-
-        </section>
-
-    </main>
+    </div>
 
 
-    <!-- =========================================================
-         AI MATCH MODAL
-    ========================================================= -->
+    <div class="nav-buttons">
+
+        <span
+            class="user-welcome"
+            id="userWelcome"
+        ></span>
+
+        <a
+            href="my-reports.html"
+            class="login-btn"
+        >
+            My Reports
+        </a>
+
+        <a
+            href="#"
+            class="signup-btn"
+            id="logoutBtn"
+        >
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+<!-- =====================================================
+     MY REPORTS
+===================================================== -->
+
+<main class="reports-page">
+
+    <div class="reports-header">
+
+        <h1>
+            My Reports
+        </h1>
+
+        <p>
+            Manage and track the items you have reported.
+        </p>
+
+        <span
+            class="reports-count"
+            id="reportsCount"
+        >
+            Loading reports...
+        </span>
+
+    </div>
+
 
     <div
-        class="match-modal"
-        id="matchModal">
+        id="reports-container"
+        class="reports-grid"
+    ></div>
 
-        <div class="match-modal-content">
+</main>
 
-            <div class="match-modal-header">
 
-                <h2 class="match-modal-title">
-                    🤖 AI Match Results
+<!-- =====================================================
+     AI MATCH MODAL
+===================================================== -->
+
+<div
+    class="modal-overlay"
+    id="matchModal"
+>
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>
+                    AI Match Results
                 </h2>
 
-                <button
-                    type="button"
-                    class="close-match-modal"
-                    id="closeMatchModal"
-                    aria-label="Close">
-                    ×
-                </button>
+                <p id="matchSubtitle">
+                    Searching for possible matches...
+                </p>
 
             </div>
 
-            <div
-                class="match-content"
-                id="matchContent">
 
-                <!-- Results inserted here -->
+            <button
+                class="close-btn"
+                id="closeMatchModal"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+            <div
+                id="matchMessage"
+                class="message-box"
+            ></div>
+
+
+            <div
+                id="matchesContainer"
+                class="matches-container"
+            >
+
+                <div class="loading-state">
+
+                    Finding possible matches...
+
+                </div>
 
             </div>
 
@@ -913,1023 +1383,535 @@
 
     </div>
 
-
-    <!-- =========================================================
-         SCRIPTS
-    ========================================================= -->
-
-    <script src="config.js"></script>
-    <script src="script.js"></script>
+</div>
 
 
-    <script>
+<!-- =====================================================
+     VERIFY OWNERSHIP MODAL
+===================================================== -->
 
-        /* =========================================================
-           BASIC HELPERS
-        ========================================================= */
+<div
+    class="modal-overlay"
+    id="verificationModal"
+>
 
-        function escapeHtml(value) {
+    <div class="modal verification-modal">
 
-            if (value === null || value === undefined) {
-                return "";
-            }
+        <div class="modal-header">
 
-            return String(value)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
+            <div>
 
+                <h2>
+                    Verify Ownership
+                </h2>
 
-        function getImageUrl(item) {
+                <p>
+                    Help the reporter confirm that this item belongs to you.
+                </p>
 
-            if (!item || !item.image_url) {
-                return "";
-            }
-
-            const imageUrl = String(item.image_url);
-
-            if (
-                imageUrl.startsWith("http://") ||
-                imageUrl.startsWith("https://")
-            ) {
-                return imageUrl;
-            }
-
-            return `${API_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
-        }
+            </div>
 
 
-        function handleImageError(img) {
+            <button
+                class="close-btn"
+                id="closeVerificationModal"
+            >
+                ×
+            </button>
 
-            if (!img) {
-                return;
-            }
-
-            img.style.display = "none";
-
-            const parent = img.parentElement;
-
-            if (parent && !parent.querySelector(".report-image-placeholder")) {
-
-                const placeholder = document.createElement("div");
-
-                placeholder.className = "report-image-placeholder";
-
-                placeholder.innerHTML = "📦";
-
-                parent.appendChild(placeholder);
-            }
-        }
+        </div>
 
 
-        /* =========================================================
-           USER
-        ========================================================= */
+        <div class="verification-content">
 
-        function getLoggedInUser() {
-
-            const storedUser = localStorage.getItem("user");
-
-            if (!storedUser) {
-
-                window.location.href = "login.html";
-
-                return null;
-            }
-
-            try {
-
-                const user = JSON.parse(storedUser);
-
-                if (!user || !user.id) {
-
-                    localStorage.removeItem("user");
-
-                    window.location.href = "login.html";
-
-                    return null;
-                }
-
-                return user;
-
-            } catch (error) {
-
-                console.error(
-                    "Invalid user data:",
-                    error
-                );
-
-                localStorage.removeItem("user");
-
-                window.location.href = "login.html";
-
-                return null;
-            }
-        }
+            <div
+                id="verificationMessage"
+                class="message-box"
+            ></div>
 
 
-        /* =========================================================
-           NAVBAR
-        ========================================================= */
+            <div class="verification-item">
 
-        function setupNavbar(user) {
+                <strong id="verificationItemName">
+                    Item
+                </strong>
 
-            const navButtons =
-                document.getElementById("navButtons");
-
-            if (!navButtons || !user) {
-                return;
-            }
-
-            navButtons.innerHTML = `
-
-                <span class="user-welcome">
-                    Hi, ${escapeHtml(user.name || "User")} 👋
+                <span>
+                    Found item matched with your lost report.
                 </span>
 
-                <a
-                    href="my-reports.html"
-                    class="login-btn">
-                    My Reports
-                </a>
-
-                <a
-                    href="#"
-                    class="signup-btn"
-                    id="logoutBtn">
-                    Logout
-                </a>
-
-            `;
+            </div>
 
 
-            const logoutBtn =
-                document.getElementById("logoutBtn");
+            <label
+                class="verification-label"
+                for="proofInput"
+            >
+                Why do you believe this item belongs to you?
+            </label>
 
-            if (logoutBtn) {
 
-                logoutBtn.addEventListener(
-                    "click",
-                    function (event) {
+            <textarea
+                id="proofInput"
+                placeholder="Example: The wallet contains my college ID. It also has a small scratch near the zipper and I lost it near the metro station."
+            ></textarea>
 
-                        event.preventDefault();
 
-                        localStorage.removeItem("user");
+            <div class="proof-help">
 
-                        window.location.href =
-                            "index.html";
-                    }
-                );
+                Give specific information that the person who found
+                the item can use to verify ownership. Do not share
+                passwords or other sensitive account information.
+
+            </div>
+
+
+            <div class="verification-actions">
+
+                <button
+                    class="cancel-btn"
+                    id="cancelVerificationBtn"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    class="submit-verification-btn"
+                    id="submitVerificationBtn"
+                >
+                    Submit Verification
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="config.js"></script>
+
+
+<script>
+
+    /* =====================================================
+       USER
+    ===================================================== */
+
+    const storedUser =
+        localStorage.getItem("user");
+
+
+    if (!storedUser) {
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    let user = null;
+
+
+    try {
+
+        user =
+            JSON.parse(storedUser);
+
+    } catch (error) {
+
+        console.error(
+            "Invalid user:",
+            error
+        );
+
+        localStorage.removeItem("user");
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    if (!user || !user.id) {
+
+        localStorage.removeItem("user");
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    /* =====================================================
+       NAVBAR
+    ===================================================== */
+
+    document.getElementById(
+        "userWelcome"
+    ).textContent =
+        `Hi, ${user.name} 👋`;
+
+
+    document.getElementById(
+        "logoutBtn"
+    ).addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            localStorage.removeItem(
+                "user"
+            );
+
+            window.location.href =
+                "index.html";
+
+        }
+    );
+
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    const reportsContainer =
+        document.getElementById(
+            "reports-container"
+        );
+
+
+    const reportsCount =
+        document.getElementById(
+            "reportsCount"
+        );
+
+
+    const matchModal =
+        document.getElementById(
+            "matchModal"
+        );
+
+
+    const matchesContainer =
+        document.getElementById(
+            "matchesContainer"
+        );
+
+
+    const matchSubtitle =
+        document.getElementById(
+            "matchSubtitle"
+        );
+
+
+    const matchMessage =
+        document.getElementById(
+            "matchMessage"
+        );
+
+
+    const verificationModal =
+        document.getElementById(
+            "verificationModal"
+        );
+
+
+    const verificationItemName =
+        document.getElementById(
+            "verificationItemName"
+        );
+
+
+    const proofInput =
+        document.getElementById(
+            "proofInput"
+        );
+
+
+    const verificationMessage =
+        document.getElementById(
+            "verificationMessage"
+        );
+
+
+    const submitVerificationBtn =
+        document.getElementById(
+            "submitVerificationBtn"
+        );
+
+
+    let verificationItemId =
+        null;
+
+
+    /* =====================================================
+       ESCAPE HTML
+    ===================================================== */
+
+    function escapeHTML(value) {
+
+        if (value === null ||
+            value === undefined) {
+
+            return "";
+
+        }
+
+        return String(value)
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    /* =====================================================
+       IMAGE URL
+    ===================================================== */
+
+    function getImageURL(item) {
+
+        if (item.image_url) {
+
+            if (
+                item.image_url.startsWith(
+                    "http"
+                )
+            ) {
+
+                return item.image_url;
+
             }
+
+            return `${API_URL}${item.image_url}`;
+
         }
 
 
-        /* =========================================================
-           MODAL
-        ========================================================= */
+        if (item.image_name) {
 
-        function openMatchModal() {
+            return (
+                `${API_URL}/uploads/` +
+                encodeURIComponent(
+                    item.image_name
+                )
+            );
 
-            const modal =
-                document.getElementById("matchModal");
-
-            if (!modal) {
-                return;
-            }
-
-            modal.classList.add("active");
-
-            document.body.style.overflow = "hidden";
         }
 
 
-        function closeMatchModal() {
+        return null;
 
-            const modal =
-                document.getElementById("matchModal");
-
-            if (!modal) {
-                return;
-            }
-
-            modal.classList.remove("active");
-
-            document.body.style.overflow = "";
-        }
+    }
 
 
-        /* =========================================================
-           FIND AI MATCH
-        ========================================================= */
+    /* =====================================================
+       LOAD MY REPORTS
+    ===================================================== */
 
-        async function findAIMatch(itemId, button) {
+    async function loadMyReports() {
 
-            const matchContent =
-                document.getElementById("matchContent");
+        try {
 
-            if (!matchContent) {
-                return;
-            }
-
-
-            openMatchModal();
-
-
-            matchContent.innerHTML = `
-
-                <div class="match-loading">
-
-                    <div class="match-loading-icon">
-                        🤖
-                    </div>
-
-                    <h3>
-                        AI is searching for matches...
-                    </h3>
-
-                    <p>
-                        Comparing descriptions, images,
-                        category, color, brand,
-                        location and date.
-                    </p>
-
-                </div>
-
-            `;
-
-
-            if (button) {
-                button.disabled = true;
-                button.textContent = "🤖 Finding Matches...";
-            }
-
-
-            try {
-
-                const response = await fetch(
-                    `${API_URL}/match/${encodeURIComponent(itemId)}`
+            const response =
+                await fetch(
+                    `${API_URL}/my-items/${user.id}`
                 );
 
 
-                if (!response.ok) {
-
-                    let errorMessage =
-                        `Unable to find matches. Server returned ${response.status}.`;
-
-                    try {
-
-                        const errorData =
-                            await response.json();
-
-                        if (errorData.detail) {
-                            errorMessage =
-                                errorData.detail;
-                        }
-
-                    } catch (error) {
-                        // Ignore JSON parsing error
-                    }
-
-                    throw new Error(errorMessage);
-                }
+            const data =
+                await response.json();
 
 
-                const data =
-                    await response.json();
+            if (!response.ok) {
 
-
-                console.log(
-                    "AI Match Response:",
-                    data
+                throw new Error(
+                    data.detail ||
+                    "Could not load reports."
                 );
 
+            }
 
-                displayMatchResults(data);
 
+            if (!Array.isArray(data)) {
 
-            } catch (error) {
-
-                console.error(
-                    "AI Match Error:",
-                    error
+                throw new Error(
+                    "Invalid reports data."
                 );
 
+            }
 
-                matchContent.innerHTML = `
 
-                    <div class="no-match">
+            reportsCount.textContent =
+                `${data.length} Report${
+                    data.length === 1
+                        ? ""
+                        : "s"
+                }`;
 
-                        <div class="no-match-icon">
-                            ⚠️
+
+            if (data.length === 0) {
+
+                reportsContainer.innerHTML = `
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            📦
                         </div>
 
-                        <h3>
-                            Unable to Find Matches
-                        </h3>
+                        <h2>
+                            No Reports Yet
+                        </h2>
 
                         <p>
-                            ${escapeHtml(
-                                error.message ||
-                                "Something went wrong while searching for matches."
-                            )}
+                            You haven't reported any
+                            lost or found items yet.
                         </p>
 
-                        <p>
-                            Please try again later.
-                        </p>
+                        <a
+                            href="report-lost.html"
+                            class="report-button"
+                        >
+                            Report an Item
+                        </a>
 
                     </div>
 
                 `;
 
-            } finally {
-
-                if (button) {
-
-                    button.disabled = false;
-
-                    button.textContent =
-                        "🤖 Find AI Match";
-                }
-            }
-        }
-
-
-        /* =========================================================
-           DISPLAY AI MATCH RESULTS
-        ========================================================= */
-
-        function displayMatchResults(data) {
-
-            const matchContent =
-                document.getElementById("matchContent");
-
-            if (!matchContent) {
                 return;
+
             }
 
 
-            const matches =
-                Array.isArray(data?.matches)
-                    ? data.matches
-                    : [];
+            reportsContainer.innerHTML = "";
 
 
-            if (matches.length === 0) {
+            data.forEach(
+                item => {
 
-                matchContent.innerHTML = `
-
-                    <div class="no-match">
-
-                        <div class="no-match-icon">
-                            🔎
-                        </div>
-
-                        <h3>
-                            No Strong Match Found
-                        </h3>
-
-                        <p>
-                            ${escapeHtml(
-                                data?.message ||
-                                "The AI could not find a strong matching item yet."
-                            )}
-                        </p>
-
-                        <p>
-                            You can check again later
-                            when more reports are added.
-                        </p>
-
-                    </div>
-
-                `;
-
-                return;
-            }
-
-
-            matchContent.innerHTML = `
-
-                <div class="match-results-info">
-
-                    🤖 Found
-                    ${matches.length}
-                    possible
-                    ${escapeHtml(
-                        data?.searching_for ||
-                        "lost item"
-                    )}
-                    match${matches.length === 1 ? "" : "es"}.
-                    Results are sorted by AI match score.
-
-                </div>
-
-                <div
-                    class="match-results"
-                    id="matchResultsContainer">
-                </div>
-
-            `;
-
-
-            const resultsContainer =
-                document.getElementById(
-                    "matchResultsContainer"
-                );
-
-
-            if (!resultsContainer) {
-                return;
-            }
-
-
-            matches.forEach(function (match) {
-
-                const card =
-                    createMatchCard(match);
-
-                resultsContainer.appendChild(card);
-
-            });
-        }
-
-
-        /* =========================================================
-           CREATE MATCH CARD
-        ========================================================= */
-
-        function createMatchCard(match) {
-
-            const score =
-                Number(match?.match_score || 0);
-
-
-            const safeScore =
-                Math.max(
-                    0,
-                    Math.min(
-                        score,
-                        100
-                    )
-                );
-
-
-            const matchedItemId =
-                match?.item_id;
-
-
-            let imageUrl = "";
-
-            if (match?.image_url) {
-
-                const rawImageUrl =
-                    String(match.image_url);
-
-                if (
-                    rawImageUrl.startsWith("http://") ||
-                    rawImageUrl.startsWith("https://")
-                ) {
-
-                    imageUrl =
-                        rawImageUrl;
-
-                } else {
-
-                    imageUrl =
-                        `${API_URL}${rawImageUrl.startsWith("/") ? "" : "/"}${rawImageUrl}`;
-                }
-            }
-
-
-            const reasons =
-                Array.isArray(match?.reasons)
-                    ? match.reasons
-                    : [];
-
-
-            const card =
-                document.createElement("div");
-
-            card.className =
-                "match-card";
-
-
-            const reasonsHTML =
-                reasons.length
-
-                    ? reasons
-                        .map(function (reason) {
-
-                            return `
-                                <li>
-                                    ${escapeHtml(reason)}
-                                </li>
-                            `;
-
-                        })
-                        .join("")
-
-                    : `
-                        <li>
-                            Possible match based on item details.
-                        </li>
-                    `;
-
-
-            card.innerHTML = `
-
-                <!-- ITEM INFORMATION -->
-
-                <div class="match-card-main">
-
-                    <div class="match-image-container">
-
-                        ${
-                            imageUrl
-
-                                ? `
-
-                                    <img
-                                        src="${escapeHtml(imageUrl)}"
-                                        class="match-image"
-                                        alt="Matched item"
-                                        onerror="this.style.display='none';"
-                                    >
-
-                                `
-
-                                : `
-
-                                    <div class="match-image-placeholder">
-                                        📦
-                                    </div>
-
-                                `
-                        }
-
-                    </div>
-
-
-                    <div class="match-details">
-
-                        <h3>
-                            ${escapeHtml(
-                                match?.item_name ||
-                                "Matched Item"
-                            )}
-                        </h3>
-
-
-                        <p class="match-description">
-
-                            ${escapeHtml(
-                                match?.description ||
-                                "No description available."
-                            )}
-
-                        </p>
-
-
-                        <div class="match-meta">
-
-                            <span>
-                                📂
-                                ${escapeHtml(
-                                    match?.category ||
-                                    "N/A"
-                                )}
-                            </span>
-
-                            <span>
-                                🎨
-                                ${escapeHtml(
-                                    match?.color ||
-                                    "N/A"
-                                )}
-                            </span>
-
-                            <span>
-                                🏷️
-                                ${escapeHtml(
-                                    match?.brand ||
-                                    "N/A"
-                                )}
-                            </span>
-
-                            <span>
-                                📍
-                                ${escapeHtml(
-                                    match?.location ||
-                                    "N/A"
-                                )}
-                            </span>
-
-                            ${
-                                match?.distance_km !== null &&
-                                match?.distance_km !== undefined
-
-                                    ? `
-
-                                        <span>
-                                            📏
-                                            ${escapeHtml(
-                                                match.distance_km
-                                            )}
-                                            km
-                                        </span>
-
-                                    `
-
-                                    : ""
-                            }
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- SCORE -->
-
-                <div class="match-score-section">
-
-                    <div class="match-score-top">
-
-                        <span class="match-score-label">
-                            AI Match Score
-                        </span>
-
-                        <span class="match-score">
-                            ${safeScore.toFixed(2)}%
-                        </span>
-
-                    </div>
-
-
-                    <div class="score-bar">
-
-                        <div
-                            class="score-fill"
-                            style="width: ${safeScore}%">
-                        </div>
-
-                    </div>
-
-
-                    <span class="match-level">
-                        ${getMatchLevel(safeScore)}
-                    </span>
-
-                </div>
-
-
-                <!-- REASONS -->
-
-                <div class="match-reasons">
-
-                    <span class="match-reasons-title">
-                        Why this may be a match:
-                    </span>
-
-                    <ul>
-                        ${reasonsHTML}
-                    </ul>
-
-                </div>
-
-
-                <!-- CONTACT -->
-
-                <div class="match-actions">
-
-                    <button
-                        type="button"
-                        class="contact-reporter-button">
-
-                        💬 Contact Reporter
-
-                    </button>
-
-                </div>
-
-            `;
-
-
-            /* =====================================================
-               CONTACT REPORTER
-            ===================================================== */
-
-            const contactButton =
-                card.querySelector(
-                    ".contact-reporter-button"
-                );
-
-
-            if (contactButton) {
-
-                contactButton.addEventListener(
-                    "click",
-                    function () {
-
-                        console.log(
-                            "Matched item:",
-                            match
-                        );
-
-                        console.log(
-                            "Matched item ID:",
-                            matchedItemId
-                        );
-
-
-                        if (!matchedItemId) {
-
-                            alert(
-                                "Unable to contact the reporter because the matched item ID is missing."
-                            );
-
-                            return;
-                        }
-
-
-                        /*
-                            IMPORTANT:
-
-                            The matched item's ID is passed to
-                            the communication page.
-
-                            Example:
-
-                            messages.html?item_id=2
-                        */
-
-                        window.location.href =
-                            `messages.html?item_id=${encodeURIComponent(
-                                matchedItemId
-                            )}`;
-
-                    }
-                );
-            }
-
-
-            return card;
-        }
-
-
-        /* =========================================================
-           MATCH LEVEL
-        ========================================================= */
-
-        function getMatchLevel(score) {
-
-            if (score >= 80) {
-                return "Very High Match";
-            }
-
-            if (score >= 65) {
-                return "High Match";
-            }
-
-            if (score >= 50) {
-                return "Possible Match";
-            }
-
-            return "Low Match";
-        }
-
-
-        /* =========================================================
-           LOAD MY REPORTS
-        ========================================================= */
-
-        async function loadMyReports(user) {
-
-            const reportsContainer =
-                document.getElementById(
-                    "reportsContainer"
-                );
-
-
-            const reportsCount =
-                document.getElementById(
-                    "reportsCount"
-                );
-
-
-            if (!reportsContainer) {
-                return;
-            }
-
-
-            reportsContainer.innerHTML = `
-
-                <div class="empty-reports">
-
-                    <div class="empty-reports-icon">
-                        ⏳
-                    </div>
-
-                    <h3>
-                        Loading your reports...
-                    </h3>
-
-                    <p>
-                        Please wait.
-                    </p>
-
-                </div>
-
-            `;
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `${API_URL}/my-items/${encodeURIComponent(user.id)}`
-                    );
-
-
-                if (!response.ok) {
-
-                    let errorMessage =
-                        `Unable to load reports. Server returned ${response.status}.`;
-
-                    try {
-
-                        const errorData =
-                            await response.json();
-
-                        if (errorData.detail) {
-                            errorMessage =
-                                errorData.detail;
-                        }
-
-                    } catch (error) {
-                        // Ignore JSON parsing error
-                    }
-
-                    throw new Error(errorMessage);
-                }
-
-
-                const items =
-                    await response.json();
-
-
-                console.log(
-                    "My Reports:",
-                    items
-                );
-
-
-                if (!Array.isArray(items)) {
-
-                    throw new Error(
-                        "Invalid reports data received from server."
-                    );
-                }
-
-
-                reportsCount.textContent =
-                    `${items.length} Report${items.length === 1 ? "" : "s"}`;
-
-
-                if (items.length === 0) {
-
-                    reportsContainer.innerHTML = `
-
-                        <div class="empty-reports">
-
-                            <div class="empty-reports-icon">
-                                📦
-                            </div>
-
-                            <h3>
-                                No Reports Yet
-                            </h3>
-
-                            <p>
-                                You have not reported any
-                                lost or found items yet.
-                            </p>
-
-                        </div>
-
-                    `;
-
-                    return;
-                }
-
-
-                reportsContainer.innerHTML = "";
-
-
-                items.forEach(function (item) {
-
-                    const article =
+                    const card =
                         document.createElement(
                             "article"
                         );
 
-                    article.className =
+
+                    card.className =
                         "report-card";
 
 
-                    const isLost =
-                        String(
-                            item.item_type || ""
-                        ).toLowerCase() === "lost";
+                    const status =
+                        item.item_type === "lost"
+                            ? "Lost"
+                            : "Found";
 
 
-                    const imageUrl =
-                        getImageUrl(item);
+                    const statusClass =
+                        item.item_type === "lost"
+                            ? "status-lost"
+                            : "status-found";
 
 
-                    article.innerHTML = `
-
-                        <div class="report-image-wrapper">
-
-                            ${
-                                imageUrl
-
-                                    ? `
-
-                                        <img
-                                            src="${escapeHtml(imageUrl)}"
-                                            class="report-image"
-                                            alt="${escapeHtml(
-                                                item.item_name ||
-                                                "Reported item"
-                                            )}"
-                                        >
-
-                                    `
-
-                                    : `
-
-                                        <div class="report-image-placeholder">
-                                            📦
-                                        </div>
-
-                                    `
-                            }
+                    const imageURL =
+                        getImageURL(item);
 
 
-                            <span
-                                class="
-                                    status-badge
-                                    ${
-                                        isLost
-                                            ? "status-lost"
-                                            : "status-found"
-                                    }
-                                ">
+                    let imageHTML;
 
-                                ${
-                                    isLost
-                                        ? "LOST"
-                                        : "FOUND"
-                                }
 
-                            </span>
+                    if (imageURL) {
 
-                        </div>
+                        imageHTML = `
 
+                            <img
+                                class="report-image"
+                                src="${escapeHTML(imageURL)}"
+                                alt="${escapeHTML(item.item_name)}"
+                                onerror="this.style.display='none'"
+                            >
+
+                        `;
+
+                    } else {
+
+                        imageHTML = `
+
+                            <div
+                                class="report-image"
+                                style="
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    font-size:55px;
+                                "
+                            >
+                                📦
+                            </div>
+
+                        `;
+
+                    }
+
+
+                    card.innerHTML = `
+
+                        ${imageHTML}
 
                         <div class="report-content">
 
-                            <div class="report-title-row">
+                            <div class="report-top">
 
                                 <h2 class="report-title">
-
-                                    ${escapeHtml(
-                                        item.item_name ||
-                                        "Unnamed Item"
-                                    )}
-
+                                    ${escapeHTML(item.item_name)}
                                 </h2>
+
+                                <span
+                                    class="status-badge ${statusClass}"
+                                >
+                                    ${status}
+                                </span>
 
                             </div>
 
 
                             <p class="report-description">
 
-                                ${escapeHtml(
-                                    item.description ||
-                                    "No description available."
+                                ${escapeHTML(
+                                    item.description
                                 )}
 
                             </p>
 
 
-                            <div class="report-info-grid">
+                            <div class="report-info">
 
                                 <div class="info-box">
 
@@ -1938,12 +1920,9 @@
                                     </span>
 
                                     <span class="info-value">
-
-                                        ${escapeHtml(
-                                            item.location ||
-                                            "N/A"
+                                        ${escapeHTML(
+                                            item.location
                                         )}
-
                                     </span>
 
                                 </div>
@@ -1956,12 +1935,9 @@
                                     </span>
 
                                     <span class="info-value">
-
-                                        ${escapeHtml(
-                                            item.item_date ||
-                                            "N/A"
+                                        ${escapeHTML(
+                                            item.item_date
                                         )}
-
                                     </span>
 
                                 </div>
@@ -1974,12 +1950,10 @@
                                     </span>
 
                                     <span class="info-value">
-
-                                        ${escapeHtml(
+                                        ${escapeHTML(
                                             item.color ||
-                                            "N/A"
+                                            "Not specified"
                                         )}
-
                                     </span>
 
                                 </div>
@@ -1992,12 +1966,10 @@
                                     </span>
 
                                     <span class="info-value">
-
-                                        ${escapeHtml(
+                                        ${escapeHTML(
                                             item.brand ||
-                                            "N/A"
+                                            "Not specified"
                                         )}
-
                                     </span>
 
                                 </div>
@@ -2005,201 +1977,1042 @@
                             </div>
 
 
-                            <button
-                                type="button"
-                                class="find-match-button">
+                            <div class="report-actions">
 
-                                🤖 Find AI Match
+                                ${
+                                    item.item_type === "lost"
+                                        ? `
+                                            <button
+                                                class="ai-match-btn"
+                                                onclick="
+                                                    event.stopPropagation();
+                                                    findAIMatches(
+                                                        ${item.id},
+                                                        '${escapeHTML(
+                                                            item.item_name
+                                                        )}'
+                                                    );
+                                                "
+                                            >
+                                                🤖 Find AI Match
+                                            </button>
+                                        `
+                                        : ""
+                                }
 
-                            </button>
 
+                                <a
+                                    href="item-detail.html?id=${encodeURIComponent(item.id)}"
+                                    class="details-btn"
+                                    onclick="event.stopPropagation();"
+                                >
+                                    View Details
+                                </a>
 
-                            <p class="report-click-hint">
-
-                                Click the button to find possible matching reports.
-
-                            </p>
+                            </div>
 
                         </div>
 
                     `;
 
 
-                    const image =
-                        article.querySelector(
-                            ".report-image"
-                        );
-
-
-                    if (image) {
-
-                        image.addEventListener(
-                            "error",
-                            function () {
-
-                                handleImageError(
-                                    image
-                                );
-
-                            }
-                        );
-                    }
-
-
-                    const matchButton =
-                        article.querySelector(
-                            ".find-match-button"
-                        );
-
-
-                    if (matchButton) {
-
-                        matchButton.addEventListener(
-                            "click",
-                            function () {
-
-                                findAIMatch(
-                                    item.id,
-                                    matchButton
-                                );
-
-                            }
-                        );
-                    }
-
-
                     reportsContainer.appendChild(
-                        article
+                        card
                     );
 
-                });
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "My Reports Error:",
+                error
+            );
 
 
-            } catch (error) {
+            reportsCount.textContent =
+                "Error";
 
-                console.error(
-                    "Load My Reports Error:",
-                    error
+
+            reportsContainer.innerHTML = `
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ⚠️
+                    </div>
+
+                    <h2>
+                        Could Not Load Reports
+                    </h2>
+
+                    <p>
+                        ${escapeHTML(
+                            error.message
+                        )}
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       FIND AI MATCHES
+    ===================================================== */
+
+    async function findAIMatches(
+        itemId,
+        itemName
+    ) {
+
+        matchModal.classList.add(
+            "active"
+        );
+
+
+        matchSubtitle.textContent =
+            `Finding matches for "${itemName}"`;
+
+
+        matchesContainer.innerHTML = `
+
+            <div class="loading-state">
+
+                🤖 AI is analyzing possible matches...
+
+            </div>
+
+        `;
+
+
+        matchMessage.className =
+            "message-box";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/match/${encodeURIComponent(itemId)}`
                 );
 
 
-                reportsContainer.innerHTML = `
+            const data =
+                await response.json();
 
-                    <div class="empty-reports">
 
-                        <div class="empty-reports-icon">
-                            ⚠️
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    "Unable to find matches."
+                );
+
+            }
+
+
+            const matches =
+                Array.isArray(data.matches)
+                    ? data.matches
+                    : [];
+
+
+            if (matches.length === 0) {
+
+                matchesContainer.innerHTML = `
+
+                    <div class="empty-match">
+
+                        <div class="empty-match-icon">
+                            🔎
                         </div>
 
                         <h3>
-                            Unable to Load Reports
+                            No Possible Matches Found
                         </h3>
 
                         <p>
-                            ${escapeHtml(
-                                error.message ||
-                                "Something went wrong while loading your reports."
-                            )}
+                            We couldn't find a suitable
+                            found-item report yet.
                         </p>
 
                     </div>
 
                 `;
 
+                return;
 
-                reportsCount.textContent =
-                    "0 Reports";
             }
-        }
 
 
-        /* =========================================================
-           DOM READY
-        ========================================================= */
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-
-                const user =
-                    getLoggedInUser();
+            matchSubtitle.textContent =
+                `${matches.length} possible match${
+                    matches.length === 1
+                        ? ""
+                        : "es"
+                } found`;
 
 
-                if (!user) {
-                    return;
-                }
+            matchesContainer.innerHTML = "";
 
 
-                setupNavbar(user);
+            for (
+                const match of matches
+            ) {
 
-                loadMyReports(user);
-
-
-                /* Close button */
-
-                const closeButton =
-                    document.getElementById(
-                        "closeMatchModal"
+                const card =
+                    createMatchCard(
+                        match
                     );
 
 
-                if (closeButton) {
-
-                    closeButton.addEventListener(
-                        "click",
-                        closeMatchModal
-                    );
-                }
-
-
-                /* Click outside modal */
-
-                const modal =
-                    document.getElementById(
-                        "matchModal"
-                    );
-
-
-                if (modal) {
-
-                    modal.addEventListener(
-                        "click",
-                        function (event) {
-
-                            if (
-                                event.target === modal
-                            ) {
-
-                                closeMatchModal();
-
-                            }
-
-                        }
-                    );
-                }
-
-
-                /* ESC key */
-
-                document.addEventListener(
-                    "keydown",
-                    function (event) {
-
-                        if (
-                            event.key === "Escape"
-                        ) {
-
-                            closeMatchModal();
-
-                        }
-
-                    }
+                matchesContainer.appendChild(
+                    card
                 );
 
             }
+
+        } catch (error) {
+
+            console.error(
+                "AI Match Error:",
+                error
+            );
+
+
+            matchesContainer.innerHTML = `
+
+                <div class="empty-match">
+
+                    <div class="empty-match-icon">
+                        ⚠️
+                    </div>
+
+                    <h3>
+                        Unable to Find Matches
+                    </h3>
+
+                    <p>
+                        ${escapeHTML(
+                            error.message
+                        )}
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CREATE MATCH CARD
+    ===================================================== */
+
+    function createMatchCard(
+        match
+    ) {
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+
+        card.className =
+            "match-card";
+
+
+        const imageURL =
+            getImageURL(match);
+
+
+        let imageHTML;
+
+
+        if (imageURL) {
+
+            imageHTML = `
+
+                <img
+                    class="match-image"
+                    src="${escapeHTML(imageURL)}"
+                    alt="${escapeHTML(
+                        match.item_name
+                    )}"
+                    onerror="
+                        this.outerHTML =
+                        '<div class=&quot;match-image-placeholder&quot;>📦</div>'
+                    "
+                >
+
+            `;
+
+        } else {
+
+            imageHTML = `
+
+                <div class="match-image-placeholder">
+                    📦
+                </div>
+
+            `;
+
+        }
+
+
+        const score =
+            Number(
+                match.match_score || 0
+            );
+
+
+        const reasons =
+            Array.isArray(match.reasons)
+                ? match.reasons
+                : [];
+
+
+        const reasonsHTML =
+            reasons.length > 0
+
+                ? reasons
+                    .map(
+                        reason =>
+                            `<li>${escapeHTML(reason)}</li>`
+                    )
+                    .join("")
+
+                : `<li>Possible match based on available information.</li>`;
+
+
+        card.innerHTML = `
+
+            <!-- FOUND ITEM -->
+
+            <div class="match-item">
+
+                ${imageHTML}
+
+                <div class="match-details">
+
+                    <h3>
+                        ${escapeHTML(
+                            match.item_name ||
+                            "Found Item"
+                        )}
+                    </h3>
+
+
+                    <p class="match-description">
+
+                        ${escapeHTML(
+                            match.description ||
+                            "No description available."
+                        )}
+
+                    </p>
+
+
+                    <div class="match-meta">
+
+                        <div class="meta-item">
+
+                            <strong>
+                                Category
+                            </strong>
+
+                            ${escapeHTML(
+                                match.category ||
+                                "—"
+                            )}
+
+                        </div>
+
+
+                        <div class="meta-item">
+
+                            <strong>
+                                Color
+                            </strong>
+
+                            ${escapeHTML(
+                                match.color ||
+                                "—"
+                            )}
+
+                        </div>
+
+
+                        <div class="meta-item">
+
+                            <strong>
+                                Brand
+                            </strong>
+
+                            ${escapeHTML(
+                                match.brand ||
+                                "—"
+                            )}
+
+                        </div>
+
+
+                        <div class="meta-item">
+
+                            <strong>
+                                Location
+                            </strong>
+
+                            ${escapeHTML(
+                                match.location ||
+                                "—"
+                            )}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SCORE -->
+
+            <div class="match-score-box">
+
+                <div class="score-label">
+                    AI Match Score
+                </div>
+
+
+                <div class="score-number">
+                    ${score}%
+                </div>
+
+
+                <span class="match-level">
+
+                    ${escapeHTML(
+                        match.match_level ||
+                        "Possible"
+                    )}
+
+                </span>
+
+            </div>
+
+
+            <!-- REASONS + ACTIONS -->
+
+            <div class="match-right">
+
+                <div class="reasons-title">
+                    Why this may be a match
+                </div>
+
+
+                <ul class="match-reasons">
+
+                    ${reasonsHTML}
+
+                </ul>
+
+
+                <div class="match-actions">
+
+                    <button
+                        class="action-btn contact-btn"
+                        onclick="
+                            contactReporter(
+                                ${Number(match.item_id)}
+                            );
+                        "
+                    >
+                        💬 Contact Reporter
+                    </button>
+
+
+                    <button
+                        class="action-btn verify-btn"
+                        data-item-id="${Number(match.item_id)}"
+                        data-item-name="${escapeHTML(
+                            match.item_name ||
+                            "Found Item"
+                        )}"
+                        onclick="
+                            openVerification(
+                                ${Number(match.item_id)},
+                                '${escapeHTML(
+                                    match.item_name ||
+                                    "Found Item"
+                                )}',
+                                this
+                            );
+                        "
+                    >
+                        🛡️ Verify Ownership
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        /* Check current status */
+
+        updateVerificationButton(
+            match.item_id,
+            card.querySelector(
+                ".verify-btn"
+            )
         );
 
-    </script>
+
+        return card;
+
+    }
+
+
+    /* =====================================================
+       CONTACT REPORTER
+    ===================================================== */
+
+    async function contactReporter(
+        itemId
+    ) {
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/items/${encodeURIComponent(itemId)}`
+                );
+
+
+            const item =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    item.detail ||
+                    "Unable to open reporter."
+                );
+
+            }
+
+
+            if (!item.user_id) {
+
+                throw new Error(
+                    "Reporter information is unavailable."
+                );
+
+            }
+
+
+            window.location.href =
+                `messages.html?item_id=${
+                    encodeURIComponent(itemId)
+                }`;
+
+        } catch (error) {
+
+            alert(
+                error.message
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CHECK VERIFICATION STATUS
+    ===================================================== */
+
+    async function updateVerificationButton(
+        itemId,
+        button
+    ) {
+
+        if (!button) {
+            return;
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/items/${encodeURIComponent(itemId)}/status`
+                );
+
+
+            if (!response.ok) {
+                return;
+            }
+
+
+            const data =
+                await response.json();
+
+
+            const status =
+                data.item_status;
+
+
+            if (status === "verified") {
+
+                button.textContent =
+                    "✓ Ownership Verified";
+
+                button.classList.add(
+                    "verified"
+                );
+
+                button.disabled = true;
+
+                button.onclick = null;
+
+                return;
+
+            }
+
+
+            if (status === "claim_pending") {
+
+                button.textContent =
+                    "⏳ Claim Pending";
+
+                button.classList.add(
+                    "pending"
+                );
+
+                /*
+                 * Keep the button visible.
+                 * Clicking it explains that a request
+                 * is already pending.
+                 */
+
+                button.onclick =
+                    function() {
+
+                        alert(
+                            "Your ownership verification request is already pending."
+                        );
+
+                    };
+
+                return;
+
+            }
+
+
+            button.textContent =
+                "🛡️ Verify Ownership";
+
+        } catch (error) {
+
+            console.error(
+                "Status check error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       OPEN VERIFICATION
+    ===================================================== */
+
+    function openVerification(
+        itemId,
+        itemName,
+        button
+    ) {
+
+        verificationItemId =
+            itemId;
+
+
+        verificationItemName.textContent =
+            itemName;
+
+
+        proofInput.value =
+            "";
+
+
+        verificationMessage.className =
+            "message-box";
+
+
+        submitVerificationBtn.disabled =
+            false;
+
+
+        verificationModal.classList.add(
+            "active"
+        );
+
+
+        proofInput.focus();
+
+    }
+
+
+    /* =====================================================
+       SUBMIT VERIFICATION
+    ===================================================== */
+
+    submitVerificationBtn.addEventListener(
+        "click",
+        async function() {
+
+            const proof =
+                proofInput.value.trim();
+
+
+            if (!proof) {
+
+                showVerificationMessage(
+                    "Please provide some ownership proof.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (proof.length < 10) {
+
+                showVerificationMessage(
+                    "Please provide more specific ownership details.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            submitVerificationBtn.disabled =
+                true;
+
+
+            submitVerificationBtn.textContent =
+                "Submitting...";
+
+
+            try {
+
+                /*
+                 * Backend expects:
+                 * item_id
+                 * claimant_id
+                 * proof
+                 *
+                 * These are FastAPI parameters,
+                 * so send them in the query string.
+                 */
+
+                const params =
+                    new URLSearchParams();
+
+
+                params.append(
+                    "item_id",
+                    verificationItemId
+                );
+
+
+                params.append(
+                    "claimant_id",
+                    user.id
+                );
+
+
+                params.append(
+                    "proof",
+                    proof
+                );
+
+
+                const response =
+                    await fetch(
+                        `${API_URL}/verification/request?${params.toString()}`,
+                        {
+                            method: "POST"
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Unable to submit verification."
+                    );
+
+                }
+
+
+                showVerificationMessage(
+                    "Ownership verification request submitted successfully.",
+                    "success"
+                );
+
+
+                submitVerificationBtn.textContent =
+                    "Submitted ✓";
+
+
+                setTimeout(
+                    function() {
+
+                        verificationModal.classList.remove(
+                            "active"
+                        );
+
+
+                        /*
+                         * Refresh match results so
+                         * button becomes Claim Pending.
+                         */
+
+                        findAIMatches(
+                            window.currentLostItemId,
+                            window.currentLostItemName
+                        );
+
+                    },
+                    1200
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Verification error:",
+                    error
+                );
+
+
+                showVerificationMessage(
+                    error.message,
+                    "error"
+                );
+
+
+                submitVerificationBtn.disabled =
+                    false;
+
+
+                submitVerificationBtn.textContent =
+                    "Submit Verification";
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       VERIFICATION MESSAGE
+    ===================================================== */
+
+    function showVerificationMessage(
+        message,
+        type
+    ) {
+
+        verificationMessage.textContent =
+            message;
+
+
+        verificationMessage.className =
+            `message-box show ${
+                type === "success"
+                    ? "message-success"
+                    : "message-error"
+            }`;
+
+    }
+
+
+    /* =====================================================
+       CLOSE MATCH MODAL
+    ===================================================== */
+
+    document.getElementById(
+        "closeMatchModal"
+    ).addEventListener(
+        "click",
+        function() {
+
+            matchModal.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       CLOSE VERIFICATION MODAL
+    ===================================================== */
+
+    document.getElementById(
+        "closeVerificationModal"
+    ).addEventListener(
+        "click",
+        function() {
+
+            verificationModal.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    document.getElementById(
+        "cancelVerificationBtn"
+    ).addEventListener(
+        "click",
+        function() {
+
+            verificationModal.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       CLOSE WHEN CLICKING OUTSIDE
+    ===================================================== */
+
+    matchModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                matchModal
+            ) {
+
+                matchModal.classList.remove(
+                    "active"
+                );
+
+            }
+
+        }
+    );
+
+
+    verificationModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                verificationModal
+            ) {
+
+                verificationModal.classList.remove(
+                    "active"
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       ESC KEY
+    ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Escape") {
+
+                matchModal.classList.remove(
+                    "active"
+                );
+
+                verificationModal.classList.remove(
+                    "active"
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       KEEP CURRENT MATCH FOR REFRESH
+    ===================================================== */
+
+    const originalFindAIMatches =
+        findAIMatches;
+
+
+    findAIMatches =
+        async function(
+            itemId,
+            itemName
+        ) {
+
+            window.currentLostItemId =
+                itemId;
+
+            window.currentLostItemName =
+                itemName;
+
+
+            return originalFindAIMatches(
+                itemId,
+                itemName
+            );
+
+        };
+
+
+    /* =====================================================
+       START
+    ===================================================== */
+
+    loadMyReports();
+
+</script>
+
 
 </body>
 

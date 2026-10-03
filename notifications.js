@@ -31,7 +31,6 @@ const storedUser =
 if (!storedUser) {
 
     notificationList.innerHTML = `
-
         <div class="empty-notifications">
 
             <div class="empty-icon">
@@ -47,7 +46,6 @@ if (!storedUser) {
             </p>
 
         </div>
-
     `;
 
     throw new Error(
@@ -73,8 +71,8 @@ try {
         throw new Error(
             "Invalid user."
         );
-    }
 
+    }
 
 } catch (error) {
 
@@ -88,7 +86,6 @@ try {
 
 
     notificationList.innerHTML = `
-
         <div class="empty-notifications">
 
             <div class="empty-icon">
@@ -104,12 +101,10 @@ try {
             </p>
 
         </div>
-
     `;
 
     throw error;
 }
-
 
 
 /* =========================================================
@@ -133,11 +128,12 @@ function setupNavbar(user) {
 
 
     navButtons.innerHTML = `
-
         <span class="user-welcome">
+
             Hi, ${escapeHTML(
                 user.name || "User"
             )} 👋
+
         </span>
 
         <a
@@ -156,7 +152,6 @@ function setupNavbar(user) {
             Logout
 
         </a>
-
     `;
 
 
@@ -185,9 +180,10 @@ function setupNavbar(user) {
 
             }
         );
-    }
-}
 
+    }
+
+}
 
 
 /* =========================================================
@@ -199,11 +195,11 @@ async function loadNotifications() {
     try {
 
         notificationList.innerHTML = `
-
             <div class="loading">
-                Loading notifications...
-            </div>
 
+                Loading notifications...
+
+            </div>
         `;
 
 
@@ -226,6 +222,7 @@ async function loadNotifications() {
             throw new Error(
                 `Server error: ${response.status}`
             );
+
         }
 
 
@@ -249,6 +246,7 @@ async function loadNotifications() {
             throw new Error(
                 "Invalid notification response."
             );
+
         }
 
 
@@ -271,7 +269,6 @@ async function loadNotifications() {
 
 
         notificationList.innerHTML = `
-
             <div class="empty-notifications">
 
                 <div class="empty-icon">
@@ -290,7 +287,6 @@ async function loadNotifications() {
                 </p>
 
             </div>
-
         `;
 
 
@@ -302,8 +298,8 @@ async function loadNotifications() {
         }
 
     }
-}
 
+}
 
 
 /* =========================================================
@@ -317,7 +313,6 @@ function displayNotifications(
     if (!notifications.length) {
 
         notificationList.innerHTML = `
-
             <div class="empty-notifications">
 
                 <div class="empty-icon">
@@ -333,7 +328,6 @@ function displayNotifications(
                 </p>
 
             </div>
-
         `;
 
 
@@ -344,7 +338,9 @@ function displayNotifications(
 
         }
 
+
         return;
+
     }
 
 
@@ -375,6 +371,7 @@ function displayNotifications(
                 card.classList.add(
                     "unread"
                 );
+
             }
 
 
@@ -392,25 +389,25 @@ function displayNotifications(
 
             const unreadBadge =
                 isUnread
-
                     ? `
                         <span class="new-badge">
+
                             NEW
+
                         </span>
                       `
-
                     : `
                         <span class="read-label">
+
                             ✓ Read
+
                         </span>
                       `;
 
 
             const markReadButton =
                 isUnread
-
                     ? `
-
                         <button
                             type="button"
                             class="mark-read-btn"
@@ -419,16 +416,13 @@ function displayNotifications(
                             Mark as read
 
                         </button>
-
                       `
-
                     : "";
 
 
-            /*
-                Different notification types
-                can have different destinations.
-            */
+            /* =================================================
+               DIFFERENT NOTIFICATION TYPES
+            ================================================= */
 
             let actionButton = "";
 
@@ -439,13 +433,16 @@ function displayNotifications(
                 ).toLowerCase();
 
 
+            /* =================================================
+               MESSAGE NOTIFICATION
+            ================================================= */
+
             if (
                 notificationType === "message" &&
                 notification.item_id
             ) {
 
                 actionButton = `
-
                     <a
                         href="messages.html?item_id=${encodeURIComponent(
                             notification.item_id
@@ -455,15 +452,69 @@ function displayNotifications(
                         💬 Open Conversation
 
                     </a>
-
                 `;
 
-            } else if (
+            }
+
+
+            /* =================================================
+               OWNERSHIP CLAIM NOTIFICATION
+               
+               User B receives this when User A
+               submits an ownership claim.
+            ================================================= */
+
+            else if (
+                notificationType === "verification"
+            ) {
+
+                actionButton = `
+                    <a
+                        href="verification-requests.html"
+                        class="view-item-btn verification-action">
+
+                        🛡️ Review Ownership Claim
+
+                    </a>
+                `;
+
+            }
+
+
+            /* =================================================
+               OWNERSHIP RESPONSE NOTIFICATION
+               
+               User A receives this after User B
+               approves or rejects the claim.
+            ================================================= */
+
+            else if (
+                notificationType ===
+                "verification_response"
+            ) {
+
+                actionButton = `
+                    <a
+                        href="my-reports.html"
+                        class="view-item-btn verification-action">
+
+                        ✅ View Claim Result
+
+                    </a>
+                `;
+
+            }
+
+
+            /* =================================================
+               OTHER ITEM NOTIFICATION
+            ================================================= */
+
+            else if (
                 notification.item_id
             ) {
 
                 actionButton = `
-
                     <a
                         href="item.html?id=${encodeURIComponent(
                             notification.item_id
@@ -473,10 +524,14 @@ function displayNotifications(
                         View Item
 
                     </a>
-
                 `;
+
             }
 
+
+            /* =================================================
+               CARD HTML
+            ================================================= */
 
             card.innerHTML = `
 
@@ -543,9 +598,9 @@ function displayNotifications(
             );
 
 
-            /*
-                Mark as read button
-            */
+            /* =================================================
+               MARK AS READ BUTTON
+            ================================================= */
 
             const readButton =
                 card.querySelector(
@@ -570,11 +625,16 @@ function displayNotifications(
 
                     }
                 );
+
             }
 
         }
     );
 
+
+    /* =================================================
+       SUMMARY
+    ================================================= */
 
     if (notificationSummary) {
 
@@ -609,9 +669,10 @@ function displayNotifications(
                 }.`;
 
         }
-    }
-}
 
+    }
+
+}
 
 
 /* =========================================================
@@ -628,16 +689,40 @@ function getNotificationIcon(
     ) {
 
         case "match":
+
             return "🔎";
 
+
         case "message":
+
             return "💬";
 
-        default:
-            return "🔔";
-    }
-}
 
+        /* =============================================
+           OWNERSHIP CLAIM
+        ============================================= */
+
+        case "verification":
+
+            return "🛡️";
+
+
+        /* =============================================
+           OWNERSHIP APPROVED / REJECTED
+        ============================================= */
+
+        case "verification_response":
+
+            return "✅";
+
+
+        default:
+
+            return "🔔";
+
+    }
+
+}
 
 
 /* =========================================================
@@ -660,9 +745,9 @@ function updateUnreadCount(
         ).length;
 
 
-    /*
-        Navbar badge
-    */
+    /* =====================================================
+       NAVBAR BADGE
+    ===================================================== */
 
     if (navBadge) {
 
@@ -679,10 +764,12 @@ function updateUnreadCount(
 
             navBadge.style.display =
                 "inline-flex";
-        }
-    }
-}
 
+        }
+
+    }
+
+}
 
 
 /* =========================================================
@@ -711,6 +798,7 @@ async function markAsRead(
             throw new Error(
                 `Server error: ${response.status}`
             );
+
         }
 
 
@@ -732,6 +820,7 @@ async function markAsRead(
                 data.message ||
                 "Unable to mark notification as read."
             );
+
         }
 
 
@@ -749,9 +838,10 @@ async function markAsRead(
         alert(
             "Unable to mark notification as read."
         );
-    }
-}
 
+    }
+
+}
 
 
 /* =========================================================
@@ -778,6 +868,7 @@ async function markAllAsRead() {
             throw new Error(
                 `Server error: ${response.status}`
             );
+
         }
 
 
@@ -799,6 +890,7 @@ async function markAllAsRead() {
                 data.message ||
                 "Unable to mark notifications as read."
             );
+
         }
 
 
@@ -816,9 +908,10 @@ async function markAllAsRead() {
         alert(
             "Unable to mark all notifications as read."
         );
-    }
-}
 
+    }
+
+}
 
 
 /* =========================================================
@@ -831,8 +924,8 @@ if (markAllButton) {
         "click",
         markAllAsRead
     );
-}
 
+}
 
 
 /* =========================================================
@@ -854,8 +947,8 @@ function escapeHTML(
 
 
     return div.innerHTML;
-}
 
+}
 
 
 /* =========================================================
@@ -869,6 +962,7 @@ function formatDate(
     if (!dateValue) {
 
         return "Just now";
+
     }
 
 
@@ -887,6 +981,7 @@ function formatDate(
         return String(
             dateValue
         );
+
     }
 
 
@@ -900,8 +995,8 @@ function formatDate(
             minute: "2-digit"
         }
     );
-}
 
+}
 
 
 /* =========================================================
@@ -921,7 +1016,6 @@ document.addEventListener(
 
     }
 );
-
 
 
 /* =========================================================

@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Verification Requests | Lost & Found AI</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <style>
+
+        body {
+            background: #f6f8fc;
+        }
+
+        .verification-page {
+            max-width: 1050px;
+            margin: auto;
+            padding: 120px 25px 60px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            margin: 0 0 8px;
+            font-size: 36px;
+            color: #172033;
+        }
+
+        .page-header p {
+            margin: 0;
+            color: #707784;
+        }
+
+        .request-count {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 7px 15px;
+            border-radius: 20px;
+            background: #eaf0ff;
+            color: #3157d5;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .requests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .request-card {
+            background: white;
+            border: 1px solid #e3e7ee;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 6px 22px rgba(0,0,0,.06);
+        }
+
+        .request-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 18px;
+        }
+
+        .item-title {
+            margin: 0 0 5px;
+            font-size: 22px;
+            color: #172033;
+        }
+
+        .claimant {
+            color: #687180;
+            font-size: 14px;
+        }
+
+        .status {
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fff4d8;
+            color: #9a6800;
+        }
+
+        .status-approved {
+            background: #e5f8ed;
+            color: #16804b;
+        }
+
+        .status-rejected {
+            background: #ffe8e8;
+            color: #c62828;
+        }
+
+        .request-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 18px;
+        }
+
+        .info-box {
+            background: #f7f8fa;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .info-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #858c98;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .proof {
+            color: #303744;
+            line-height: 1.6;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .response-box {
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #f7f8fa;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .response-label {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid #edf0f4;
+        }
+
+        .action-btn {
+            border: none;
+            border-radius: 9px;
+            padding: 12px 22px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+
+        .approve-btn {
+            background: #16804b;
+            color: white;
+        }
+
+        .approve-btn:hover {
+            background: #116b3e;
+        }
+
+        .reject-btn {
+            background: #ffe8e8;
+            color: #c62828;
+        }
+
+        .reject-btn:hover {
+            background: #ffd7d7;
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 16px;
+            padding: 60px 25px;
+            text-align: center;
+            border: 1px solid #e3e7ee;
+        }
+
+        .empty-icon {
+            font-size: 50px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state h2 {
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: #777;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #777;
+        }
+
+        .error {
+            background: #ffe9e9;
+            color: #b42318;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        /* RESPONSE MODAL */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 9999;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            width: min(550px, 100%);
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 25px 70px rgba(0,0,0,.3);
+        }
+
+        .modal-header {
+            padding: 22px 25px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 23px;
+        }
+
+        .close-btn {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 50%;
+            background: #f1f3f7;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-body label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        #responseMessage {
+            width: 100%;
+            min-height: 130px;
+            resize: vertical;
+            box-sizing: border-box;
+            border: 1px solid #d8dce5;
+            border-radius: 10px;
+            padding: 13px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        #responseMessage:focus {
+            border-color: #3157d5;
+            box-shadow: 0 0 0 3px rgba(49,87,213,.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .cancel-btn {
+            flex: 1;
+            border: none;
+            border-radius: 9px;
+            background: #eef0f3;
+            padding: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            border: none;
+            border-radius: 9px;
+            color: white;
+            padding: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .confirm-approve {
+            background: #16804b;
+        }
+
+        .confirm-reject {
+            background: #c62828;
+        }
+
+        @media (max-width: 700px) {
+
+            .verification-page {
+                padding: 100px 15px 40px;
+            }
+
+            .page-header h1 {
+                font-size: 30px;
+            }
+
+            .request-top {
+                flex-direction: column;
+            }
+
+            .request-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<nav class="navbar">
+
+    <div class="logo">
+        Lost & Found AI
+    </div>
+
+    <div class="nav-links">
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="items.html">
+            Items
+        </a>
+
+        <a href="report-lost.html">
+            Report Lost
+        </a>
+
+        <a href="report-found.html">
+            Report Found
+        </a>
+
+        <a href="my-reports.html">
+            My Reports
+        </a>
+
+        <a href="notifications.html">
+            🔔 Notifications
+        </a>
+
+    </div>
+
+    <div class="nav-buttons">
+
+        <span
+            class="user-welcome"
+            id="userWelcome"
+        ></span>
+
+        <a
+            href="#"
+            class="signup-btn"
+            id="logoutBtn"
+        >
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+<main class="verification-page">
+
+
+    <div class="page-header">
+
+        <h1>
+            Ownership Verification
+        </h1>
+
+        <p>
+            Review ownership claims submitted for your found items.
+        </p>
+
+        <span
+            class="request-count"
+            id="requestCount"
+        >
+            Loading...
+        </span>
+
+    </div>
+
+
+    <div
+        id="requestsList"
+        class="requests-list"
+    >
+
+        <div class="loading">
+            Loading verification requests...
+        </div>
+
+    </div>
+
+
+</main>
+
+
+<!-- RESPONSE MODAL -->
+
+<div
+    class="modal-overlay"
+    id="responseModal"
+>
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2 id="modalTitle">
+                Review Claim
+            </h2>
+
+            <button
+                class="close-btn"
+                id="closeModal"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+            <p id="modalDescription">
+                Review the ownership proof before responding.
+            </p>
+
+
+            <label for="responseMessage">
+                Response message
+            </label>
+
+            <textarea
+                id="responseMessage"
+                placeholder="Optional message to the claimant..."
+            ></textarea>
+
+
+            <div class="modal-actions">
+
+                <button
+                    class="cancel-btn"
+                    id="cancelBtn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="confirm-btn"
+                    id="confirmBtn"
+                >
+                    Confirm
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="config.js"></script>
+
+
+<script>
+
+    /* =====================================================
+       USER
+    ===================================================== */
+
+    const storedUser =
+        localStorage.getItem("user");
+
+
+    if (!storedUser) {
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    let currentUser;
+
+
+    try {
+
+        currentUser =
+            JSON.parse(storedUser);
+
+    } catch (error) {
+
+        localStorage.removeItem("user");
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    if (!currentUser || !currentUser.id) {
+
+        localStorage.removeItem("user");
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    document.getElementById(
+        "userWelcome"
+    ).textContent =
+        `Hi, ${currentUser.name} 👋`;
+
+
+    document.getElementById(
+        "logoutBtn"
+    ).addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            localStorage.removeItem("user");
+
+            window.location.href =
+                "index.html";
+
+        }
+    );
+
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    const requestsList =
+        document.getElementById(
+            "requestsList"
+        );
+
+
+    const requestCount =
+        document.getElementById(
+            "requestCount"
+        );
+
+
+    const responseModal =
+        document.getElementById(
+            "responseModal"
+        );
+
+
+    const modalTitle =
+        document.getElementById(
+            "modalTitle"
+        );
+
+
+    const modalDescription =
+        document.getElementById(
+            "modalDescription"
+        );
+
+
+    const responseMessage =
+        document.getElementById(
+            "responseMessage"
+        );
+
+
+    const confirmBtn =
+        document.getElementById(
+            "confirmBtn"
+        );
+
+
+    let selectedRequestId = null;
+
+    let selectedStatus = null;
+
+
+    /* =====================================================
+       ESCAPE HTML
+    ===================================================== */
+
+    function escapeHTML(value) {
+
+        return String(
+            value ?? ""
+        )
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+    }
+
+
+    /* =====================================================
+       LOAD REQUESTS
+    ===================================================== */
+
+    async function loadRequests() {
+
+        requestsList.innerHTML = `
+
+            <div class="loading">
+                Loading verification requests...
+            </div>
+
+        `;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/verification/user/${encodeURIComponent(currentUser.id)}`
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    "Unable to load verification requests."
+                );
+
+            }
+
+
+            const requests =
+                Array.isArray(
+                    data.requests
+                )
+                    ? data.requests
+                    : [];
+
+
+            const reporterRequests =
+                requests.filter(
+                    request =>
+                        Number(
+                            request.reporter_id
+                        ) ===
+                        Number(
+                            currentUser.id
+                        )
+                );
+
+
+            requestCount.textContent =
+                `${reporterRequests.length} request${
+                    reporterRequests.length === 1
+                        ? ""
+                        : "s"
+                }`;
+
+
+            if (
+                reporterRequests.length === 0
+            ) {
+
+                requestsList.innerHTML = `
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            🛡️
+                        </div>
+
+                        <h2>
+                            No Ownership Claims
+                        </h2>
+
+                        <p>
+                            You don't have any ownership
+                            verification requests yet.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            requestsList.innerHTML = "";
+
+
+            reporterRequests.forEach(
+                request => {
+
+                    requestsList.appendChild(
+                        createRequestCard(
+                            request
+                        )
+                    );
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Verification requests error:",
+                error
+            );
+
+
+            requestsList.innerHTML = `
+
+                <div class="error">
+
+                    ${escapeHTML(
+                        error.message
+                    )}
+
+                </div>
+
+            `;
+
+            requestCount.textContent =
+                "Error";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CREATE REQUEST CARD
+    ===================================================== */
+
+    function createRequestCard(
+        request
+    ) {
+
+        const card =
+            document.createElement(
+                "article"
+            );
+
+
+        card.className =
+            "request-card";
+
+
+        let statusClass =
+            "status-pending";
+
+
+        let statusText =
+            "Pending";
+
+
+        if (
+            request.status ===
+            "approved"
+        ) {
+
+            statusClass =
+                "status-approved";
+
+            statusText =
+                "Approved";
+
+        }
+
+
+        if (
+            request.status ===
+            "rejected"
+        ) {
+
+            statusClass =
+                "status-rejected";
+
+            statusText =
+                "Rejected";
+
+        }
+
+
+        let actionsHTML = "";
+
+
+        if (
+            request.status ===
+            "pending"
+        ) {
+
+            actionsHTML = `
+
+                <div class="actions">
+
+                    <button
+                        class="action-btn approve-btn"
+                        onclick="
+                            openResponseModal(
+                                ${Number(request.id)},
+                                'approved',
+                                '${escapeHTML(
+                                    request.item_name
+                                )}',
+                                '${escapeHTML(
+                                    request.claimant_name
+                                )}'
+                            );
+                        "
+                    >
+                        ✓ Approve Ownership
+                    </button>
+
+
+                    <button
+                        class="action-btn reject-btn"
+                        onclick="
+                            openResponseModal(
+                                ${Number(request.id)},
+                                'rejected',
+                                '${escapeHTML(
+                                    request.item_name
+                                )}',
+                                '${escapeHTML(
+                                    request.claimant_name
+                                )}'
+                            );
+                        "
+                    >
+                        ✕ Reject Claim
+                    </button>
+
+                </div>
+
+            `;
+
+        }
+
+
+        card.innerHTML = `
+
+            <div class="request-top">
+
+                <div>
+
+                    <h2 class="item-title">
+                        ${escapeHTML(
+                            request.item_name
+                        )}
+                    </h2>
+
+                    <div class="claimant">
+
+                        👤 Claim submitted by:
+
+                        <strong>
+                            ${escapeHTML(
+                                request.claimant_name
+                            )}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <span class="status ${statusClass}">
+                    ${statusText}
+                </span>
+
+            </div>
+
+
+            <div class="request-grid">
+
+                <div class="info-box">
+
+                    <div class="info-title">
+                        Claimant
+                    </div>
+
+                    <div class="proof">
+
+                        <strong>
+                            ${escapeHTML(
+                                request.claimant_name
+                            )}
+                        </strong>
+
+                        <br>
+
+                        ${escapeHTML(
+                            request.claimant_email ||
+                            "Email unavailable"
+                        )}
+
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-title">
+                        Ownership Proof
+                    </div>
+
+                    <div class="proof">
+
+                        ${escapeHTML(
+                            request.proof
+                        )}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            ${
+                request.response_message
+                    ? `
+                        <div class="response-box">
+
+                            <div class="response-label">
+                                Response
+                            </div>
+
+                            ${escapeHTML(
+                                request.response_message
+                            )}
+
+                        </div>
+                    `
+                    : ""
+            }
+
+
+            ${actionsHTML}
+
+        `;
+
+
+        return card;
+
+    }
+
+
+    /* =====================================================
+       OPEN RESPONSE MODAL
+    ===================================================== */
+
+    function openResponseModal(
+        requestId,
+        status,
+        itemName,
+        claimantName
+    ) {
+
+        selectedRequestId =
+            requestId;
+
+
+        selectedStatus =
+            status;
+
+
+        responseMessage.value =
+            "";
+
+
+        if (
+            status ===
+            "approved"
+        ) {
+
+            modalTitle.textContent =
+                "Approve Ownership";
+
+
+            modalDescription.textContent =
+                `Approve ${claimantName}'s ownership claim for ${itemName}?`;
+
+
+            confirmBtn.textContent =
+                "✓ Approve Ownership";
+
+
+            confirmBtn.className =
+                "confirm-btn confirm-approve";
+
+        } else {
+
+            modalTitle.textContent =
+                "Reject Ownership Claim";
+
+
+            modalDescription.textContent =
+                `Reject ${claimantName}'s ownership claim for ${itemName}?`;
+
+
+            confirmBtn.textContent =
+                "✕ Reject Claim";
+
+
+            confirmBtn.className =
+                "confirm-btn confirm-reject";
+
+        }
+
+
+        responseModal.classList.add(
+            "active"
+        );
+
+    }
+
+
+    /* =====================================================
+       SEND RESPONSE
+    ===================================================== */
+
+    confirmBtn.addEventListener(
+        "click",
+        async function() {
+
+            if (
+                !selectedRequestId ||
+                !selectedStatus
+            ) {
+
+                return;
+
+            }
+
+
+            confirmBtn.disabled =
+                true;
+
+
+            confirmBtn.textContent =
+                "Processing...";
+
+
+            try {
+
+                const params =
+                    new URLSearchParams();
+
+
+                params.append(
+                    "reporter_id",
+                    currentUser.id
+                );
+
+
+                params.append(
+                    "status",
+                    selectedStatus
+                );
+
+
+                params.append(
+                    "response_message",
+                    responseMessage.value.trim()
+                );
+
+
+                const response =
+                    await fetch(
+                        `${API_URL}/verification/${encodeURIComponent(selectedRequestId)}/respond?${params.toString()}`,
+                        {
+                            method: "PUT"
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Unable to process request."
+                    );
+
+                }
+
+
+                responseModal.classList.remove(
+                    "active"
+                );
+
+
+                alert(
+                    selectedStatus === "approved"
+                        ? "Ownership claim approved successfully."
+                        : "Ownership claim rejected."
+                );
+
+
+                selectedRequestId =
+                    null;
+
+                selectedStatus =
+                    null;
+
+
+                await loadRequests();
+
+            } catch (error) {
+
+                console.error(
+                    "Verification response error:",
+                    error
+                );
+
+
+                alert(
+                    error.message
+                );
+
+            } finally {
+
+                confirmBtn.disabled =
+                    false;
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       CLOSE MODAL
+    ===================================================== */
+
+    function closeModal() {
+
+        responseModal.classList.remove(
+            "active"
+        );
+
+        selectedRequestId =
+            null;
+
+        selectedStatus =
+            null;
+
+    }
+
+
+    document.getElementById(
+        "closeModal"
+    ).addEventListener(
+        "click",
+        closeModal
+    );
+
+
+    document.getElementById(
+        "cancelBtn"
+    ).addEventListener(
+        "click",
+        closeModal
+    );
+
+
+    responseModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                responseModal
+            ) {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       START
+    ===================================================== */
+
+    loadRequests();
+
+</script>
+
+
+</body>
+
+</html>
