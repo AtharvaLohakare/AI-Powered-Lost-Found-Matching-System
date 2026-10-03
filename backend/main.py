@@ -944,39 +944,12 @@ def search_items(
 # =========================================================
 
 def get_item_status(db, item):
-    """
-    Return the current lifecycle status of an item.
-
-    Status flow:
-
-        active
-            ↓
-        match_found
-            ↓
-        claim_pending
-            ↓
-        ownership_verified
-            ↓
-        returned
-    """
-
-    # -----------------------------------------------------
-    # RETURNED
-    # -----------------------------------------------------
 
     if item.status == "returned":
         return "returned"
 
-    # -----------------------------------------------------
-    # OWNERSHIP VERIFIED
-    # -----------------------------------------------------
-
     if item.status == "ownership_verified":
         return "ownership_verified"
-
-    # -----------------------------------------------------
-    # CHECK LATEST VERIFICATION REQUEST
-    # -----------------------------------------------------
 
     latest_request = (
         db.query(VerificationRequest)
@@ -999,10 +972,6 @@ def get_item_status(db, item):
 
         if latest_request.status == "rejected":
             return item.status or "active"
-
-    # -----------------------------------------------------
-    # NORMAL ITEM STATUS
-    # -----------------------------------------------------
 
     return item.status or "active"
 
