@@ -60,12 +60,13 @@
 
             <a
                 href="notifications.html"
-                class="notification-link">
+                class="notification-link active">
 
                 🔔 Notifications
 
                 <span
                     id="navBadge"
+                    class="nav-notification-badge"
                     style="display: none;">
                     0
                 </span>
@@ -91,12 +92,19 @@
 
     <main class="notifications-page">
 
-        <div class="notifications-header">
 
-            <div>
+        <!-- PAGE HEADER -->
+
+        <section class="notifications-hero">
+
+            <div class="notifications-title">
+
+                <span class="notifications-eyebrow">
+                    ACTIVITY CENTER
+                </span>
 
                 <h1>
-                    Notifications 🔔
+                    Notifications
                 </h1>
 
                 <p id="notificationSummary">
@@ -111,18 +119,28 @@
                 class="mark-all-btn"
                 type="button">
 
+                <span>✓</span>
+
                 Mark all as read
 
             </button>
 
-        </div>
+        </section>
 
 
-        <div
-            id="notificationList"
-            class="notification-list">
 
-        </div>
+        <!-- NOTIFICATION LIST -->
+
+        <section class="notifications-container">
+
+            <div
+                id="notificationList"
+                class="notification-list">
+
+            </div>
+
+        </section>
+
 
     </main>
 

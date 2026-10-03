@@ -123,17 +123,17 @@ function setupNavbar(user) {
         !navButtons ||
         !user
     ) {
+
         return;
+
     }
 
 
     navButtons.innerHTML = `
         <span class="user-welcome">
-
             Hi, ${escapeHTML(
                 user.name || "User"
             )} 👋
-
         </span>
 
         <a
@@ -182,7 +182,6 @@ function setupNavbar(user) {
         );
 
     }
-
 }
 
 
@@ -196,9 +195,7 @@ async function loadNotifications() {
 
         notificationList.innerHTML = `
             <div class="loading">
-
                 Loading notifications...
-
             </div>
         `;
 
@@ -298,7 +295,6 @@ async function loadNotifications() {
         }
 
     }
-
 }
 
 
@@ -309,6 +305,7 @@ async function loadNotifications() {
 function displayNotifications(
     notifications
 ) {
+
 
     if (!notifications.length) {
 
@@ -350,14 +347,17 @@ function displayNotifications(
     notifications.forEach(
         function (notification) {
 
+
             const card =
                 document.createElement(
                     "div"
                 );
 
 
-            card.className =
-                "notification-card";
+            const notificationType =
+                String(
+                    notification.notification_type || ""
+                ).toLowerCase();
 
 
             const isUnread =
@@ -366,10 +366,20 @@ function displayNotifications(
                 ) === 0;
 
 
+            card.className =
+                "notification-card";
+
+
             if (isUnread) {
 
                 card.classList.add(
                     "unread"
+                );
+
+            } else {
+
+                card.classList.add(
+                    "read"
                 );
 
             }
@@ -377,7 +387,7 @@ function displayNotifications(
 
             const icon =
                 getNotificationIcon(
-                    notification.notification_type
+                    notificationType
                 );
 
 
@@ -389,24 +399,23 @@ function displayNotifications(
 
             const unreadBadge =
                 isUnread
+
                     ? `
                         <span class="new-badge">
-
                             NEW
-
                         </span>
                       `
+
                     : `
                         <span class="read-label">
-
                             ✓ Read
-
                         </span>
                       `;
 
 
             const markReadButton =
                 isUnread
+
                     ? `
                         <button
                             type="button"
@@ -417,25 +426,18 @@ function displayNotifications(
 
                         </button>
                       `
+
                     : "";
 
 
             /* =================================================
-               DIFFERENT NOTIFICATION TYPES
+               ACTION BUTTON
             ================================================= */
 
             let actionButton = "";
 
 
-            const notificationType =
-                String(
-                    notification.notification_type || ""
-                ).toLowerCase();
-
-
-            /* =================================================
-               MESSAGE NOTIFICATION
-            ================================================= */
+            /* MESSAGE */
 
             if (
                 notificationType === "message" &&
@@ -457,12 +459,7 @@ function displayNotifications(
             }
 
 
-            /* =================================================
-               OWNERSHIP CLAIM NOTIFICATION
-               
-               User B receives this when User A
-               submits an ownership claim.
-            ================================================= */
+            /* OWNERSHIP CLAIM */
 
             else if (
                 notificationType === "verification"
@@ -481,12 +478,7 @@ function displayNotifications(
             }
 
 
-            /* =================================================
-               OWNERSHIP RESPONSE NOTIFICATION
-               
-               User A receives this after User B
-               approves or rejects the claim.
-            ================================================= */
+            /* OWNERSHIP RESULT */
 
             else if (
                 notificationType ===
@@ -506,9 +498,7 @@ function displayNotifications(
             }
 
 
-            /* =================================================
-               OTHER ITEM NOTIFICATION
-            ================================================= */
+            /* OTHER ITEM NOTIFICATION */
 
             else if (
                 notification.item_id
@@ -530,15 +520,13 @@ function displayNotifications(
 
 
             /* =================================================
-               CARD HTML
+               CARD
             ================================================= */
 
             card.innerHTML = `
 
                 <div class="notification-icon">
-
                     ${icon}
-
                 </div>
 
 
@@ -548,12 +536,10 @@ function displayNotifications(
                     <div class="notification-header">
 
                         <h3>
-
                             ${escapeHTML(
                                 notification.title ||
                                 "Notification"
                             )}
-
                         </h3>
 
                         ${unreadBadge}
@@ -574,9 +560,7 @@ function displayNotifications(
                     <div class="notification-footer">
 
                         <span class="notification-date">
-
                             ${createdAt}
-
                         </span>
 
 
@@ -599,7 +583,7 @@ function displayNotifications(
 
 
             /* =================================================
-               MARK AS READ BUTTON
+               MARK READ
             ================================================= */
 
             const readButton =
@@ -688,6 +672,7 @@ function getNotificationIcon(
             .toLowerCase()
     ) {
 
+
         case "match":
 
             return "🔎";
@@ -698,18 +683,10 @@ function getNotificationIcon(
             return "💬";
 
 
-        /* =============================================
-           OWNERSHIP CLAIM
-        ============================================= */
-
         case "verification":
 
             return "🛡️";
 
-
-        /* =============================================
-           OWNERSHIP APPROVED / REJECTED
-        ============================================= */
 
         case "verification_response":
 
@@ -744,10 +721,6 @@ function updateUnreadCount(
             }
         ).length;
 
-
-    /* =====================================================
-       NAVBAR BADGE
-    ===================================================== */
 
     if (navBadge) {
 
