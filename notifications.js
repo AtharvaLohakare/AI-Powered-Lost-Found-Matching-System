@@ -672,31 +672,23 @@ function getNotificationIcon(
             .toLowerCase()
     ) {
 
-
         case "match":
-
             return "🔎";
 
-
         case "message":
-
             return "💬";
 
-
         case "verification":
-
             return "🛡️";
 
-
         case "verification_response":
-
             return "✅";
 
+        case "item_returned":
+            return "📦";
 
         default:
-
             return "🔔";
-
     }
 
 }

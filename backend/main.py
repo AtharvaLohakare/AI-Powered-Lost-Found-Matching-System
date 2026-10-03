@@ -1014,9 +1014,15 @@ def mark_item_returned(
     user_id: int,
     db: Session = Depends(get_db)
 ):
+    # -----------------------------------------------------
+    # FIND ITEM
+    # -----------------------------------------------------
+
     item = (
         db.query(Item)
-        .filter(Item.id == item_id)
+        .filter(
+            Item.id == item_id
+        )
         .first()
     )
 
@@ -1026,24 +1032,88 @@ def mark_item_returned(
             detail="Item not found."
         )
 
+    # -----------------------------------------------------
+    # ONLY REPORTER CAN MARK RETURNED
+    # -----------------------------------------------------
+
     if item.user_id != user_id:
         raise HTTPException(
             status_code=403,
             detail="You are not allowed to update this item."
         )
 
-    current_status = get_item_status(db, item)
+    # -----------------------------------------------------
+    # CHECK CURRENT STATUS
+    # -----------------------------------------------------
+
+    current_status = get_item_status(
+        db,
+        item
+    )
 
     if current_status != "ownership_verified":
         raise HTTPException(
             status_code=400,
-            detail="Only an ownership-verified item can be marked as returned."
+            detail=(
+                "Only an ownership-verified item "
+                "can be marked as returned."
+            )
         )
+
+    # -----------------------------------------------------
+    # FIND APPROVED CLAIM
+    # -----------------------------------------------------
+
+    approved_request = (
+        db.query(VerificationRequest)
+        .filter(
+            VerificationRequest.item_id == item.id,
+            VerificationRequest.status == "approved"
+        )
+        .order_by(
+            VerificationRequest.id.desc()
+        )
+        .first()
+    )
+
+    # -----------------------------------------------------
+    # MARK ITEM RETURNED
+    # -----------------------------------------------------
 
     item.status = "returned"
 
     db.commit()
     db.refresh(item)
+
+    # -----------------------------------------------------
+    # NOTIFY CLAIMANT
+    # -----------------------------------------------------
+
+    if approved_request:
+
+        notification = Notification(
+            user_id=approved_request.claimant_id,
+            item_id=item.id,
+            title="Item Returned",
+            message=(
+                f"Your ownership-verified item "
+                f"'{item.item_name}' has been marked "
+                f"as returned by the finder."
+            ),
+            notification_type="item_returned",
+            is_read=0
+        )
+
+        try:
+            db.add(notification)
+            db.commit()
+
+        except Exception:
+            db.rollback()
+
+    # -----------------------------------------------------
+    # RESPONSE
+    # -----------------------------------------------------
 
     return {
         "status": "success",
