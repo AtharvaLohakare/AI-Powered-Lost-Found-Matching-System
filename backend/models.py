@@ -66,10 +66,6 @@ class Item(Base):
         nullable=False
     )
 
-    # =====================================================
-    # GPS LOCATION
-    # =====================================================
-
     latitude = Column(
         Float,
         nullable=True
@@ -90,11 +86,15 @@ class Item(Base):
         nullable=True
     )
 
+    status = Column(
+        String(30),
+        nullable=False,
+        default="active"
+    )
+
     created_at = Column(
         TIMESTAMP
     )
-
-
 # =========================================================
 # USER MODEL
 # =========================================================
