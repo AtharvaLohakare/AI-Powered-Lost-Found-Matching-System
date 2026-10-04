@@ -803,3 +803,57 @@ if (foundForm) {
     );
 
 }
+
+// =========================================================
+// RESPONSIVE NAVBAR
+// =========================================================
+
+const menuToggle = document.getElementById("menuToggle");
+const navMenu = document.getElementById("navMenu");
+
+if (menuToggle && navMenu) {
+
+    menuToggle.addEventListener("click", function () {
+
+        navMenu.classList.toggle("active");
+
+        // Change hamburger icon
+        if (navMenu.classList.contains("active")) {
+            menuToggle.textContent = "✕";
+        } else {
+            menuToggle.textContent = "☰";
+        }
+
+    });
+
+
+    // Close menu after clicking a navigation link
+    const navLinks = navMenu.querySelectorAll("a");
+
+    navLinks.forEach(function (link) {
+
+        link.addEventListener("click", function () {
+
+            navMenu.classList.remove("active");
+
+            menuToggle.textContent = "☰";
+
+        });
+
+    });
+
+
+    // Close menu when screen becomes desktop
+    window.addEventListener("resize", function () {
+
+        if (window.innerWidth > 800) {
+
+            navMenu.classList.remove("active");
+
+            menuToggle.textContent = "☰";
+
+        }
+
+    });
+
+}
