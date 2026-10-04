@@ -838,6 +838,14 @@ async def report_item(
             new_item
         )
 
+        # Sighting reports use a separate nearby-alert matcher.
+        # This links sightings to nearby lost reports even though
+        # their report_kind values are intentionally different.
+        create_automatic_sighting_notifications(
+            db,
+            new_item
+        )
+
     except Exception as e:
 
         db.rollback()
@@ -2833,6 +2841,323 @@ def create_match_notifications(
 
 
 # =========================================================
+# AUTOMATIC SIGHTING / NEARBY ALERT NOTIFICATION
+# =========================================================
+
+def _sighting_text(item):
+    """Build searchable text for a sighting/lost-report comparison."""
+    return " ".join([
+        getattr(item, "item_name", "") or "",
+        getattr(item, "description", "") or "",
+        getattr(item, "category", "") or "",
+        getattr(item, "color", "") or "",
+        getattr(item, "brand", "") or "",
+    ])
+
+
+def _sighting_text_score(item_a, item_b):
+    """Return a lightweight 0-100 text similarity score."""
+    try:
+        value = calculate_text_similarity(
+            _sighting_text(item_a),
+            _sighting_text(item_b)
+        )
+        return max(0.0, min(100.0, float(value) * 100.0))
+    except Exception:
+        return 0.0
+
+
+def _sighting_image_score(item_a, item_b):
+    """Return a lightweight 0-100 image similarity score."""
+    try:
+        path_a = ensure_local_image(
+            getattr(item_a, "image_name", None)
+        )
+        path_b = ensure_local_image(
+            getattr(item_b, "image_name", None)
+        )
+
+        if not path_a or not path_b:
+            return 0.0
+
+        value = calculate_image_similarity(
+            path_a,
+            path_b
+        )
+        return max(0.0, min(100.0, float(value) * 100.0))
+    except Exception:
+        return 0.0
+
+
+def _sighting_date_score(date_a, date_b):
+    """Return a 0-100 date proximity score."""
+    if not date_a or not date_b:
+        return 0.0
+
+    try:
+        days = abs((date_a - date_b).days)
+    except Exception:
+        return 0.0
+
+    if days == 0:
+        return 100.0
+    if days <= 1:
+        return 90.0
+    if days <= 3:
+        return 75.0
+    if days <= 7:
+        return 55.0
+    if days <= 14:
+        return 30.0
+    if days <= 30:
+        return 15.0
+    return 0.0
+
+
+def _sighting_match_score(source_item, candidate_item):
+    """
+    Score a sighting against a lost report using text, image,
+    location and date. The result is 0-100.
+    """
+
+    text_score = _sighting_text_score(
+        source_item,
+        candidate_item
+    )
+
+    image_score = _sighting_image_score(
+        source_item,
+        candidate_item
+    )
+
+    location_score = 0.0
+    distance_km = None
+
+    try:
+        distance_km = calculate_distance_km(
+            source_item.latitude,
+            source_item.longitude,
+            candidate_item.latitude,
+            candidate_item.longitude
+        )
+
+        if distance_km is not None:
+            if distance_km <= 0.5:
+                location_score = 100.0
+            elif distance_km <= 1:
+                location_score = 95.0
+            elif distance_km <= 3:
+                location_score = 85.0
+            elif distance_km <= 5:
+                location_score = 70.0
+            elif distance_km <= 10:
+                location_score = 50.0
+            else:
+                location_score = 0.0
+    except Exception:
+        distance_km = None
+        location_score = 0.0
+
+    date_score = _sighting_date_score(
+        source_item.item_date,
+        candidate_item.item_date
+    )
+
+    # When GPS exists, location is strong evidence for a sighting.
+    if distance_km is not None:
+        final_score = (
+            text_score * 0.45
+            + image_score * 0.20
+            + location_score * 0.25
+            + date_score * 0.10
+        )
+    else:
+        # Without GPS, avoid pretending there is proximity evidence.
+        final_score = (
+            text_score * 0.60
+            + image_score * 0.25
+            + date_score * 0.15
+        )
+
+    return round(final_score, 2), distance_km
+
+
+def _create_sighting_notification(
+    db,
+    receiver_id,
+    sighting_item,
+    lost_item,
+    score,
+    distance_km
+):
+    """Create one deduplicated nearby-sighting notification."""
+
+    if not receiver_id:
+        return False
+
+    if distance_km is not None:
+        distance_text = (
+            f" about {distance_km:.1f} km from your report"
+        )
+    else:
+        distance_text = ""
+
+    lost_kind = (
+        getattr(lost_item, "report_kind", "item")
+        or "item"
+    ).lower()
+
+    if lost_kind == "person":
+        title = "👀 Possible Missing-Person Sighting"
+        message = (
+            "A community sighting may be related to your "
+            f"missing-person report '{lost_item.item_name}'"
+            f"{distance_text}. Match score: {score}%."
+        )
+    else:
+        title = "👀 Nearby Sighting Alert"
+        message = (
+            "A community sighting may be related to your "
+            f"lost report '{lost_item.item_name}'"
+            f"{distance_text}. Match score: {score}%."
+        )
+
+    duplicate = (
+        db.query(Notification)
+        .filter(
+            Notification.user_id == receiver_id,
+            Notification.item_id == sighting_item.id,
+            Notification.notification_type == "sighting_alert"
+        )
+        .first()
+    )
+
+    if duplicate:
+        return False
+
+    db.add(
+        Notification(
+            user_id=receiver_id,
+            item_id=sighting_item.id,
+            title=title,
+            message=message,
+            notification_type="sighting_alert",
+            is_read=0
+        )
+    )
+
+    return True
+
+
+def create_automatic_sighting_notifications(
+    db,
+    new_item
+):
+    """
+    Connect a new sighting with nearby lost reports, or connect
+    a new lost report with existing sightings.
+
+    No exact GPS coordinates are sent inside the notification text.
+    """
+
+    report_kind = (
+        getattr(new_item, "report_kind", "item")
+        or "item"
+    ).lower()
+
+    item_type = (
+        getattr(new_item, "item_type", "")
+        or ""
+    ).lower()
+
+    try:
+        if report_kind == "sighting":
+            # A sighting is treated as a seen/found event. Match it
+            # against active lost reports from other users.
+            candidates = (
+                db.query(Item)
+                .filter(Item.item_type == "lost")
+                .filter(Item.status != "returned")
+                .filter(Item.user_id != new_item.user_id)
+                .all()
+            )
+
+            for lost_item in candidates:
+                score, distance_km = _sighting_match_score(
+                    new_item,
+                    lost_item
+                )
+
+                # A sighting without GPS needs stronger text/image evidence.
+                if distance_km is not None:
+                    if distance_km > 10:
+                        continue
+                    threshold = 60.0
+                else:
+                    threshold = 70.0
+
+                if score < threshold:
+                    continue
+
+                _create_sighting_notification(
+                    db,
+                    lost_item.user_id,
+                    new_item,
+                    lost_item,
+                    score,
+                    distance_km
+                )
+
+        elif item_type == "lost" and report_kind != "sighting":
+            # A new lost report should also catch older sightings.
+            sightings = (
+                db.query(Item)
+                .filter(Item.report_kind == "sighting")
+                .filter(Item.item_type == "found")
+                .filter(Item.status != "returned")
+                .filter(Item.user_id != new_item.user_id)
+                .all()
+            )
+
+            for sighting in sightings:
+                score, distance_km = _sighting_match_score(
+                    sighting,
+                    new_item
+                )
+
+                if distance_km is not None:
+                    if distance_km > 10:
+                        continue
+                    threshold = 60.0
+                else:
+                    threshold = 70.0
+
+                if score < threshold:
+                    continue
+
+                _create_sighting_notification(
+                    db,
+                    new_item.user_id,
+                    sighting,
+                    new_item,
+                    score,
+                    distance_km
+                )
+
+        else:
+            return
+
+        db.commit()
+
+    except Exception as e:
+        db.rollback()
+        print(
+            "Automatic sighting notification error:",
+            e
+        )
+
+
+# =========================================================
 # AUTOMATIC COMMUNITY MATCH NOTIFICATION
 # =========================================================
 
@@ -2871,6 +3196,12 @@ def create_automatic_match_notifications(
             )
             or "item"
         ).lower()
+
+        # Sightings are handled by the dedicated nearby-sighting
+        # matcher below because they intentionally link to lost
+        # reports of different report_kind values.
+        if current_kind == "sighting":
+            return
 
         candidates = (
             db.query(Item)

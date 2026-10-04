@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Community Recovery | Lost & Found AI</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f7fb;
+        }
+
+        .community-page {
+            max-width: 1280px;
+            margin: 100px auto 50px;
+            padding: 20px;
+        }
+
+        .community-header {
+            margin-bottom: 28px;
+        }
+
+        .community-header h1 {
+            font-size: 44px;
+            margin: 0 0 12px;
+            line-height: 1.15;
+        }
+
+        .community-header p {
+            max-width: 850px;
+            color: #666;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .community-layout {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.07);
+        }
+
+        .panel h2 {
+            margin: 0 0 20px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #dcdcdc;
+            border-radius: 10px;
+            background: #fff;
+            font: inherit;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #3157d5;
+            box-shadow: 0 0 0 3px rgba(49,87,213,0.08);
+        }
+
+        .form-group textarea {
+            min-height: 115px;
+            resize: vertical;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .privacy-note,
+        .sighting-note {
+            display: none;
+            padding: 12px;
+            margin-bottom: 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .privacy-note {
+            background: #fff6dc;
+            border: 1px solid #efd48c;
+            color: #805800;
+        }
+
+        .sighting-note {
+            background: #eef8ff;
+            border: 1px solid #cfe8fb;
+            color: #14557d;
+        }
+
+        .tool-box,
+        .photo-analyzer {
+            background: #f7f9ff;
+            border: 1px solid #dfe6ff;
+            border-radius: 15px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+
+        .tool-box strong,
+        .photo-analyzer strong {
+            color: #24336d;
+        }
+
+        .tool-box p,
+        .photo-analyzer p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .tool-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+        }
+
+        .tool-btn {
+            border: none;
+            padding: 11px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .suggest-btn {
+            background: #eef2ff;
+            color: #3157d5;
+        }
+
+        .voice-btn {
+            background: #eef8ff;
+            color: #1769aa;
+        }
+
+        .photo-analyzer-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-pill {
+            display: inline-flex;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: #e9edff;
+            color: #3157d5;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        #photoPreview {
+            display: none;
+            width: 100%;
+            max-height: 240px;
+            object-fit: contain;
+            margin: 12px 0;
+            border-radius: 12px;
+            background: #eef1f7;
+            border: 1px solid #e0e0e0;
+        }
+
+        #aiPhotoStatus {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+
+        #aiPhotoResult {
+            display: none;
+            margin-top: 13px;
+            padding: 13px;
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #dfe6ff;
+        }
+
+        .prediction-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 5px 0;
+            font-size: 13px;
+        }
+
+        .prediction-score {
+            color: #3157d5;
+            font-weight: 700;
+        }
+
+        .analysis-item {
+            margin: 6px 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .analysis-divider {
+            border: none;
+            border-top: 1px solid #e7e7e7;
+            margin: 13px 0;
+        }
+
+        .location-btn {
+            width: 100%;
+            border: none;
+            background: #edf8f1;
+            color: #16804b;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-bottom: 11px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            border: none;
+            background: #3157d5;
+            color: #fff;
+            padding: 14px;
+            border-radius: 11px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .submit-btn:hover {
+            background: #2446b8;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
+        .status-message {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .map-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .map-controls select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fff;
+            font: inherit;
+        }
+
+        #communityMap {
+            height: 650px;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .map-popup {
+            min-width: 220px;
+        }
+
+        .map-popup h3 {
+            margin: 0 0 8px;
+            font-size: 17px;
+        }
+
+        .map-popup p {
+            margin: 5px 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 7px;
+            margin-top: 11px;
+        }
+
+        .popup-actions a {
+            text-decoration: none;
+            color: #fff;
+            background: #3157d5;
+            padding: 7px 10px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .map-note {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #777;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 1050px) {
+            .community-layout {
+                grid-template-columns: 1fr;
+            }
+
+            #communityMap {
+                height: 520px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .community-page {
+                margin-top: 90px;
+                padding: 12px;
+            }
+
+            .community-header h1 {
+                font-size: 32px;
+            }
+
+            .two-col,
+            .tool-buttons,
+            .map-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+
+            #communityMap {
+                height: 430px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="logo">Lost & Found AI</div>
+
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="community.html">Community</a>
+        <a href="items.html">Items</a>
+        <a href="report-lost.html">Report Lost</a>
+        <a href="report-found.html">Report Found</a>
+        <a href="my-reports.html">My Reports</a>
+        <a href="notifications.html">🔔 Notifications</a>
+    </div>
+
+    <div class="nav-buttons" id="navButtons"></div>
+</nav>
+
+<main class="community-page">
+
+    <section class="community-header">
+        <h1>Community Recovery 🌍</h1>
+
+        <p>
+            Help your community recover lost items, pets, documents,
+            vehicles and missing-person reports through AI-assisted
+            reporting, location awareness, sightings and intelligent matching.
+        </p>
+    </section>
+
+    <div class="community-layout">
+
+        <section class="panel">
+
+            <h2>Create Report</h2>
+
+            <form id="communityForm" enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <label for="reportKind">What are you reporting?</label>
+
+                    <select id="reportKind" name="report_kind" required>
+                        <option value="item">📱 Item</option>
+                        <option value="pet">🐕 Pet</option>
+                        <option value="person">🧑 Missing Person</option>
+                        <option value="vehicle">🚗 Vehicle</option>
+                        <option value="document">🪪 Document</option>
+                        <option value="sighting">👀 Sighting</option>
+                    </select>
+                </div>
+
+                <div id="privacyNote" class="privacy-note">
+                    <strong>Privacy notice:</strong>
+                    Exact GPS coordinates for person reports are hidden
+                    from the public map. Do not include private phone numbers,
+                    addresses, identity numbers or other sensitive information
+                    in the public description.
+                </div>
+
+                <div id="sightingNote" class="sighting-note">
+                    <strong>👀 Nearby alert:</strong>
+                    A sighting is compared with nearby active lost reports
+                    using location, text, image and date. A possible match can
+                    automatically notify the person who reported the loss.
+                </div>
+
+                <div class="form-group">
+                    <label for="itemType">Report status</label>
+
+                    <select id="itemType" name="item_type" required>
+                        <option value="lost">Lost / Missing</option>
+                        <option value="found">Found / Seen</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemName">Name / Title</label>
+
+                    <input
+                        type="text"
+                        name="item_name"
+                        id="itemName"
+                        placeholder="Black Wallet / Bruno / Honda Bike"
+                        required
+                    >
+                </div>
+
+                <div class="two-col">
+
+                    <div class="form-group">
+                        <label for="category">Category</label>
+
+                        <input
+                            type="text"
+                            name="category"
+                            id="category"
+                            placeholder="Accessories"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="color">Color</label>
+
+                        <input
+                            type="text"
+                            name="color"
+                            id="color"
+                            placeholder="Black"
+                        >
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+
+                    <textarea
+                        name="description"
+                        id="description"
+                        placeholder="Describe what was lost, found or seen..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="tool-box">
+
+                    <strong>🤖 Smart Report Assistant</strong>
+
+                    <p>
+                        Get quick field suggestions from your description.
+                    </p>
+
+                    <div class="tool-buttons">
+
+                        <button
+                            type="button"
+                            id="suggestBtn"
+                            class="tool-btn suggest-btn"
+                        >
+                            ✨ Suggest Fields
+                        </button>
+
+                        <button
+                            type="button"
+                            id="voiceBtn"
+                            class="tool-btn voice-btn"
+                        >
+                            🎙️ Voice Description
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="communityImage">Photo</label>
+
+                    <input
+                        type="file"
+                        name="image"
+                        id="communityImage"
+                        accept="image/*"
+                        required
+                    >
+                </div>
+
+                <div class="photo-analyzer">
+
+                    <div class="photo-analyzer-title">
+                        <strong>🧠 AI Photo Analyzer</strong>
+                        <span class="ai-pill">AI</span>
+                    </div>
+
+                    <p>
+                        Upload a photo and let browser AI suggest the
+                        report type, category, object name, color and OCR text.
+                    </p>
+
+                    <img
+                        id="photoPreview"
+                        alt="Selected photo preview"
+                    >
+
+                    <button
+                        type="button"
+                        id="analyzePhotoBtn"
+                        class="submit-btn"
+                        style="padding:11px;font-size:14px;"
+                    >
+                        🧠 Analyze Photo
+                    </button>
+
+                    <div id="aiPhotoStatus">
+                        Select a photo and click Analyze Photo.
+                    </div>
+
+                    <div id="aiPhotoResult"></div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="brand">Brand / Breed / Model</label>
+
+                    <input
+                        type="text"
+                        name="brand"
+                        id="brand"
+                        placeholder="Wildhorn / Labrador / Honda"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location</label>
+
+                    <input
+                        type="text"
+                        name="location"
+                        id="location"
+                        placeholder="Metro Station"
+                        required
+                    >
+                </div>
+
+                <button
+                    type="button"
+                    id="locationBtn"
+                    class="location-btn"
+                >
+                    📍 Use My Current Location
+                </button>
+
+                <div class="two-col">
+
+                    <div class="form-group">
+                        <label for="latitude">Latitude</label>
+
+                        <input
+                            type="number"
+                            step="any"
+                            name="latitude"
+                            id="latitude"
+                            placeholder="21.1458"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="longitude">Longitude</label>
+
+                        <input
+                            type="number"
+                            step="any"
+                            name="longitude"
+                            id="longitude"
+                            placeholder="79.0882"
+                        >
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date</label>
+
+                    <input
+                        type="date"
+                        name="date"
+                        id="date"
+                        required
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="submit-btn"
+                >
+                    🚨 Submit Community Report
+                </button>
+
+                <div id="statusMessage" class="status-message"></div>
+
+            </form>
+        </section>
+
+        <section class="panel">
+
+            <h2>Nearby Community Reports</h2>
+
+            <div class="map-controls">
+
+                <select id="mapKind">
+                    <option value="">Everything</option>
+                    <option value="item">📱 Items</option>
+                    <option value="pet">🐕 Pets</option>
+                    <option value="person">🧑 People</option>
+                    <option value="vehicle">🚗 Vehicles</option>
+                    <option value="document">🪪 Documents</option>
+                    <option value="sighting">👀 Sightings</option>
+                </select>
+
+                <select id="mapStatus">
+                    <option value="">Lost + Found</option>
+                    <option value="lost">Lost / Missing</option>
+                    <option value="found">Found / Seen</option>
+                </select>
+
+            </div>
+
+            <div id="communityMap"></div>
+
+            <div class="map-note">
+                Person reports without public coordinates are intentionally
+                not displayed as exact map points. Sightings with valid GPS
+                coordinates can be compared with nearby lost reports automatically.
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+<script src="config.js"></script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@latest"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@latest/dist/tesseract.min.js"></script>
+
+<script>
+const form = document.getElementById("communityForm");
+const reportKind = document.getElementById("reportKind");
+const itemType = document.getElementById("itemType");
+const privacyNote = document.getElementById("privacyNote");
+const sightingNote = document.getElementById("sightingNote");
+const statusMessage = document.getElementById("statusMessage");
+const submitBtn = document.getElementById("submitBtn");
+const locationBtn = document.getElementById("locationBtn");
+const latitude = document.getElementById("latitude");
+const longitude = document.getElementById("longitude");
+const locationInput = document.getElementById("location");
+const itemName = document.getElementById("itemName");
+const category = document.getElementById("category");
+const color = document.getElementById("color");
+const brand = document.getElementById("brand");
+const description = document.getElementById("description");
+const mapKind = document.getElementById("mapKind");
+const mapStatus = document.getElementById("mapStatus");
+const communityImage = document.getElementById("communityImage");
+const photoPreview = document.getElementById("photoPreview");
+const analyzePhotoBtn = document.getElementById("analyzePhotoBtn");
+const aiPhotoStatus = document.getElementById("aiPhotoStatus");
+const aiPhotoResult = document.getElementById("aiPhotoResult");
+const navButtons = document.getElementById("navButtons");
+
+const storedUser = localStorage.getItem("user");
+
+if (!storedUser) {
+    window.location.href = "login.html";
+}
+
+let currentUser = null;
+
+try {
+    currentUser = JSON.parse(storedUser);
+} catch (error) {
+    console.error(error);
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+}
+
+if (!currentUser || !currentUser.id) {
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+if (navButtons && currentUser) {
+    navButtons.innerHTML = `
+        <span class="user-welcome">
+            Hi, ${escapeHtml(currentUser.name || "User")} 👋
+        </span>
+
+        <a href="my-reports.html" class="login-btn">
+            My Reports
+        </a>
+
+        <a href="notifications.html" class="login-btn">
+            🔔
+        </a>
+
+        <a href="#" id="logoutBtn" class="signup-btn">
+            Logout
+        </a>
+    `;
+
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function(event) {
+            event.preventDefault();
+
+            localStorage.removeItem("user");
+
+            window.location.href = "index.html";
+        });
+    }
+}
+
+function updateReportKindUI() {
+    const kind = String(reportKind.value || "").toLowerCase();
+
+    privacyNote.style.display =
+        kind === "person" ? "block" : "none";
+
+    sightingNote.style.display =
+        kind === "sighting" ? "block" : "none";
+
+    if (kind === "sighting") {
+        itemType.value = "found";
+
+        description.placeholder =
+            "Describe what you saw, where you saw it and any identifying details...";
+
+        if (!itemName.value.trim()) {
+            itemName.value = "Possible sighting";
+        }
+
+        if (!category.value.trim()) {
+            category.value = "Sighting";
+        }
+    } else {
+        description.placeholder =
+            "Describe what was lost, found or seen...";
+
+        if (itemName.value === "Possible sighting") {
+            itemName.value = "";
+        }
+
+        if (category.value === "Sighting") {
+            category.value = "";
+        }
+    }
+}
+
+reportKind.addEventListener("change", updateReportKindUI);
+updateReportKindUI();
+
+/* =========================
+   SMART FIELD SUGGESTIONS
+========================= */
+
+document.getElementById("suggestBtn").addEventListener(
+    "click",
+    function() {
+
+        const text = description.value.toLowerCase();
+
+        if (
+            text.includes("wallet") ||
+            text.includes("purse") ||
+            text.includes("watch")
+        ) {
+            category.value = "Accessories";
+        }
+
+        if (
+            text.includes("phone") ||
+            text.includes("mobile") ||
+            text.includes("laptop")
+        ) {
+            category.value = "Electronics";
+        }
+
+        if (
+            text.includes("bag") ||
+            text.includes("backpack")
+        ) {
+            category.value = "Bags";
+        }
+
+        if (
+            text.includes("dog") ||
+            text.includes("cat") ||
+            text.includes("pet")
+        ) {
+            reportKind.value = "pet";
+            category.value = "Pet";
+            updateReportKindUI();
+        }
+
+        if (
+            text.includes("vehicle") ||
+            text.includes("car") ||
+            text.includes("bike") ||
+            text.includes("motorcycle") ||
+            text.includes("scooter")
+        ) {
+            reportKind.value = "vehicle";
+            category.value = "Vehicle";
+            updateReportKindUI();
+        }
+
+        if (
+            text.includes("document") ||
+            text.includes("passport") ||
+            text.includes("license") ||
+            text.includes("certificate")
+        ) {
+            reportKind.value = "document";
+            category.value = "Documents";
+            updateReportKindUI();
+        }
+
+        const colors = [
+            "black",
+            "white",
+            "blue",
+            "red",
+            "green",
+            "yellow",
+            "brown",
+            "orange",
+            "pink",
+            "purple",
+            "grey",
+            "gray"
+        ];
+
+        for (const currentColor of colors) {
+            if (text.includes(currentColor)) {
+                color.value =
+                    currentColor.charAt(0).toUpperCase() +
+                    currentColor.slice(1);
+
+                break;
+            }
+        }
+
+        if (!itemName.value.trim()) {
+            if (text.includes("wallet")) itemName.value = "Wallet";
+            else if (text.includes("phone")) itemName.value = "Mobile Phone";
+            else if (text.includes("dog")) itemName.value = "Dog";
+            else if (text.includes("cat")) itemName.value = "Cat";
+            else if (text.includes("bike")) itemName.value = "Bike";
+            else if (text.includes("car")) itemName.value = "Car";
+        }
+
+        alert("✨ Smart suggestions applied.");
+    }
+);
+
+/* =========================
+   VOICE INPUT
+========================= */
+
+document.getElementById("voiceBtn").addEventListener(
+    "click",
+    function() {
+
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            alert("Voice recognition is not supported in this browser.");
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+
+        recognition.lang = "en-IN";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = function() {
+            document.getElementById("voiceBtn").textContent =
+                "🎙️ Listening...";
+        };
+
+        recognition.onresult = function(event) {
+            const spokenText =
+                event.results[0][0].transcript;
+
+            if (description.value.trim()) {
+                description.value += " " + spokenText;
+            } else {
+                description.value = spokenText;
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error("Voice error:", event.error);
+            alert("Voice recognition failed.");
+        };
+
+        recognition.onend = function() {
+            document.getElementById("voiceBtn").textContent =
+                "🎙️ Voice Description";
+        };
+
+        recognition.start();
+    }
+);
+
+/* =========================
+   CURRENT LOCATION
+========================= */
+
+locationBtn.addEventListener(
+    "click",
+    function() {
+
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by this browser.");
+            return;
+        }
+
+        locationBtn.disabled = true;
+        locationBtn.textContent = "📍 Getting location...";
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+
+                latitude.value =
+                    position.coords.latitude.toFixed(7);
+
+                longitude.value =
+                    position.coords.longitude.toFixed(7);
+
+                locationInput.value =
+                    "Current Location";
+
+                locationBtn.disabled = false;
+                locationBtn.textContent =
+                    "✅ Location Captured";
+            },
+
+            function(error) {
+
+                console.error(error);
+
+                locationBtn.disabled = false;
+                locationBtn.textContent =
+                    "📍 Use My Current Location";
+
+                alert(
+                    "Unable to get your location. Please allow location access."
+                );
+            },
+
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+            }
+        );
+    }
+);
+
+/* =========================
+   MAP
+========================= */
+
+const map = L.map("communityMap").setView(
+    [21.1458, 79.0882],
+    12
+);
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
+    }
+).addTo(map);
+
+const markerLayer = L.layerGroup().addTo(map);
+
+/* =========================
+   LOAD COMMUNITY REPORTS
+========================= */
+
+async function loadCommunityReports() {
+
+    try {
+
+        markerLayer.clearLayers();
+
+        const params = new URLSearchParams();
+
+        if (mapKind.value) {
+            params.set("report_kind", mapKind.value);
+        }
+
+        if (mapStatus.value) {
+            params.set("item_type", mapStatus.value);
+        }
+
+        const queryString = params.toString();
+
+        const url =
+            queryString
+                ? `${API_URL}/community/reports?${queryString}`
+                : `${API_URL}/community/reports`;
+
+        const response = await fetch(url);
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data?.detail ||
+                "Unable to load community reports."
+            );
+        }
+
+        const reports = data?.reports || [];
+
+        reports.forEach(function(report) {
+
+            if (
+                report.latitude === null ||
+                report.longitude === null ||
+                report.latitude === undefined ||
+                report.longitude === undefined
+            ) {
+                return;
+            }
+
+            const marker = L.marker([
+                Number(report.latitude),
+                Number(report.longitude)
+            ]);
+
+            const safeName =
+                escapeHtml(
+                    report.item_name || "Community Report"
+                );
+
+            const safeKind =
+                escapeHtml(
+                    report.report_kind || "item"
+                );
+
+            const safeStatus =
+                escapeHtml(
+                    report.item_type || ""
+                );
+
+            const safeLocation =
+                escapeHtml(
+                    report.location || "Location unavailable"
+                );
+
+            const safeCategory =
+                escapeHtml(
+                    report.category || "General"
+                );
+
+            const buttonText =
+                report.report_kind === "sighting"
+                    ? "View Sighting"
+                    : "View Report";
+
+            const popup = `
+                <div class="map-popup">
+
+                    <h3>${safeName}</h3>
+
+                    <p>
+                        <strong>Report:</strong>
+                        ${safeKind}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        ${safeStatus}
+                    </p>
+
+                    <p>
+                        <strong>Category:</strong>
+                        ${safeCategory}
+                    </p>
+
+                    <p>
+                        <strong>Location:</strong>
+                        ${safeLocation}
+                    </p>
+
+                    <div class="popup-actions">
+
+                        <a
+                            href="item-detail.html?id=${encodeURIComponent(report.id)}"
+                        >
+                            ${buttonText}
+                        </a>
+
+                    </div>
+
+                </div>
+            `;
+
+            marker.bindPopup(popup);
+
+            marker.addTo(markerLayer);
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load community reports:",
+            error
+        );
+    }
+}
+
+mapKind.addEventListener(
+    "change",
+    loadCommunityReports
+);
+
+mapStatus.addEventListener(
+    "change",
+    loadCommunityReports
+);
+
+/* =========================
+   PHOTO PREVIEW
+========================= */
+
+communityImage.addEventListener(
+    "change",
+    function() {
+
+        const file = communityImage.files[0];
+
+        if (!file) {
+            photoPreview.style.display = "none";
+            aiPhotoResult.style.display = "none";
+
+            aiPhotoStatus.textContent =
+                "Select a photo and click Analyze Photo.";
+
+            return;
+        }
+
+        const imageUrl =
+            URL.createObjectURL(file);
+
+        photoPreview.src = imageUrl;
+        photoPreview.style.display = "block";
+
+        aiPhotoResult.style.display = "none";
+
+        aiPhotoStatus.textContent =
+            "✅ Photo selected. Click Analyze Photo.";
+    }
+);
+
+let mobileNetModel = null;
+
+async function loadMobileNetModel() {
+
+    if (mobileNetModel) {
+        return mobileNetModel;
+    }
+
+    aiPhotoStatus.textContent =
+        "🧠 Loading AI image model...";
+
+    mobileNetModel =
+        await mobilenet.load();
+
+    return mobileNetModel;
+}
+
+function loadImageFromFile(file) {
+
+    return new Promise(function(resolve, reject) {
+
+        const image = new Image();
+
+        const objectUrl =
+            URL.createObjectURL(file);
+
+        image.onload = function() {
+            URL.revokeObjectURL(objectUrl);
+            resolve(image);
+        };
+
+        image.onerror = function(error) {
+            URL.revokeObjectURL(objectUrl);
+            reject(error);
+        };
+
+        image.src = objectUrl;
+    });
+}
+
+function detectDominantColor(image) {
+
+    const canvas =
+        document.createElement("canvas");
+
+    const size = 100;
+
+    canvas.width = size;
+    canvas.height = size;
+
+    const context =
+        canvas.getContext(
+            "2d",
+            { willReadFrequently: true }
+        );
+
+    context.drawImage(
+        image,
+        0,
+        0,
+        size,
+        size
+    );
+
+    const data =
+        context.getImageData(
+            0,
+            0,
+            size,
+            size
+        ).data;
+
+    let totalR = 0;
+    let totalG = 0;
+    let totalB = 0;
+    let count = 0;
+
+    for (
+        let i = 0;
+        i < data.length;
+        i += 4
+    ) {
+
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        if (
+            r > 242 &&
+            g > 242 &&
+            b > 242
+        ) {
+            continue;
+        }
+
+        totalR += r;
+        totalG += g;
+        totalB += b;
+
+        count++;
+    }
+
+    if (count === 0) {
+        return "Unknown";
+    }
+
+    const r = totalR / count;
+    const g = totalG / count;
+    const b = totalB / count;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+
+    if (max < 70) return "Black";
+
+    if (min > 185) return "White";
+
+    if (
+        b > r * 1.25 &&
+        b > g * 1.08
+    ) {
+        return "Blue";
+    }
+
+    if (
+        r > g * 1.3 &&
+        r > b * 1.25
+    ) {
+        return "Red";
+    }
+
+    if (
+        g > r * 1.2 &&
+        g > b * 1.1
+    ) {
+        return "Green";
+    }
+
+    if (
+        r > 130 &&
+        g > 100 &&
+        b < 100
+    ) {
+        return "Yellow";
+    }
+
+    if (
+        r > 90 &&
+        g > 65 &&
+        b < 70
+    ) {
+        return "Brown";
+    }
+
+    return "Mixed";
+}
+
+function detectReportKind(
+    predictions,
+    ocrText
+) {
+
+    const labels =
+        predictions
+            .map(function(prediction) {
+                return String(
+                    prediction.className
+                ).toLowerCase();
+            })
+            .join(" ");
+
+    const combined =
+        labels +
+        " " +
+        String(
+            ocrText || ""
+        ).toLowerCase();
+
+    if (
+        combined.includes("passport") ||
+        combined.includes("identity") ||
+        combined.includes("id card") ||
+        combined.includes("driver") ||
+        combined.includes("license") ||
+        combined.includes("certificate") ||
+        combined.includes("document") ||
+        combined.includes("aadhaar") ||
+        combined.includes("pan card")
+    ) {
+        return "document";
+    }
+
+    if (
+        combined.includes("car") ||
+        combined.includes("vehicle") ||
+        combined.includes("motorcycle") ||
+        combined.includes("motorbike") ||
+        combined.includes("bicycle") ||
+        combined.includes("scooter") ||
+        combined.includes("truck") ||
+        combined.includes("bus") ||
+        combined.includes("van")
+    ) {
+        return "vehicle";
+    }
+
+    if (
+        combined.includes("dog") ||
+        combined.includes("cat") ||
+        combined.includes("puppy") ||
+        combined.includes("kitten") ||
+        combined.includes("labrador") ||
+        combined.includes("retriever")
+    ) {
+        return "pet";
+    }
+
+    return "item";
+}
+
+function suggestCategoryFromAI(
+    predictions,
+    detectedKind
+) {
+
+    if (detectedKind === "pet") {
+        return "Pet";
+    }
+
+    if (detectedKind === "vehicle") {
+        return "Vehicle";
+    }
+
+    if (detectedKind === "document") {
+        return "Documents";
+    }
+
+    const labels =
+        predictions
+            .map(function(prediction) {
+                return String(
+                    prediction.className
+                ).toLowerCase();
+            })
+            .join(" ");
+
+    if (
+        labels.includes("cellular telephone") ||
+        labels.includes("cell phone") ||
+        labels.includes("smartphone") ||
+        labels.includes("mobile phone")
+    ) {
+        return "Electronics";
+    }
+
+    if (
+        labels.includes("wallet") ||
+        labels.includes("purse") ||
+        labels.includes("watch")
+    ) {
+        return "Accessories";
+    }
+
+    if (
+        labels.includes("backpack") ||
+        labels.includes("bag") ||
+        labels.includes("handbag")
+    ) {
+        return "Bags";
+    }
+
+    return "General";
+}
+
+function suggestObjectName(
+    predictions,
+    detectedKind
+) {
+
+    if (detectedKind === "pet") {
+        return "Pet";
+    }
+
+    if (detectedKind === "vehicle") {
+        return "Vehicle";
+    }
+
+    if (detectedKind === "document") {
+        return "Document";
+    }
+
+    if (!predictions.length) {
+        return "Reported Item";
+    }
+
+    return String(
+        predictions[0].className
+    ).split(",")[0];
+}
+
+async function runOCR(file) {
+
+    if (typeof Tesseract === "undefined") {
+        return "";
+    }
+
+    try {
+
+        aiPhotoStatus.textContent =
+            "📄 Reading visible text...";
+
+        const worker =
+            await Tesseract.createWorker("eng");
+
+        const result =
+            await worker.recognize(file);
+
+        const text =
+            String(
+                result?.data?.text || ""
+            )
+            .replace(/\s+/g, " ")
+            .trim();
+
+        await worker.terminate();
+
+        return text;
+
+    } catch (error) {
+
+        console.error(
+            "OCR error:",
+            error
+        );
+
+        return "";
+    }
+}
+
+/* =========================
+   AI PHOTO ANALYSIS
+========================= */
+
+analyzePhotoBtn.addEventListener(
+    "click",
+    async function() {
+
+        const file =
+            communityImage.files[0];
+
+        if (!file) {
+            alert("Please select a photo first.");
+            return;
+        }
+
+        try {
+
+            analyzePhotoBtn.disabled = true;
+            analyzePhotoBtn.textContent =
+                "🧠 Analyzing...";
+
+            aiPhotoStatus.textContent =
+                "🧠 Preparing AI analysis...";
+
+            const model =
+                await loadMobileNetModel();
+
+            const image =
+                await loadImageFromFile(file);
+
+            aiPhotoStatus.textContent =
+                "🔍 Detecting objects...";
+
+            const predictions =
+                await model.classify(
+                    image,
+                    5
+                );
+
+            const ocrText =
+                await runOCR(file);
+
+            aiPhotoStatus.textContent =
+                "🎨 Analyzing visual features...";
+
+            const dominantColor =
+                detectDominantColor(image);
+
+            const detectedKind =
+                detectReportKind(
+                    predictions,
+                    ocrText
+                );
+
+            const detectedCategory =
+                suggestCategoryFromAI(
+                    predictions,
+                    detectedKind
+                );
+
+            const detectedObject =
+                suggestObjectName(
+                    predictions,
+                    detectedKind
+                );
+
+            /*
+             * Do not auto-change a generic image
+             * into a missing-person report.
+             */
+
+            if (detectedKind !== "item") {
+
+                reportKind.value =
+                    detectedKind;
+
+                reportKind.dispatchEvent(
+                    new Event("change")
+                );
+            }
+
+            if (
+                !category.value.trim() ||
+                category.value === "General"
+            ) {
+                category.value =
+                    detectedCategory;
+            }
+
+            if (
+                !itemName.value.trim() ||
+                itemName.value === "Reported Item"
+            ) {
+                itemName.value =
+                    detectedObject;
+            }
+
+            if (!color.value.trim()) {
+                color.value =
+                    dominantColor;
+            }
+
+            if (
+                ocrText &&
+                !description.value.trim()
+            ) {
+                description.value =
+                    `Visible text: ${ocrText}`;
+            }
+
+            const predictionHtml =
+                predictions
+                    .map(function(prediction) {
+
+                        const score =
+                            (
+                                Number(
+                                    prediction.probability
+                                ) * 100
+                            ).toFixed(1);
+
+                        return `
+                            <div class="prediction-row">
+                                <span>
+                                    ${escapeHtml(
+                                        prediction.className
+                                    )}
+                                </span>
+
+                                <span class="prediction-score">
+                                    ${score}%
+                                </span>
+                            </div>
+                        `;
+                    })
+                    .join("");
+
+            aiPhotoResult.innerHTML = `
+                <strong
+                    style="
+                        color:#16804b;
+                        display:block;
+                        margin-bottom:8px;
+                    "
+                >
+                    ✅ AI Analysis Complete
+                </strong>
+
+                <div class="analysis-item">
+                    <strong>Suggested report:</strong>
+                    ${escapeHtml(detectedKind)}
+                </div>
+
+                <div class="analysis-item">
+                    <strong>Suggested category:</strong>
+                    ${escapeHtml(detectedCategory)}
+                </div>
+
+                <div class="analysis-item">
+                    <strong>Suggested object:</strong>
+                    ${escapeHtml(detectedObject)}
+                </div>
+
+                <div class="analysis-item">
+                    <strong>Dominant color:</strong>
+                    ${escapeHtml(dominantColor)}
+                </div>
+
+                ${
+                    ocrText
+                        ? `
+                            <div class="analysis-item">
+                                <strong>OCR text:</strong>
+                                ${escapeHtml(ocrText)}
+                            </div>
+                        `
+                        : ""
+                }
+
+                <hr class="analysis-divider">
+
+                <strong style="font-size:13px;">
+                    Top AI predictions
+                </strong>
+
+                <div style="margin-top:7px;">
+                    ${predictionHtml}
+                </div>
+            `;
+
+            aiPhotoResult.style.display =
+                "block";
+
+            aiPhotoStatus.textContent =
+                "✅ Suggestions have been applied to the report form.";
+
+        } catch (error) {
+
+            console.error(
+                "AI photo analysis error:",
+                error
+            );
+
+            aiPhotoStatus.textContent =
+                "❌ Unable to analyze this image. You can still complete the form manually.";
+
+        } finally {
+
+            analyzePhotoBtn.disabled = false;
+
+            analyzePhotoBtn.textContent =
+                "🧠 Analyze Photo";
+        }
+    }
+);
+
+/* =========================
+   SUBMIT REPORT
+========================= */
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        if (
+            !currentUser ||
+            !currentUser.id
+        ) {
+            alert("Please login again.");
+            return;
+        }
+
+        submitBtn.disabled = true;
+
+        submitBtn.textContent =
+            "⏳ Submitting...";
+
+        statusMessage.style.display =
+            "block";
+
+        statusMessage.textContent =
+            "Submitting community report...";
+
+        statusMessage.style.background =
+            "#eef2ff";
+
+        try {
+
+            const formData =
+                new FormData(form);
+
+            formData.append(
+                "user_id",
+                currentUser.id
+            );
+
+            const response =
+                await fetch(
+                    `${API_URL}/report-item`,
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+            let result = null;
+
+            try {
+                result =
+                    await response.json();
+            } catch {
+                result = null;
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    result?.detail ||
+                    result?.message ||
+                    `Server error: ${response.status}`
+                );
+            }
+
+            const submittedKind =
+                String(
+                    formData.get("report_kind") ||
+                    "item"
+                ).toLowerCase();
+
+            if (
+                submittedKind === "sighting"
+            ) {
+                statusMessage.textContent =
+                    "✅ Sighting submitted. Nearby matching lost-report users will be notified automatically.";
+            } else {
+                statusMessage.textContent =
+                    "✅ Community report submitted successfully.";
+            }
+
+            statusMessage.style.background =
+                "#e5f8ed";
+
+            form.reset();
+
+            updateReportKindUI();
+
+            privacyNote.style.display =
+                "none";
+
+            sightingNote.style.display =
+                "none";
+
+            photoPreview.style.display =
+                "none";
+
+            aiPhotoResult.style.display =
+                "none";
+
+            aiPhotoStatus.textContent =
+                "Select a photo and click Analyze Photo.";
+
+            await loadCommunityReports();
+
+            setTimeout(function() {
+
+                if (
+                    result &&
+                    result.item_id
+                ) {
+                    window.location.href =
+                        `item-detail.html?id=${encodeURIComponent(
+                            result.item_id
+                        )}`;
+                }
+
+            }, 1200);
+
+        } catch (error) {
+
+            console.error(
+                "Community report submission error:",
+                error
+            );
+
+            statusMessage.textContent =
+                `❌ ${error.message}`;
+
+            statusMessage.style.background =
+                "#ffe8e8";
+
+        } finally {
+
+            submitBtn.disabled = false;
+
+            submitBtn.textContent =
+                "🚨 Submit Community Report";
+        }
+    }
+);
+
+/* =========================
+   DEFAULT DATE
+========================= */
+
+(function setDefaultDate() {
+
+    const dateInput =
+        document.getElementById("date");
+
+    if (
+        dateInput &&
+        !dateInput.value
+    ) {
+
+        const today =
+            new Date();
+
+        const year =
+            today.getFullYear();
+
+        const month =
+            String(
+                today.getMonth() + 1
+            ).padStart(2, "0");
+
+        const day =
+            String(
+                today.getDate()
+            ).padStart(2, "0");
+
+        dateInput.value =
+            `${year}-${month}-${day}`;
+    }
+
+})();
+
+/* =========================
+   INITIAL LOAD
+========================= */
+
+loadCommunityReports();
+</script>
+
+</body>
+</html>

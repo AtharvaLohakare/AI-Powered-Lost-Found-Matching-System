@@ -1,12 +1,3 @@
-/* =========================================================
-   NOTIFICATIONS CENTER
-========================================================= */
-
-
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
 const notificationList =
     document.getElementById("notificationList");
 
@@ -62,7 +53,6 @@ try {
     currentUser =
         JSON.parse(storedUser);
 
-
     if (
         !currentUser ||
         !currentUser.id
@@ -81,9 +71,9 @@ try {
         error
     );
 
-
-    localStorage.removeItem("user");
-
+    localStorage.removeItem(
+        "user"
+    );
 
     notificationList.innerHTML = `
         <div class="empty-notifications">
@@ -118,7 +108,6 @@ function setupNavbar(user) {
             "navButtons"
         );
 
-
     if (
         !navButtons ||
         !user
@@ -127,7 +116,6 @@ function setupNavbar(user) {
         return;
 
     }
-
 
     navButtons.innerHTML = `
         <span class="user-welcome">
@@ -154,12 +142,10 @@ function setupNavbar(user) {
         </a>
     `;
 
-
     const logoutBtn =
         document.getElementById(
             "logoutBtn"
         );
-
 
     if (logoutBtn) {
 
@@ -169,11 +155,9 @@ function setupNavbar(user) {
 
                 event.preventDefault();
 
-
                 localStorage.removeItem(
                     "user"
                 );
-
 
                 window.location.href =
                     "index.html";
@@ -199,7 +183,6 @@ async function loadNotifications() {
             </div>
         `;
 
-
         const response =
             await fetch(
                 `${API_URL}/notifications/${encodeURIComponent(
@@ -207,12 +190,10 @@ async function loadNotifications() {
                 )}`
             );
 
-
         console.log(
             "Notification API status:",
             response.status
         );
-
 
         if (!response.ok) {
 
@@ -222,16 +203,13 @@ async function loadNotifications() {
 
         }
 
-
         const data =
             await response.json();
-
 
         console.log(
             "Notifications API response:",
             data
         );
-
 
         if (
             data.status !== "success" ||
@@ -246,16 +224,13 @@ async function loadNotifications() {
 
         }
 
-
         displayNotifications(
             data.notifications
         );
 
-
         updateUnreadCount(
             data.notifications
         );
-
 
     } catch (error) {
 
@@ -263,7 +238,6 @@ async function loadNotifications() {
             "Unable to load notifications:",
             error
         );
-
 
         notificationList.innerHTML = `
             <div class="empty-notifications">
@@ -286,14 +260,12 @@ async function loadNotifications() {
             </div>
         `;
 
-
         if (notificationSummary) {
 
             notificationSummary.textContent =
                 "Unable to load notifications.";
 
         }
-
     }
 }
 
@@ -305,7 +277,6 @@ async function loadNotifications() {
 function displayNotifications(
     notifications
 ) {
-
 
     if (!notifications.length) {
 
@@ -327,7 +298,6 @@ function displayNotifications(
             </div>
         `;
 
-
         if (notificationSummary) {
 
             notificationSummary.textContent =
@@ -335,40 +305,31 @@ function displayNotifications(
 
         }
 
-
         return;
-
     }
-
 
     notificationList.innerHTML = "";
 
-
     notifications.forEach(
         function (notification) {
-
 
             const card =
                 document.createElement(
                     "div"
                 );
 
-
             const notificationType =
                 String(
                     notification.notification_type || ""
                 ).toLowerCase();
-
 
             const isUnread =
                 Number(
                     notification.is_read
                 ) === 0;
 
-
             card.className =
                 "notification-card";
-
 
             if (isUnread) {
 
@@ -384,38 +345,31 @@ function displayNotifications(
 
             }
 
-
             const icon =
                 getNotificationIcon(
                     notificationType
                 );
-
 
             const createdAt =
                 formatDate(
                     notification.created_at
                 );
 
-
             const unreadBadge =
                 isUnread
-
                     ? `
                         <span class="new-badge">
                             NEW
                         </span>
-                      `
-
+                    `
                     : `
                         <span class="read-label">
                             ✓ Read
                         </span>
-                      `;
-
+                    `;
 
             const markReadButton =
                 isUnread
-
                     ? `
                         <button
                             type="button"
@@ -425,14 +379,8 @@ function displayNotifications(
                             Mark as read
 
                         </button>
-                      `
-
+                    `
                     : "";
-
-
-            /* =================================================
-               ACTION BUTTON
-            ================================================= */
 
             let actionButton = "";
 
@@ -498,6 +446,28 @@ function displayNotifications(
             }
 
 
+            /* NEARBY SIGHTING ALERT */
+
+            else if (
+                notificationType === "sighting_alert" &&
+                notification.item_id
+            ) {
+
+                actionButton = `
+                    <a
+                        href="item-detail.html?id=${encodeURIComponent(
+                            notification.item_id
+                        )}"
+                        class="view-item-btn">
+
+                        👀 View Sighting
+
+                    </a>
+                `;
+
+            }
+
+
             /* OTHER ITEM NOTIFICATION */
 
             else if (
@@ -519,19 +489,13 @@ function displayNotifications(
             }
 
 
-            /* =================================================
-               CARD
-            ================================================= */
-
             card.innerHTML = `
 
                 <div class="notification-icon">
                     ${icon}
                 </div>
 
-
                 <div class="notification-content">
-
 
                     <div class="notification-header">
 
@@ -546,7 +510,6 @@ function displayNotifications(
 
                     </div>
 
-
                     <p class="notification-message">
 
                         ${escapeHTML(
@@ -556,41 +519,32 @@ function displayNotifications(
 
                     </p>
 
-
                     <div class="notification-footer">
 
                         <span class="notification-date">
                             ${createdAt}
                         </span>
 
-
                         ${actionButton}
-
 
                         ${markReadButton}
 
                     </div>
 
-
                 </div>
-
             `;
-
 
             notificationList.appendChild(
                 card
             );
 
 
-            /* =================================================
-               MARK READ
-            ================================================= */
+            /* MARK READ */
 
             const readButton =
                 card.querySelector(
                     ".mark-read-btn"
                 );
-
 
             if (readButton) {
 
@@ -601,7 +555,6 @@ function displayNotifications(
                         const notificationId =
                             readButton.dataset
                                 .notificationId;
-
 
                         markAsRead(
                             notificationId
@@ -616,9 +569,7 @@ function displayNotifications(
     );
 
 
-    /* =================================================
-       SUMMARY
-    ================================================= */
+    /* SUMMARY */
 
     if (notificationSummary) {
 
@@ -632,7 +583,6 @@ function displayNotifications(
 
                 }
             ).length;
-
 
         if (unread === 0) {
 
@@ -687,6 +637,9 @@ function getNotificationIcon(
         case "item_returned":
             return "📦";
 
+        case "sighting_alert":
+            return "👀";
+
         default:
             return "🔔";
     }
@@ -713,12 +666,10 @@ function updateUnreadCount(
             }
         ).length;
 
-
     if (navBadge) {
 
         navBadge.textContent =
             unread;
-
 
         if (unread === 0) {
 
@@ -757,7 +708,6 @@ async function markAsRead(
                 }
             );
 
-
         if (!response.ok) {
 
             throw new Error(
@@ -766,16 +716,13 @@ async function markAsRead(
 
         }
 
-
         const data =
             await response.json();
-
 
         console.log(
             "Mark as read response:",
             data
         );
-
 
         if (
             data.status !== "success"
@@ -788,9 +735,7 @@ async function markAsRead(
 
         }
 
-
         await loadNotifications();
-
 
     } catch (error) {
 
@@ -798,7 +743,6 @@ async function markAsRead(
             "Unable to mark notification as read:",
             error
         );
-
 
         alert(
             "Unable to mark notification as read."
@@ -819,14 +763,13 @@ async function markAllAsRead() {
 
         const response =
             await fetch(
-                `${API_URL}/notifications/user/${encodeURIComponent(
+                `${API_URL}/notifications/read-all/${encodeURIComponent(
                     currentUser.id
-                )}/read-all`,
+                )}`,
                 {
                     method: "PUT"
                 }
             );
-
 
         if (!response.ok) {
 
@@ -836,16 +779,13 @@ async function markAllAsRead() {
 
         }
 
-
         const data =
             await response.json();
-
 
         console.log(
             "Mark all as read response:",
             data
         );
-
 
         if (
             data.status !== "success"
@@ -858,9 +798,7 @@ async function markAllAsRead() {
 
         }
 
-
         await loadNotifications();
-
 
     } catch (error) {
 
@@ -868,7 +806,6 @@ async function markAllAsRead() {
             "Unable to mark all notifications:",
             error
         );
-
 
         alert(
             "Unable to mark all notifications as read."
@@ -906,10 +843,8 @@ function escapeHTML(
             "div"
         );
 
-
     div.textContent =
         value ?? "";
-
 
     return div.innerHTML;
 
@@ -930,12 +865,10 @@ function formatDate(
 
     }
 
-
     const date =
         new Date(
             dateValue
         );
-
 
     if (
         Number.isNaN(
@@ -948,7 +881,6 @@ function formatDate(
         );
 
     }
-
 
     return date.toLocaleString(
         "en-IN",
@@ -975,7 +907,6 @@ document.addEventListener(
         setupNavbar(
             currentUser
         );
-
 
         loadNotifications();
 
