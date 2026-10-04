@@ -1,4 +1,22 @@
 
+// =========================================================
+// LOST & FOUND AI
+// ITEM DETAIL + AI MATCHING + LOCATION MAP
+// OWNERSHIP VERIFICATION + CONTACT REPORTER
+// =========================================================
+
+// =========================================================
+// BACKEND URL
+// =========================================================
+// Change this ONLY if your backend runs somewhere else.
+
+const API_URL = "https://ai-powered-lost-found-matching-system.onrender.com";
+
+
+// =========================================================
+// NAVBAR / MOBILE MENU
+// =========================================================
+
 const menuToggle = document.getElementById("menuToggle");
 const navMenu = document.getElementById("navMenu");
 
@@ -18,7 +36,8 @@ if (menuToggle && navMenu) {
     });
 
 
-    // Close menu after clicking a navigation link
+    // Close menu after clicking navigation link
+
     const navLinks = navMenu.querySelectorAll("a");
 
     navLinks.forEach(function (link) {
@@ -35,6 +54,7 @@ if (menuToggle && navMenu) {
 
 
     // Close menu when screen becomes desktop
+
     window.addEventListener("resize", function () {
 
         if (window.innerWidth > 800) {
@@ -49,20 +69,30 @@ if (menuToggle && navMenu) {
 
 }
 
+
 // =========================================================
-// LOST & FOUND AI
-// ITEM DETAIL + AI MATCHING + LOCATION MAP
+// ITEM DETAIL
 // =========================================================
 
 const itemDetail = document.getElementById("item-detail");
 
+
+// Get item ID from URL
+//
+// Example:
+// item-detail.html?id=5
+//
+
 const params = new URLSearchParams(window.location.search);
+
 const itemId = params.get("id");
 
-// Store current item for map
+
+// Current item
 let currentItem = null;
 
-// Store Leaflet map
+
+// Leaflet map
 let matchMap = null;
 
 
@@ -71,11 +101,13 @@ let matchMap = null;
 // =========================================================
 
 function escapeHtml(value) {
+
     if (value === null || value === undefined) {
         return "";
     }
 
     const div = document.createElement("div");
+
     div.textContent = String(value);
 
     return div.innerHTML;
@@ -87,29 +119,50 @@ function escapeHtml(value) {
 // =========================================================
 
 function getImageUrl(item) {
+
     if (!item) {
         return "";
     }
 
-    // If backend gives a full URL, use it directly
+
+    // Backend gives full URL
+
     if (item.image_url) {
+
         if (
             item.image_url.startsWith("http://") ||
             item.image_url.startsWith("https://")
         ) {
+
             return item.image_url;
+
         }
 
-        // If backend gives relative URL like /uploads/file.jpg
+
+        // Backend gives relative URL
+        //
+        // Example:
+        // /uploads/image.jpg
+        //
+
         return `${API_URL}${item.image_url}`;
+
     }
+
 
     // Fallback using image_name
+
     if (item.image_name) {
-        return `${API_URL}/uploads/${encodeURIComponent(item.image_name)}`;
+
+        return `${API_URL}/uploads/${encodeURIComponent(
+            item.image_name
+        )}`;
+
     }
 
+
     return "";
+
 }
 
 
@@ -120,7 +173,9 @@ function getImageUrl(item) {
 function imageErrorHandler(img) {
 
     img.onerror = null;
+
     img.style.display = "none";
+
 
     if (img.parentElement) {
 
@@ -132,60 +187,97 @@ function imageErrorHandler(img) {
                 <span>Image unavailable</span>
             </div>
         `;
+
     }
+
 }
 
 
 // =========================================================
-// LOAD LEAFLET CSS + JS
+// LEAFLET CSS + JS
 // =========================================================
 
 function loadLeaflet() {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(function (resolve, reject) {
 
         // Already loaded
+
         if (window.L) {
+
             resolve();
+
             return;
+
         }
 
-        // -------------------------------
-        // Leaflet CSS
-        // -------------------------------
+
+        // Load CSS
 
         if (!document.getElementById("leaflet-css")) {
 
             const css = document.createElement("link");
 
             css.id = "leaflet-css";
+
             css.rel = "stylesheet";
+
             css.href =
                 "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 
             document.head.appendChild(css);
+
         }
 
 
-        // -------------------------------
-        // Leaflet JS
-        // -------------------------------
+        // Load JS
+
+        const existingScript =
+            document.getElementById("leaflet-js");
+
+
+        if (existingScript) {
+
+            existingScript.addEventListener(
+                "load",
+                resolve
+            );
+
+            existingScript.addEventListener(
+                "error",
+                function () {
+                    reject(
+                        new Error("Unable to load map library.")
+                    );
+                }
+            );
+
+            return;
+
+        }
+
 
         const script = document.createElement("script");
+
+        script.id = "leaflet-js";
 
         script.src =
             "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 
-        script.onload = () => resolve();
+        script.onload = resolve;
 
-        script.onerror = () => {
+        script.onerror = function () {
+
             reject(
                 new Error("Unable to load map library.")
             );
+
         };
 
         document.head.appendChild(script);
+
     });
+
 }
 
 
@@ -199,8 +291,11 @@ function hasCoordinates(item) {
         return false;
     }
 
+
     const lat = Number(item.latitude);
+
     const lon = Number(item.longitude);
+
 
     return (
         Number.isFinite(lat) &&
@@ -210,6 +305,7 @@ function hasCoordinates(item) {
         lon >= -180 &&
         lon <= 180
     );
+
 }
 
 
@@ -225,44 +321,46 @@ async function createMatchMap(item, matches) {
     const mapStatus =
         document.getElementById("map-status");
 
+
     if (!mapContainer) {
         return;
     }
 
 
-    // -----------------------------------------
-    // Check current item GPS
-    // -----------------------------------------
+    // Current item GPS
 
-    const currentHasGPS = hasCoordinates(item);
-
-
-    // -----------------------------------------
-    // Find matches having GPS
-    // -----------------------------------------
-
-    const matchesWithGPS = matches.filter(
-        match => hasCoordinates(match)
-    );
+    const currentHasGPS =
+        hasCoordinates(item);
 
 
-    // -----------------------------------------
-    // If nothing has GPS
-    // -----------------------------------------
+    // Matching items having GPS
 
-    if (!currentHasGPS && matchesWithGPS.length === 0) {
+    const matchesWithGPS =
+        Array.isArray(matches)
+            ? matches.filter(function (match) {
+                return hasCoordinates(match);
+            })
+            : [];
+
+
+    // Nothing has GPS
+
+    if (
+        !currentHasGPS &&
+        matchesWithGPS.length === 0
+    ) {
 
         if (mapStatus) {
 
-            mapStatus.innerHTML = `
-                📍 Location data is not available
-                for these items.
-            `;
+            mapStatus.innerHTML =
+                "📍 Location data is not available for these items.";
+
         }
 
         mapContainer.style.display = "none";
 
         return;
+
     }
 
 
@@ -270,57 +368,54 @@ async function createMatchMap(item, matches) {
 
         await loadLeaflet();
 
+
         mapContainer.style.display = "block";
 
+
         if (mapStatus) {
+
             mapStatus.innerHTML =
                 "📍 Showing reported item locations";
+
         }
 
 
-        // -----------------------------------------
         // Remove old map
-        // -----------------------------------------
 
         if (matchMap) {
 
             matchMap.remove();
 
             matchMap = null;
+
         }
 
 
-        // -----------------------------------------
         // Create map
-        // -----------------------------------------
 
-        matchMap = L.map("match-map");
+        matchMap =
+            L.map("match-map");
 
 
-        // -----------------------------------------
-        // OpenStreetMap tiles
-        // -----------------------------------------
+        // OpenStreetMap
 
         L.tileLayer(
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             {
                 maxZoom: 19,
+
                 attribution:
-                    '&copy; OpenStreetMap contributors'
+                    "&copy; OpenStreetMap contributors"
             }
         ).addTo(matchMap);
 
 
-        // -----------------------------------------
-        // Markers
-        // -----------------------------------------
-
         const mapPoints = [];
 
 
-        // -----------------------------------------
-        // Current item marker
-        // -----------------------------------------
+        // =====================================================
+        // CURRENT ITEM MARKER
+        // =====================================================
 
         if (currentHasGPS) {
 
@@ -330,61 +425,80 @@ async function createMatchMap(item, matches) {
             const lon =
                 Number(item.longitude);
 
+
             const marker =
                 L.marker([lat, lon])
                     .addTo(matchMap);
+
 
             marker.bindPopup(`
                 <strong>Current Item</strong><br>
                 ${escapeHtml(
-                item.item_name || "Reported Item"
-            )}<br>
+                    item.item_name || "Reported Item"
+                )}<br>
                 ${escapeHtml(
-                item.location || "Location unavailable"
-            )}
+                    item.location || "Location unavailable"
+                )}
             `);
 
+
             mapPoints.push([lat, lon]);
+
         }
 
 
-        // -----------------------------------------
-        // Match markers
-        // -----------------------------------------
+        // =====================================================
+        // MATCH MARKERS
+        // =====================================================
 
-        matchesWithGPS.forEach((match, index) => {
+        matchesWithGPS.forEach(
+            function (match, index) {
 
-            const lat =
-                Number(match.latitude);
+                const lat =
+                    Number(match.latitude);
 
-            const lon =
-                Number(match.longitude);
-
-            const marker =
-                L.marker([lat, lon])
-                    .addTo(matchMap);
-
-            const score =
-                Number(match.match_score || 0);
-
-            marker.bindPopup(`
-                <strong>Possible Match #${index + 1}</strong><br>
-                ${escapeHtml(
-                match.item_name || "Possible Match"
-            )}<br>
-                Match: ${score.toFixed(1)}%<br>
-                ${escapeHtml(
-                match.location || "Location unavailable"
-            )}
-            `);
-
-            mapPoints.push([lat, lon]);
-        });
+                const lon =
+                    Number(match.longitude);
 
 
-        // -----------------------------------------
-        // Fit map to all markers
-        // -----------------------------------------
+                const marker =
+                    L.marker([lat, lon])
+                        .addTo(matchMap);
+
+
+                const score =
+                    Number(match.match_score || 0);
+
+
+                marker.bindPopup(`
+                    <strong>
+                        Possible Match #${index + 1}
+                    </strong><br>
+
+                    ${escapeHtml(
+                        match.item_name ||
+                        "Possible Match"
+                    )}<br>
+
+                    Match:
+                    ${score.toFixed(1)}%<br>
+
+                    ${escapeHtml(
+                        match.location ||
+                        "Location unavailable"
+                    )}
+                `);
+
+
+                mapPoints.push([lat, lon]);
+
+            }
+        );
+
+
+        // =====================================================
+        // FIT MAP
+        // =====================================================
 
         if (mapPoints.length === 1) {
 
@@ -394,10 +508,12 @@ async function createMatchMap(item, matches) {
             );
 
         }
+
         else if (mapPoints.length > 1) {
 
             const bounds =
                 L.latLngBounds(mapPoints);
+
 
             matchMap.fitBounds(
                 bounds,
@@ -407,29 +523,31 @@ async function createMatchMap(item, matches) {
             );
 
         }
+
         else {
 
             matchMap.setView(
                 [20.5937, 78.9629],
                 5
             );
+
         }
 
 
-        // -----------------------------------------
-        // Fix Leaflet rendering
-        // -----------------------------------------
+        // Fix rendering
 
-        setTimeout(() => {
+        setTimeout(function () {
 
             if (matchMap) {
+
                 matchMap.invalidateSize();
+
             }
 
         }, 300);
 
-
     }
+
     catch (error) {
 
         console.error(
@@ -437,14 +555,19 @@ async function createMatchMap(item, matches) {
             error
         );
 
+
         mapContainer.style.display = "none";
+
 
         if (mapStatus) {
 
             mapStatus.innerHTML =
                 "Unable to load location map.";
+
         }
+
     }
+
 }
 
 
@@ -454,54 +577,139 @@ async function createMatchMap(item, matches) {
 
 async function loadItem() {
 
+    // Make sure HTML contains item-detail
+
+    if (!itemDetail) {
+
+        console.error(
+            "ERROR: #item-detail was not found in item-detail.html"
+        );
+
+        return;
+
+    }
+
+
+    // No ID
+
     if (!itemId) {
 
         itemDetail.innerHTML = `
             <div class="detail-card">
+
                 <h2>Item not found</h2>
-                <p>No item ID was provided.</p>
+
+                <p>
+                    No item ID was provided in the URL.
+                </p>
+
             </div>
         `;
 
         return;
+
     }
+
+
+    console.log(
+        "Loading item ID:",
+        itemId
+    );
+
+
+    // Loading message
+
+    itemDetail.innerHTML = `
+        <div class="detail-card">
+
+            <h2>Loading item...</h2>
+
+            <p>
+                Please wait.
+            </p>
+
+        </div>
+    `;
 
 
     try {
 
-        const response = await fetch(
-            `${API_URL}/items/${encodeURIComponent(itemId)}`
+        // =====================================================
+        // API REQUEST
+        // =====================================================
+
+        const url =
+            `${API_URL}/items/${encodeURIComponent(itemId)}`;
+
+
+        console.log(
+            "Fetching:",
+            url
         );
+
+
+        const response =
+            await fetch(url);
 
 
         let data = null;
 
+
         try {
 
-            data = await response.json();
+            data =
+                await response.json();
 
         }
-        catch {
+
+        catch (jsonError) {
 
             data = null;
+
         }
 
+
+        // API error
 
         if (!response.ok) {
 
             throw new Error(
                 data?.detail ||
                 data?.message ||
-                "Item not found"
+                `Item not found. Server returned ${response.status}`
             );
+
+        }
+
+
+        // Make sure data exists
+
+        if (!data) {
+
+            throw new Error(
+                "No item data was returned by the server."
+            );
+
         }
 
 
         const item = data;
 
-        // Store globally for map
+
+        // Store current item
+
         currentItem = item;
 
+
+        console.log(
+            "Item loaded successfully:",
+            item
+        );
+
+
+        // =====================================================
+        // IMAGE
+        // =====================================================
 
         const imageUrl =
             getImageUrl(item);
@@ -512,25 +720,61 @@ async function loadItem() {
             ? `
                 <img
                     src="${escapeHtml(imageUrl)}"
-                    alt="${escapeHtml(item.item_name)}"
+                    alt="${escapeHtml(
+                        item.item_name ||
+                        "Item"
+                    )}"
                     onerror="imageErrorHandler(this)"
                 >
-              `
+            `
 
             : `
                 <div class="image-placeholder">
                     📦
-                    <span>No image available</span>
+                    <span>
+                        No image available
+                    </span>
                 </div>
-              `;
+            `;
 
+
+        // =====================================================
+        // AI BUTTON
+        // =====================================================
+
+        let matchButtonHTML = "";
+
+
+        if (
+            item.item_type === "lost" ||
+            item.item_type === "found"
+        ) {
+
+            matchButtonHTML = `
+                <button
+                    class="match-btn"
+                    onclick="findMatches(${Number(item.id)})"
+                    type="button"
+                >
+                    🤖 Find AI Matches
+                </button>
+            `;
+
+        }
+
+
+        // =====================================================
+        // DISPLAY ITEM
+        // =====================================================
 
         itemDetail.innerHTML = `
 
             <div class="detail-card">
 
                 <div class="detail-image">
+
                     ${imageHTML}
+
                 </div>
 
 
@@ -539,10 +783,10 @@ async function loadItem() {
                     <span class="item-type">
 
                         ${escapeHtml(
-            String(
-                item.item_type || ""
-            ).toUpperCase()
-        )}
+                            String(
+                                item.item_type || ""
+                            ).toUpperCase()
+                        )}
 
                     </span>
 
@@ -550,103 +794,102 @@ async function loadItem() {
                     <h1>
 
                         ${escapeHtml(
-            item.item_name ||
-            "Unnamed Item"
-        )}
+                            item.item_name ||
+                            "Unnamed Item"
+                        )}
 
                     </h1>
 
 
                     <p>
 
-                        <strong>Category:</strong>
+                        <strong>
+                            Category:
+                        </strong>
 
                         ${escapeHtml(
-            item.category ||
-            "Not specified"
-        )}
+                            item.category ||
+                            "Not specified"
+                        )}
 
                     </p>
 
 
                     <p>
 
-                        <strong>Description:</strong>
+                        <strong>
+                            Description:
+                        </strong>
 
                         ${escapeHtml(
-            item.description ||
-            "Not specified"
-        )}
+                            item.description ||
+                            "Not specified"
+                        )}
 
                     </p>
 
 
                     <p>
 
-                        <strong>Color:</strong>
+                        <strong>
+                            Color:
+                        </strong>
 
                         ${escapeHtml(
-            item.color ||
-            "Not specified"
-        )}
+                            item.color ||
+                            "Not specified"
+                        )}
 
                     </p>
 
 
                     <p>
 
-                        <strong>Brand:</strong>
+                        <strong>
+                            Brand:
+                        </strong>
 
                         ${escapeHtml(
-            item.brand ||
-            "Not specified"
-        )}
+                            item.brand ||
+                            "Not specified"
+                        )}
 
                     </p>
 
 
                     <p>
 
-                        <strong>Location:</strong>
+                        <strong>
+                            Location:
+                        </strong>
 
                         ${escapeHtml(
-            item.location ||
-            "Not specified"
-        )}
+                            item.location ||
+                            "Not specified"
+                        )}
 
                     </p>
 
 
                     <p>
 
-                        <strong>Date:</strong>
+                        <strong>
+                            Date:
+                        </strong>
 
                         ${escapeHtml(
-            item.item_date ||
-            "Not specified"
-        )}
+                            item.item_date ||
+                            "Not specified"
+                        )}
 
                     </p>
 
 
-                    ${item.item_type === "lost" ||
-                item.item_type === "found"
+                    <div class="item-actions">
 
-                ?
+                        ${matchButtonHTML}
 
-                `
-                            <button
-                                class="match-btn"
-                                onclick="findMatches(${item.id})"
-                            >
-                                🤖 Find AI Matches
-                            </button>
-                        `
-
-                :
-
-                ""
-            }
+                    </div>
 
                 </div>
 
@@ -656,8 +899,8 @@ async function loadItem() {
             <div id="match-results"></div>
 
         `;
-    }
 
+    }
 
     catch (error) {
 
@@ -672,22 +915,30 @@ async function loadItem() {
             <div class="detail-card">
 
                 <h2>
-                    Unable to load item
+                    ❌ Unable to load item
                 </h2>
 
                 <p>
-
                     ${escapeHtml(
-            error.message ||
-            "Something went wrong while loading the item."
-        )}
-
+                        error.message ||
+                        "Something went wrong while loading the item."
+                    )}
                 </p>
+
+                <button
+                    type="button"
+                    onclick="loadItem()"
+                    class="match-btn"
+                >
+                    🔄 Try Again
+                </button>
 
             </div>
 
         `;
+
     }
+
 }
 
 
@@ -698,13 +949,23 @@ async function loadItem() {
 async function findMatches(id) {
 
     const matchResults =
-        document.getElementById("match-results");
+        document.getElementById(
+            "match-results"
+        );
 
 
     if (!matchResults) {
+
+        console.error(
+            "match-results element not found."
+        );
+
         return;
+
     }
 
+
+    // Loading
 
     matchResults.innerHTML = `
 
@@ -726,32 +987,40 @@ async function findMatches(id) {
     `;
 
 
-    if (typeof showToast === "function") {
+    if (
+        typeof showToast === "function"
+    ) {
 
         showToast(
             "🤖 AI matching started...",
             "success"
         );
+
     }
 
 
     try {
 
-        const response = await fetch(
-            `${API_URL}/match/${encodeURIComponent(id)}`
-        );
+        const response =
+            await fetch(
+                `${API_URL}/match/${encodeURIComponent(id)}`
+            );
 
 
         let data = null;
 
+
         try {
 
-            data = await response.json();
+            data =
+                await response.json();
 
         }
-        catch {
+
+        catch (jsonError) {
 
             data = null;
+
         }
 
 
@@ -760,8 +1029,9 @@ async function findMatches(id) {
             throw new Error(
                 data?.detail ||
                 data?.message ||
-                "Matching failed"
+                "Matching failed."
             );
+
         }
 
 
@@ -771,12 +1041,12 @@ async function findMatches(id) {
         );
 
 
-        // =================================================
-        // NO MATCH FOUND
-        // =================================================
+        // =====================================================
+        // NO MATCH
+        // =====================================================
 
         if (
-            !data.matches ||
+            !data ||
             !Array.isArray(data.matches) ||
             data.matches.length === 0
         ) {
@@ -790,8 +1060,8 @@ async function findMatches(id) {
                     </h2>
 
                     <p>
-                        The AI could not find a strong
-                        matching found item.
+                        The AI could not find a
+                        strong matching item.
                     </p>
 
                 </div>
@@ -799,35 +1069,36 @@ async function findMatches(id) {
             `;
 
 
-            if (typeof showToast === "function") {
+            if (
+                typeof showToast === "function"
+            ) {
 
                 showToast(
                     "No strong match found.",
                     "warning"
                 );
+
             }
 
 
             return;
+
         }
 
 
-        // =================================================
-        // TAKE TOP 5 MATCHES
-        // =================================================
+        // Top 5
 
         const topMatches =
             data.matches.slice(0, 5);
 
 
-        // =================================================
-        // DISPLAY AI RESULTS
-        // =================================================
+        // =====================================================
+        // DISPLAY RESULTS
+        // =====================================================
 
         matchResults.innerHTML = `
 
             <div class="ai-results">
-
 
                 <div class="ai-summary">
 
@@ -844,14 +1115,13 @@ async function findMatches(id) {
                         </strong>
 
                         possible match${data.matches.length === 1
-                ? ""
-                : "es"
-            }
+                            ? ""
+                            : "es"
+                        }
 
-                        for this lost item.
+                        for this item.
 
                     </p>
-
 
                     <p>
 
@@ -883,107 +1153,116 @@ async function findMatches(id) {
 
                 <p class="ai-subtitle">
 
-                    Matches are ranked using image similarity,
-                    text similarity and item metadata.
+                    Matches are ranked using image
+                    similarity, text similarity
+                    and item metadata.
 
                 </p>
 
 
-                ${topMatches.map(match => {
-
-                const score =
-                    Math.max(
-                        0,
-                        Math.min(
-                            100,
-                            Number(
-                                match.match_score || 0
-                            )
-                        )
-                    );
+                ${topMatches.map(
+                    function (match) {
 
 
-                const imageScore =
-                    Math.max(
-                        0,
-                        Math.min(
-                            100,
-                            Number(
-                                match.image_similarity || 0
-                            )
-                        )
-                    );
+                        const score =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.match_score || 0
+                                    )
+                                )
+                            );
 
 
-                const textScore =
-                    Math.max(
-                        0,
-                        Math.min(
-                            100,
-                            Number(
-                                match.text_similarity || 0
-                            )
-                        )
-                    );
+                        const imageScore =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.image_similarity || 0
+                                    )
+                                )
+                            );
 
 
-                const metadataScore =
-                    Math.max(
-                        0,
-                        Math.min(
-                            100,
-                            Number(
-                                match.metadata_score || 0
-                            )
-                        )
-                    );
+                        const textScore =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.text_similarity || 0
+                                    )
+                                )
+                            );
 
 
-                let confidence =
-                    "Low Match";
+                        const metadataScore =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(
+                                        match.metadata_score || 0
+                                    )
+                                )
+                            );
 
 
-                if (score >= 90) {
-
-                    confidence =
-                        "Very High Match";
-
-                }
-                else if (score >= 75) {
-
-                    confidence =
-                        "High Match";
-
-                }
-                else if (score >= 50) {
-
-                    confidence =
-                        "Possible Match";
-                }
+                        let confidence =
+                            "Low Match";
 
 
-                const imageUrl =
-                    getImageUrl(match);
+                        if (score >= 90) {
+
+                            confidence =
+                                "Very High Match";
+
+                        }
+
+                        else if (score >= 75) {
+
+                            confidence =
+                                "High Match";
+
+                        }
+
+                        else if (score >= 50) {
+
+                            confidence =
+                                "Possible Match";
+
+                        }
 
 
-                const matchImage = imageUrl
+                        const imageUrl =
+                            getImageUrl(match);
 
-                    ?
 
-                    `
+                        const matchImage =
+                            imageUrl
+
+                            ?
+
+                            `
                                 <img
-                                    src="${escapeHtml(imageUrl)}"
+                                    src="${escapeHtml(
+                                        imageUrl
+                                    )}"
                                     alt="${escapeHtml(
-                        match.item_name ||
-                        "Possible match"
-                    )}"
+                                        match.item_name ||
+                                        "Possible match"
+                                    )}"
                                     onerror="imageErrorHandler(this)"
                                 >
                             `
 
-                    :
+                            :
 
-                    `
+                            `
                                 <div class="image-placeholder">
 
                                     📦
@@ -996,16 +1275,24 @@ async function findMatches(id) {
                             `;
 
 
-                const reasons =
-                    Array.isArray(match.reasons)
-                        ? match.reasons
-                        : [];
+                        const reasons =
+                            Array.isArray(
+                                match.reasons
+                            )
+                                ? match.reasons
+                                : [];
 
 
-                return `
+                        const matchId =
+                            Number(
+                                match.item_id ||
+                                match.id
+                            );
+
+
+                        return `
 
                             <div class="match-card">
-
 
                                 <div class="match-image">
 
@@ -1016,13 +1303,12 @@ async function findMatches(id) {
 
                                 <div class="match-info">
 
-
                                     <h3>
 
                                         ${escapeHtml(
-                    match.item_name ||
-                    "Possible Match"
-                )}
+                                            match.item_name ||
+                                            "Possible Match"
+                                        )}
 
                                     </h3>
 
@@ -1082,57 +1368,79 @@ async function findMatches(id) {
 
                                     <ul>
 
-                                        ${reasons.length > 0
+                                        ${
+                                            reasons.length > 0
 
-                        ?
+                                            ?
 
-                        reasons
-                            .map(
-                                reason =>
-                                    `
+                                            reasons
+                                                .map(
+                                                    function (reason) {
+
+                                                        return `
                                                             <li>
-                                                                ${escapeHtml(reason)}
+                                                                ${escapeHtml(
+                                                                    reason
+                                                                )}
                                                             </li>
-                                                            `
-                            )
-                            .join("")
+                                                        `;
 
-                        :
+                                                    }
+                                                )
+                                                .join("")
 
-                        `
-                                                    <li>
-                                                        No strong matching features found.
-                                                    </li>
-                                                `
-                    }
+                                            :
+
+                                            `
+                                                <li>
+                                                    No strong matching features found.
+                                                </li>
+                                            `
+                                        }
 
                                     </ul>
 
 
                                     <div class="match-actions">
 
+
+                                        <!-- VIEW MATCH -->
+
                                         <button
                                             class="view-match-btn"
-                                            onclick="viewItem(${Number(match.item_id)})"
+                                            type="button"
+                                            onclick="viewItem(${matchId})"
                                         >
-                                            View Possible Match
+                                            👁️ View Possible Match
                                         </button>
+
+
+                                        <!-- CONTACT REPORTER -->
 
                                         <button
                                             class="contact-btn"
-                                            onclick="contactReporter(${Number(match.item_id)})"
+                                            type="button"
+                                            onclick="contactReporter(${matchId})"
                                         >
                                             📩 Contact Reporter
                                         </button>
 
+
+                                        <!-- OWNERSHIP VERIFICATION -->
+
                                         <button
                                             class="verify-ownership-btn"
-                                            data-item-id="${Number(match.item_id)}"
+                                            type="button"
+
+                                            data-item-id="${matchId}"
+
                                             data-item-name="${escapeHtml(
-                        match.item_name || "Found Item"
-                    )}"
+                                                match.item_name ||
+                                                "Found Item"
+                                            )}"
+
                                             onclick="openVerification(
-                                                ${Number(match.item_id)},
+                                                ${matchId},
                                                 this.dataset.itemName,
                                                 this
                                             )"
@@ -1140,19 +1448,22 @@ async function findMatches(id) {
                                             🛡️ Verify Ownership
                                         </button>
 
-                                    </div>
 
+                                    </div>
 
                                 </div>
 
                             </div>
 
                         `;
-            }).join("")
-            }
+
+                    }
+                ).join("")}
 
 
-                <!-- MAP -->
+                <!-- =================================================
+                     LOCATION MAP
+                ================================================= -->
 
                 <div class="location-map-section">
 
@@ -1183,9 +1494,9 @@ async function findMatches(id) {
         `;
 
 
-        // =================================================
-        // CREATE MAP AFTER RESULTS ARE DISPLAYED
-        // =================================================
+        // =====================================================
+        // CREATE MAP
+        // =====================================================
 
         await createMatchMap(
             currentItem,
@@ -1193,24 +1504,13 @@ async function findMatches(id) {
         );
 
 
-        // =================================================
-        // CHECK OWNERSHIP STATUS
-        // =================================================
-
-        document
-            .querySelectorAll(".verify-ownership-btn")
-            .forEach(function (button) {
-
-                // Keep the button ready for the ownership flow.
-                // Backend status checking can be added here
-                // once the exact item-status endpoint is confirmed.
-
-            });
-        // =================================================
+        // =====================================================
         // MATCH ALERT
-        // =================================================
+        // =====================================================
 
-        if (typeof showToast === "function") {
+        if (
+            typeof showToast === "function"
+        ) {
 
             const topMatch =
                 data.matches[0];
@@ -1249,6 +1549,7 @@ async function findMatches(id) {
 
                 alertMessage =
                     `🔔 Possible Match Found! ${score.toFixed(1)}%`;
+
             }
 
 
@@ -1256,10 +1557,10 @@ async function findMatches(id) {
                 alertMessage,
                 "success"
             );
+
         }
 
     }
-
 
     catch (error) {
 
@@ -1278,12 +1579,10 @@ async function findMatches(id) {
                 </h2>
 
                 <p>
-
                     ${escapeHtml(
-            error.message ||
-            "The AI matching service could not be reached."
-        )}
-
+                        error.message ||
+                        "The AI matching service could not be reached."
+                    )}
                 </p>
 
             </div>
@@ -1291,15 +1590,20 @@ async function findMatches(id) {
         `;
 
 
-        if (typeof showToast === "function") {
+        if (
+            typeof showToast === "function"
+        ) {
 
             showToast(
                 error.message ||
                 "AI matching service could not be reached.",
                 "error"
             );
+
         }
+
     }
+
 }
 
 
@@ -1316,17 +1620,25 @@ let verificationItemId = null;
 
 function getLoggedInUser() {
 
-    const storedUser = localStorage.getItem("user");
+    const storedUser =
+        localStorage.getItem("user");
+
 
     if (!storedUser) {
+
         return null;
+
     }
+
 
     try {
 
-        return JSON.parse(storedUser);
+        return JSON.parse(
+            storedUser
+        );
 
     }
+
     catch (error) {
 
         console.error(
@@ -1335,12 +1647,14 @@ function getLoggedInUser() {
         );
 
         return null;
+
     }
+
 }
 
 
 // =========================================================
-// CREATE VERIFICATION MODAL
+// CREATE OWNERSHIP MODAL
 // =========================================================
 
 function ensureVerificationModal() {
@@ -1350,25 +1664,40 @@ function ensureVerificationModal() {
             "ownership-verification-modal"
         );
 
+
     if (modal) {
+
         return modal;
+
     }
 
 
+    // =====================================================
+    // MODAL CSS
+    // =====================================================
+
     const style =
         document.createElement("style");
+
 
     style.textContent = `
 
         .verify-ownership-btn {
 
             background: #16804b;
+
             color: white;
+
             border: none;
+
             border-radius: 8px;
+
             padding: 10px 14px;
+
             font-weight: 700;
+
             cursor: pointer;
+
             margin-top: 8px;
 
         }
@@ -1384,6 +1713,7 @@ function ensureVerificationModal() {
         .verify-ownership-btn.pending {
 
             background: #9aa0a6;
+
             cursor: default;
 
         }
@@ -1392,6 +1722,7 @@ function ensureVerificationModal() {
         .verify-ownership-btn.verified {
 
             background: #16804b;
+
             cursor: default;
 
         }
@@ -1400,13 +1731,15 @@ function ensureVerificationModal() {
         .ownership-modal-overlay {
 
             position: fixed;
+
             inset: 0;
 
-            background: rgba(0,0,0,.65);
+            background: rgba(0, 0, 0, .65);
 
             display: none;
 
             align-items: center;
+
             justify-content: center;
 
             padding: 20px;
@@ -1435,7 +1768,7 @@ function ensureVerificationModal() {
 
             box-shadow:
                 0 20px 60px
-                rgba(0,0,0,.25);
+                rgba(0, 0, 0, .25);
 
         }
 
@@ -1443,6 +1776,7 @@ function ensureVerificationModal() {
         .ownership-modal h2 {
 
             margin-top: 0;
+
             color: #1d3557;
 
         }
@@ -1505,6 +1839,7 @@ function ensureVerificationModal() {
         .ownership-message.success {
 
             background: #e5f8ed;
+
             color: #16804b;
 
         }
@@ -1513,6 +1848,7 @@ function ensureVerificationModal() {
         .ownership-message.error {
 
             background: #ffe8e8;
+
             color: #c62828;
 
         }
@@ -1567,11 +1903,17 @@ function ensureVerificationModal() {
     document.head.appendChild(style);
 
 
+    // =====================================================
+    // CREATE MODAL
+    // =====================================================
+
     modal =
         document.createElement("div");
 
+
     modal.id =
         "ownership-verification-modal";
+
 
     modal.className =
         "ownership-modal-overlay";
@@ -1584,6 +1926,7 @@ function ensureVerificationModal() {
             <h2>
                 🛡️ Verify Ownership
             </h2>
+
 
             <p>
                 Explain why you believe
@@ -1646,33 +1989,45 @@ function ensureVerificationModal() {
     document.body.appendChild(modal);
 
 
-    document.getElementById(
-        "ownership-cancel"
-    ).addEventListener(
-        "click",
-        function () {
+    // Cancel
 
-            modal.classList.remove(
-                "active"
-            );
+    document
+        .getElementById(
+            "ownership-cancel"
+        )
+        .addEventListener(
+            "click",
+            function () {
 
-        }
-    );
+                modal.classList.remove(
+                    "active"
+                );
+
+            }
+        );
 
 
-    document.getElementById(
-        "ownership-submit"
-    ).addEventListener(
-        "click",
-        submitOwnershipVerification
-    );
+    // Submit
 
+    document
+        .getElementById(
+            "ownership-submit"
+        )
+        .addEventListener(
+            "click",
+            submitOwnershipVerification
+        );
+
+
+    // Click outside
 
     modal.addEventListener(
         "click",
         function (event) {
 
-            if (event.target === modal) {
+            if (
+                event.target === modal
+            ) {
 
                 modal.classList.remove(
                     "active"
@@ -1685,11 +2040,12 @@ function ensureVerificationModal() {
 
 
     return modal;
+
 }
 
 
 // =========================================================
-// OPEN VERIFICATION
+// OPEN OWNERSHIP VERIFICATION
 // =========================================================
 
 function openVerification(
@@ -1702,16 +2058,22 @@ function openVerification(
         getLoggedInUser();
 
 
-    if (!user || !user.id) {
+    if (
+        !user ||
+        !user.id
+    ) {
 
         alert(
             "Please login before submitting an ownership claim."
         );
 
+
         window.location.href =
             "login.html";
 
+
         return;
+
     }
 
 
@@ -1753,7 +2115,9 @@ function openVerification(
         );
 
 
-    submitButton.disabled = false;
+    submitButton.disabled =
+        false;
+
 
     submitButton.textContent =
         "Submit Claim";
@@ -1767,6 +2131,7 @@ function openVerification(
     document.getElementById(
         "ownership-proof"
     ).focus();
+
 }
 
 
@@ -1780,13 +2145,17 @@ async function submitOwnershipVerification() {
         getLoggedInUser();
 
 
-    if (!user || !user.id) {
+    if (
+        !user ||
+        !user.id
+    ) {
 
         alert(
             "Please login before submitting an ownership claim."
         );
 
         return;
+
     }
 
 
@@ -1798,13 +2167,25 @@ async function submitOwnershipVerification() {
         );
 
         return;
+
+    }
+
+
+    const proofElement =
+        document.getElementById(
+            "ownership-proof"
+        );
+
+
+    if (!proofElement) {
+
+        return;
+
     }
 
 
     const proof =
-        document.getElementById(
-            "ownership-proof"
-        ).value.trim();
+        proofElement.value.trim();
 
 
     if (!proof) {
@@ -1815,6 +2196,7 @@ async function submitOwnershipVerification() {
         );
 
         return;
+
     }
 
 
@@ -1826,6 +2208,7 @@ async function submitOwnershipVerification() {
         );
 
         return;
+
     }
 
 
@@ -1835,7 +2218,9 @@ async function submitOwnershipVerification() {
         );
 
 
-    submitButton.disabled = true;
+    submitButton.disabled =
+        true;
+
 
     submitButton.textContent =
         "Submitting...";
@@ -1883,7 +2268,8 @@ async function submitOwnershipVerification() {
                 await response.json();
 
         }
-        catch {
+
+        catch (jsonError) {
 
             data = null;
 
@@ -1910,6 +2296,8 @@ async function submitOwnershipVerification() {
         submitButton.textContent =
             "Submitted ✓";
 
+
+        // Update button
 
         const currentButton =
             document.querySelector(
@@ -1940,6 +2328,8 @@ async function submitOwnershipVerification() {
         }
 
 
+        // Close modal after 1.2 seconds
+
         setTimeout(
             function () {
 
@@ -1962,6 +2352,7 @@ async function submitOwnershipVerification() {
         );
 
     }
+
     catch (error) {
 
         console.error(
@@ -1971,7 +2362,8 @@ async function submitOwnershipVerification() {
 
 
         showOwnershipMessage(
-            error.message,
+            error.message ||
+            "Unable to submit ownership claim.",
             "error"
         );
 
@@ -1984,11 +2376,12 @@ async function submitOwnershipVerification() {
             "Submit Claim";
 
     }
+
 }
 
 
 // =========================================================
-// SHOW VERIFICATION MESSAGE
+// SHOW OWNERSHIP MESSAGE
 // =========================================================
 
 function showOwnershipMessage(
@@ -2003,7 +2396,9 @@ function showOwnershipMessage(
 
 
     if (!element) {
+
         return;
+
     }
 
 
@@ -2013,7 +2408,9 @@ function showOwnershipMessage(
 
     element.className =
         `ownership-message show ${type}`;
+
 }
+
 
 // =========================================================
 // VIEW POSSIBLE MATCH
@@ -2022,12 +2419,19 @@ function showOwnershipMessage(
 function viewItem(id) {
 
     if (!id) {
+
+        console.error(
+            "viewItem: invalid item ID"
+        );
+
         return;
+
     }
 
 
     window.location.href =
         `item-detail.html?id=${encodeURIComponent(id)}`;
+
 }
 
 
@@ -2041,18 +2445,34 @@ async function contactReporter(id) {
         localStorage.getItem("user");
 
 
-    // -----------------------------------------------------
+    // =====================================================
     // CHECK LOGIN
-    // -----------------------------------------------------
+    // =====================================================
 
     if (!storedUser) {
 
-        showToast(
-            "Please login before contacting the reporter.",
-            "warning"
-        );
+        if (
+            typeof showToast === "function"
+        ) {
+
+            showToast(
+                "Please login before contacting the reporter.",
+                "warning"
+            );
+
+        }
+
+        else {
+
+            alert(
+                "Please login before contacting the reporter."
+            );
+
+        }
+
 
         return;
+
     }
 
 
@@ -2062,7 +2482,9 @@ async function contactReporter(id) {
     try {
 
         user =
-            JSON.parse(storedUser);
+            JSON.parse(
+                storedUser
+            );
 
     }
 
@@ -2073,34 +2495,56 @@ async function contactReporter(id) {
             error
         );
 
-        localStorage.removeItem("user");
 
-
-        showToast(
-            "Your login session is invalid. Please login again.",
-            "error"
+        localStorage.removeItem(
+            "user"
         );
 
+
+        if (
+            typeof showToast === "function"
+        ) {
+
+            showToast(
+                "Your login session is invalid. Please login again.",
+                "error"
+            );
+
+        }
+
+
         return;
+
     }
 
 
-    if (!user || !user.id) {
+    if (
+        !user ||
+        !user.id
+    ) {
 
-        showToast(
-            "User information not found. Please login again.",
-            "error"
-        );
+        if (
+            typeof showToast === "function"
+        ) {
+
+            showToast(
+                "User information not found. Please login again.",
+                "error"
+            );
+
+        }
+
 
         return;
+
     }
 
 
     try {
 
-        // -------------------------------------------------
+        // =================================================
         // GET ITEM INFORMATION
-        // -------------------------------------------------
+        // =================================================
 
         const response =
             await fetch(
@@ -2118,9 +2562,10 @@ async function contactReporter(id) {
 
         }
 
-        catch {
+        catch (jsonError) {
 
             item = null;
+
         }
 
 
@@ -2131,6 +2576,7 @@ async function contactReporter(id) {
                 item?.message ||
                 "Unable to get item information."
             );
+
         }
 
 
@@ -2140,9 +2586,9 @@ async function contactReporter(id) {
         );
 
 
-        // -------------------------------------------------
+        // =================================================
         // CHECK REPORTER
-        // -------------------------------------------------
+        // =================================================
 
         if (
             item.user_id === null ||
@@ -2150,10 +2596,16 @@ async function contactReporter(id) {
             item.user_id === ""
         ) {
 
-            showToast(
-                "Reporter information is unavailable.",
-                "error"
-            );
+            if (
+                typeof showToast === "function"
+            ) {
+
+                showToast(
+                    "Reporter information is unavailable.",
+                    "error"
+                );
+
+            }
 
 
             console.error(
@@ -2161,31 +2613,41 @@ async function contactReporter(id) {
                 item
             );
 
+
             return;
+
         }
 
 
-        // -------------------------------------------------
+        // =================================================
         // PREVENT CONTACTING YOURSELF
-        // -------------------------------------------------
+        // =================================================
 
         if (
             Number(item.user_id) ===
             Number(user.id)
         ) {
 
-            showToast(
-                "This is your own reported item.",
-                "warning"
-            );
+            if (
+                typeof showToast === "function"
+            ) {
+
+                showToast(
+                    "This is your own reported item.",
+                    "warning"
+                );
+
+            }
+
 
             return;
+
         }
 
 
-        // -------------------------------------------------
-        // OPEN MESSAGES PAGE
-        // -------------------------------------------------
+        // =================================================
+        // OPEN MESSAGES
+        // =================================================
 
         const messagesUrl =
             new URL(
@@ -2202,8 +2664,8 @@ async function contactReporter(id) {
 
         window.location.href =
             messagesUrl.toString();
-    }
 
+    }
 
     catch (error) {
 
@@ -2213,18 +2675,59 @@ async function contactReporter(id) {
         );
 
 
-        showToast(
-            error.message ||
-            "Unable to contact reporter.",
-            "error"
-        );
+        if (
+            typeof showToast === "function"
+        ) {
+
+            showToast(
+                error.message ||
+                "Unable to contact reporter.",
+                "error"
+            );
+
+        }
+
     }
+
 }
+
+
+// =========================================================
+// MAKE FUNCTIONS AVAILABLE TO HTML onclick=""
+// =========================================================
+
+window.loadItem =
+    loadItem;
+
+window.findMatches =
+    findMatches;
+
+window.openVerification =
+    openVerification;
+
+window.submitOwnershipVerification =
+    submitOwnershipVerification;
+
+window.viewItem =
+    viewItem;
+
+window.contactReporter =
+    contactReporter;
+
+window.imageErrorHandler =
+    imageErrorHandler;
 
 
 // =========================================================
 // START
 // =========================================================
 
-loadItem();
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        loadItem();
+
+    }
+);
 
