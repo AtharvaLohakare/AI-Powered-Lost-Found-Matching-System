@@ -57,9 +57,11 @@
             <a href="my-reports.html">
                 My Reports
             </a>
-<a href="community.html">
-    Community
-</a>
+
+            <a href="community.html">
+                Community
+            </a>
+
             <a
                 href="notifications.html"
                 class="notification-link active">
@@ -70,7 +72,9 @@
                     id="navBadge"
                     class="nav-notification-badge"
                     style="display: none;">
+
                     0
+
                 </span>
 
             </a>
@@ -95,7 +99,9 @@
     <main class="notifications-page">
 
 
-        <!-- PAGE HEADER -->
+        <!-- =================================================
+             PAGE HEADER
+        ================================================== -->
 
         <section class="notifications-hero">
 
@@ -116,22 +122,36 @@
             </div>
 
 
-            <button
-                id="markAllBtn"
-                class="mark-all-btn"
-                type="button">
+            <div class="notification-actions">
 
-                <span>✓</span>
+                <button
+                    id="markAllBtn"
+                    class="mark-all-btn"
+                    type="button">
 
-                Mark all as read
+                    ✓ Mark all as read
 
-            </button>
+                </button>
+
+
+                <button
+                    id="deleteAllBtn"
+                    class="delete-all-btn"
+                    type="button">
+
+                    🗑️ Delete all
+
+                </button>
+
+            </div>
 
         </section>
 
 
 
-        <!-- NOTIFICATION LIST -->
+        <!-- =================================================
+             NOTIFICATION LIST
+        ================================================== -->
 
         <section class="notifications-container">
 

@@ -1,128 +1,242 @@
+/* =========================================================
+   NOTIFICATIONS SYSTEM
+========================================================= */
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
 const notificationList =
-    document.getElementById("notificationList");
+    document.getElementById(
+        "notificationList"
+    );
 
 const notificationSummary =
-    document.getElementById("notificationSummary");
+    document.getElementById(
+        "notificationSummary"
+    );
 
 const markAllButton =
-    document.getElementById("markAllBtn");
+    document.getElementById(
+        "markAllBtn"
+    );
+
+const deleteAllButton =
+    document.getElementById(
+        "deleteAllBtn"
+    );
 
 const navBadge =
-    document.getElementById("navBadge");
+    document.getElementById(
+        "navBadge"
+    );
+
+
+/* =========================================================
+   USER
+========================================================= */
+
+const storedUser =
+    localStorage.getItem("user");
+
+let currentUser = null;
 
 
 /* =========================================================
    CHECK LOGIN
 ========================================================= */
 
-const storedUser =
-    localStorage.getItem("user");
-
-
 if (!storedUser) {
 
-    notificationList.innerHTML = `
-        <div class="empty-notifications">
+    showLoginRequired();
 
-            <div class="empty-icon">
-                🔒
-            </div>
+} else {
 
-            <h3>
-                Please login
-            </h3>
+    try {
 
-            <p>
-                Please login to view your notifications.
-            </p>
-
-        </div>
-    `;
-
-    throw new Error(
-        "User not logged in."
-    );
-}
+        currentUser =
+            JSON.parse(
+                storedUser
+            );
 
 
-let currentUser;
+        if (
+            !currentUser ||
+            !currentUser.id
+        ) {
 
+            throw new Error(
+                "Invalid user."
+            );
 
-try {
+        }
 
-    currentUser =
-        JSON.parse(storedUser);
+    } catch (error) {
 
-    if (
-        !currentUser ||
-        !currentUser.id
-    ) {
-
-        throw new Error(
-            "Invalid user."
+        console.error(
+            "Invalid user data:",
+            error
         );
+
+        localStorage.removeItem(
+            "user"
+        );
+
+        currentUser = null;
+
+        showInvalidSession();
 
     }
 
-} catch (error) {
-
-    console.error(
-        "Invalid user data:",
-        error
-    );
-
-    localStorage.removeItem(
-        "user"
-    );
-
-    notificationList.innerHTML = `
-        <div class="empty-notifications">
-
-            <div class="empty-icon">
-                🔒
-            </div>
-
-            <h3>
-                Invalid Login Session
-            </h3>
-
-            <p>
-                Please login again.
-            </p>
-
-        </div>
-    `;
-
-    throw error;
 }
 
 
 /* =========================================================
-   NAVBAR USER
+   LOGIN REQUIRED
 ========================================================= */
 
-function setupNavbar(user) {
+function showLoginRequired() {
+
+    if (notificationList) {
+
+        notificationList.innerHTML = `
+
+            <div class="empty-notifications">
+
+                <div class="empty-icon">
+                    🔒
+                </div>
+
+                <h3>
+                    Please Login
+                </h3>
+
+                <p>
+                    Please login to view your notifications.
+                </p>
+
+                <a
+                    href="login.html"
+                    class="view-item-btn">
+
+                    Login
+
+                </a>
+
+            </div>
+
+        `;
+
+    }
+
+
+    disableNotificationButtons();
+
+}
+
+
+/* =========================================================
+   INVALID SESSION
+========================================================= */
+
+function showInvalidSession() {
+
+    if (notificationList) {
+
+        notificationList.innerHTML = `
+
+            <div class="empty-notifications">
+
+                <div class="empty-icon">
+                    🔒
+                </div>
+
+                <h3>
+                    Invalid Login Session
+                </h3>
+
+                <p>
+                    Please login again.
+                </p>
+
+                <a
+                    href="login.html"
+                    class="view-item-btn">
+
+                    Login Again
+
+                </a>
+
+            </div>
+
+        `;
+
+    }
+
+
+    disableNotificationButtons();
+
+}
+
+
+/* =========================================================
+   DISABLE BUTTONS
+========================================================= */
+
+function disableNotificationButtons() {
+
+    if (markAllButton) {
+
+        markAllButton.disabled =
+            true;
+
+    }
+
+
+    if (deleteAllButton) {
+
+        deleteAllButton.disabled =
+            true;
+
+    }
+
+}
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+function setupNavbar() {
 
     const navButtons =
         document.getElementById(
             "navButtons"
         );
 
+
     if (
         !navButtons ||
-        !user
+        !currentUser
     ) {
 
         return;
 
     }
 
+
     navButtons.innerHTML = `
+
         <span class="user-welcome">
+
             Hi, ${escapeHTML(
-                user.name || "User"
+                currentUser.name ||
+                "User"
             )} 👋
+
         </span>
+
 
         <a
             href="my-reports.html"
@@ -132,6 +246,7 @@ function setupNavbar(user) {
 
         </a>
 
+
         <a
             href="#"
             class="signup-btn"
@@ -140,12 +255,15 @@ function setupNavbar(user) {
             Logout
 
         </a>
+
     `;
+
 
     const logoutBtn =
         document.getElementById(
             "logoutBtn"
         );
+
 
     if (logoutBtn) {
 
@@ -155,9 +273,11 @@ function setupNavbar(user) {
 
                 event.preventDefault();
 
+
                 localStorage.removeItem(
                     "user"
                 );
+
 
                 window.location.href =
                     "index.html";
@@ -166,6 +286,7 @@ function setupNavbar(user) {
         );
 
     }
+
 }
 
 
@@ -175,13 +296,74 @@ function setupNavbar(user) {
 
 async function loadNotifications() {
 
+    if (!currentUser) {
+
+        return;
+
+    }
+
+
     try {
 
         notificationList.innerHTML = `
+
             <div class="loading">
+
                 Loading notifications...
+
             </div>
+
         `;
+
+
+        /*
+         * FIRST:
+         *
+         * Check reports for possible matches.
+         *
+         * This allows older reports to generate
+         * notifications when the notification page
+         * is opened.
+         */
+
+        try {
+
+            const matchResponse =
+                await fetch(
+                    `${API_URL}/notifications/check-matches/${encodeURIComponent(
+                        currentUser.id
+                    )}`,
+                    {
+                        method: "POST"
+                    }
+                );
+
+
+            if (!matchResponse.ok) {
+
+                console.warn(
+                    "Match notification check failed:",
+                    matchResponse.status
+                );
+
+            }
+
+        } catch (matchError) {
+
+            console.warn(
+                "Match notification check error:",
+                matchError
+            );
+
+        }
+
+
+        /*
+         * SECOND:
+         *
+         * Get notifications belonging ONLY
+         * to the current user.
+         */
 
         const response =
             await fetch(
@@ -190,10 +372,12 @@ async function loadNotifications() {
                 )}`
             );
 
+
         console.log(
             "Notification API status:",
             response.status
         );
+
 
         if (!response.ok) {
 
@@ -203,13 +387,16 @@ async function loadNotifications() {
 
         }
 
+
         const data =
             await response.json();
+
 
         console.log(
             "Notifications API response:",
             data
         );
+
 
         if (
             data.status !== "success" ||
@@ -224,13 +411,16 @@ async function loadNotifications() {
 
         }
 
+
         displayNotifications(
             data.notifications
         );
 
+
         updateUnreadCount(
             data.notifications
         );
+
 
     } catch (error) {
 
@@ -239,7 +429,9 @@ async function loadNotifications() {
             error
         );
 
+
         notificationList.innerHTML = `
+
             <div class="empty-notifications">
 
                 <div class="empty-icon">
@@ -257,8 +449,20 @@ async function loadNotifications() {
                     )}
                 </p>
 
+
+                <button
+                    type="button"
+                    class="view-item-btn"
+                    onclick="loadNotifications()">
+
+                    Try Again
+
+                </button>
+
             </div>
+
         `;
+
 
         if (notificationSummary) {
 
@@ -266,7 +470,9 @@ async function loadNotifications() {
                 "Unable to load notifications.";
 
         }
+
     }
+
 }
 
 
@@ -278,9 +484,11 @@ function displayNotifications(
     notifications
 ) {
 
+
     if (!notifications.length) {
 
         notificationList.innerHTML = `
+
             <div class="empty-notifications">
 
                 <div class="empty-icon">
@@ -288,7 +496,7 @@ function displayNotifications(
                 </div>
 
                 <h3>
-                    No notifications
+                    No Notifications
                 </h3>
 
                 <p>
@@ -296,7 +504,9 @@ function displayNotifications(
                 </p>
 
             </div>
+
         `;
+
 
         if (notificationSummary) {
 
@@ -305,31 +515,42 @@ function displayNotifications(
 
         }
 
+
         return;
+
     }
 
-    notificationList.innerHTML = "";
+
+    notificationList.innerHTML =
+        "";
+
 
     notifications.forEach(
         function (notification) {
+
 
             const card =
                 document.createElement(
                     "div"
                 );
 
+
             const notificationType =
                 String(
-                    notification.notification_type || ""
+                    notification.notification_type ||
+                    ""
                 ).toLowerCase();
+
 
             const isUnread =
                 Number(
                     notification.is_read
                 ) === 0;
 
+
             card.className =
                 "notification-card";
+
 
             if (isUnread) {
 
@@ -345,54 +566,95 @@ function displayNotifications(
 
             }
 
+
             const icon =
                 getNotificationIcon(
                     notificationType
                 );
+
 
             const createdAt =
                 formatDate(
                     notification.created_at
                 );
 
+
+            /* =================================================
+               READ STATUS
+            ================================================= */
+
             const unreadBadge =
                 isUnread
+
                     ? `
-                        <span class="new-badge">
+
+                        <span
+                            class="new-badge">
+
                             NEW
+
                         </span>
+
                     `
+
                     : `
-                        <span class="read-label">
+
+                        <span
+                            class="read-label">
+
                             ✓ Read
+
                         </span>
+
                     `;
+
+
+            /* =================================================
+               MARK READ BUTTON
+            ================================================= */
 
             const markReadButton =
                 isUnread
+
                     ? `
+
                         <button
                             type="button"
                             class="mark-read-btn"
                             data-notification-id="${notification.id}">
 
-                            Mark as read
+                            ✓ Mark as read
 
                         </button>
+
                     `
+
                     : "";
 
-            let actionButton = "";
+
+            /* =================================================
+               ACTION BUTTON
+            ================================================= */
+
+            let actionButton =
+                "";
 
 
             /* MESSAGE */
 
             if (
-                notificationType === "message" &&
+
+                notificationType ===
+                    "message"
+
+                &&
+
                 notification.item_id
+
             ) {
 
                 actionButton = `
+
                     <a
                         href="messages.html?item_id=${encodeURIComponent(
                             notification.item_id
@@ -402,6 +664,7 @@ function displayNotifications(
                         💬 Open Conversation
 
                     </a>
+
                 `;
 
             }
@@ -410,10 +673,14 @@ function displayNotifications(
             /* OWNERSHIP CLAIM */
 
             else if (
-                notificationType === "verification"
+
+                notificationType ===
+                    "verification"
+
             ) {
 
                 actionButton = `
+
                     <a
                         href="verification-requests.html"
                         class="view-item-btn verification-action">
@@ -421,19 +688,23 @@ function displayNotifications(
                         🛡️ Review Ownership Claim
 
                     </a>
+
                 `;
 
             }
 
 
-            /* OWNERSHIP RESULT */
+            /* OWNERSHIP RESPONSE */
 
             else if (
+
                 notificationType ===
-                "verification_response"
+                    "verification_response"
+
             ) {
 
                 actionButton = `
+
                     <a
                         href="my-reports.html"
                         class="view-item-btn verification-action">
@@ -441,19 +712,27 @@ function displayNotifications(
                         ✅ View Claim Result
 
                     </a>
+
                 `;
 
             }
 
 
-            /* NEARBY SIGHTING ALERT */
+            /* SIGHTING ALERT */
 
             else if (
-                notificationType === "sighting_alert" &&
+
+                notificationType ===
+                    "sighting_alert"
+
+                &&
+
                 notification.item_id
+
             ) {
 
                 actionButton = `
+
                     <a
                         href="item-detail.html?id=${encodeURIComponent(
                             notification.item_id
@@ -463,54 +742,72 @@ function displayNotifications(
                         👀 View Sighting
 
                     </a>
+
                 `;
 
             }
 
 
-            /* OTHER ITEM NOTIFICATION */
+            /* NORMAL ITEM / MATCH */
 
             else if (
+
                 notification.item_id
+
             ) {
 
                 actionButton = `
+
                     <a
-                        href="item.html?id=${encodeURIComponent(
+                        href="item-detail.html?id=${encodeURIComponent(
                             notification.item_id
                         )}"
                         class="view-item-btn">
 
-                        View Item
+                        🔎 View Report
 
                     </a>
+
                 `;
 
             }
 
 
+            /* =================================================
+               CARD HTML
+            ================================================= */
+
             card.innerHTML = `
 
                 <div class="notification-icon">
+
                     ${icon}
+
                 </div>
 
+
                 <div class="notification-content">
+
 
                     <div class="notification-header">
 
                         <h3>
+
                             ${escapeHTML(
                                 notification.title ||
                                 "Notification"
                             )}
+
                         </h3>
+
 
                         ${unreadBadge}
 
                     </div>
 
-                    <p class="notification-message">
+
+                    <p
+                        class="notification-message">
 
                         ${escapeHTML(
                             notification.message ||
@@ -519,32 +816,57 @@ function displayNotifications(
 
                     </p>
 
-                    <div class="notification-footer">
 
-                        <span class="notification-date">
+                    <div
+                        class="notification-footer">
+
+
+                        <span
+                            class="notification-date">
+
                             ${createdAt}
+
                         </span>
+
 
                         ${actionButton}
 
+
                         ${markReadButton}
+
+
+                        <button
+                            type="button"
+                            class="delete-notification-btn"
+                            data-notification-id="${notification.id}">
+
+                            🗑️ Delete
+
+                        </button>
+
 
                     </div>
 
+
                 </div>
+
             `;
+
 
             notificationList.appendChild(
                 card
             );
 
 
-            /* MARK READ */
+            /* =================================================
+               MARK READ EVENT
+            ================================================= */
 
             const readButton =
                 card.querySelector(
                     ".mark-read-btn"
                 );
+
 
             if (readButton) {
 
@@ -556,7 +878,39 @@ function displayNotifications(
                             readButton.dataset
                                 .notificationId;
 
+
                         markAsRead(
+                            notificationId
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /* =================================================
+               DELETE EVENT
+            ================================================= */
+
+            const deleteButton =
+                card.querySelector(
+                    ".delete-notification-btn"
+                );
+
+
+            if (deleteButton) {
+
+                deleteButton.addEventListener(
+                    "click",
+                    function () {
+
+                        const notificationId =
+                            deleteButton.dataset
+                                .notificationId;
+
+
+                        deleteNotification(
                             notificationId
                         );
 
@@ -569,42 +923,9 @@ function displayNotifications(
     );
 
 
-    /* SUMMARY */
-
-    if (notificationSummary) {
-
-        const unread =
-            notifications.filter(
-                function (notification) {
-
-                    return Number(
-                        notification.is_read
-                    ) === 0;
-
-                }
-            ).length;
-
-        if (unread === 0) {
-
-            notificationSummary.textContent =
-                `You have ${notifications.length} notification${
-                    notifications.length === 1
-                        ? ""
-                        : "s"
-                }.`;
-
-        } else {
-
-            notificationSummary.textContent =
-                `You have ${unread} unread notification${
-                    unread === 1
-                        ? ""
-                        : "s"
-                }.`;
-
-        }
-
-    }
+    updateSummary(
+        notifications
+    );
 
 }
 
@@ -618,30 +939,46 @@ function getNotificationIcon(
 ) {
 
     switch (
+
         String(type || "")
             .toLowerCase()
+
     ) {
 
         case "match":
+
             return "🔎";
 
+
         case "message":
+
             return "💬";
 
+
         case "verification":
+
             return "🛡️";
 
+
         case "verification_response":
+
             return "✅";
 
+
         case "item_returned":
+
             return "📦";
 
+
         case "sighting_alert":
+
             return "👀";
 
+
         default:
+
             return "🔔";
+
     }
 
 }
@@ -666,24 +1003,56 @@ function updateUnreadCount(
             }
         ).length;
 
+
     if (navBadge) {
 
         navBadge.textContent =
             unread;
 
-        if (unread === 0) {
 
-            navBadge.style.display =
-                "none";
-
-        } else {
-
-            navBadge.style.display =
-                "inline-flex";
-
-        }
+        navBadge.style.display =
+            unread > 0
+                ? "inline-flex"
+                : "none";
 
     }
+
+}
+
+
+/* =========================================================
+   UPDATE SUMMARY
+========================================================= */
+
+function updateSummary(
+    notifications
+) {
+
+    if (!notificationSummary) {
+
+        return;
+
+    }
+
+
+    const unread =
+        notifications.filter(
+            function (notification) {
+
+                return Number(
+                    notification.is_read
+                ) === 0;
+
+            }
+        ).length;
+
+
+    notificationSummary.textContent =
+        `${notifications.length} notification${
+            notifications.length === 1
+                ? ""
+                : "s"
+        } • ${unread} unread`;
 
 }
 
@@ -698,34 +1067,45 @@ async function markAsRead(
 
     try {
 
+        /*
+         * IMPORTANT:
+         *
+         * user_id is required by backend.
+         */
+
         const response =
             await fetch(
+
                 `${API_URL}/notifications/${encodeURIComponent(
                     notificationId
-                )}/read`,
+                )}/read?user_id=${encodeURIComponent(
+                    currentUser.id
+                )}`,
+
                 {
                     method: "PUT"
                 }
+
             );
+
+
+        const data =
+            await response.json();
+
 
         if (!response.ok) {
 
             throw new Error(
+                data.detail ||
                 `Server error: ${response.status}`
             );
 
         }
 
-        const data =
-            await response.json();
-
-        console.log(
-            "Mark as read response:",
-            data
-        );
 
         if (
-            data.status !== "success"
+            data.status !==
+            "success"
         ) {
 
             throw new Error(
@@ -735,7 +1115,9 @@ async function markAsRead(
 
         }
 
+
         await loadNotifications();
+
 
     } catch (error) {
 
@@ -744,7 +1126,9 @@ async function markAsRead(
             error
         );
 
+
         alert(
+            error.message ||
             "Unable to mark notification as read."
         );
 
@@ -759,36 +1143,46 @@ async function markAsRead(
 
 async function markAllAsRead() {
 
+    if (!currentUser) {
+
+        return;
+
+    }
+
+
     try {
 
         const response =
             await fetch(
+
                 `${API_URL}/notifications/read-all/${encodeURIComponent(
                     currentUser.id
                 )}`,
+
                 {
                     method: "PUT"
                 }
+
             );
+
+
+        const data =
+            await response.json();
+
 
         if (!response.ok) {
 
             throw new Error(
+                data.detail ||
                 `Server error: ${response.status}`
             );
 
         }
 
-        const data =
-            await response.json();
-
-        console.log(
-            "Mark all as read response:",
-            data
-        );
 
         if (
-            data.status !== "success"
+            data.status !==
+            "success"
         ) {
 
             throw new Error(
@@ -798,7 +1192,9 @@ async function markAllAsRead() {
 
         }
 
+
         await loadNotifications();
+
 
     } catch (error) {
 
@@ -807,8 +1203,194 @@ async function markAllAsRead() {
             error
         );
 
+
         alert(
+            error.message ||
             "Unable to mark all notifications as read."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DELETE ONE NOTIFICATION
+========================================================= */
+
+async function deleteNotification(
+    notificationId
+) {
+
+    if (!currentUser) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Delete this notification?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                `${API_URL}/notifications/${encodeURIComponent(
+                    notificationId
+                )}?user_id=${encodeURIComponent(
+                    currentUser.id
+                )}`,
+
+                {
+                    method: "DELETE"
+                }
+
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                `Server error: ${response.status}`
+            );
+
+        }
+
+
+        if (
+            data.status !==
+            "success"
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to delete notification."
+            );
+
+        }
+
+
+        await loadNotifications();
+
+
+    } catch (error) {
+
+        console.error(
+            "Unable to delete notification:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to delete notification."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DELETE ALL NOTIFICATIONS
+========================================================= */
+
+async function deleteAllNotifications() {
+
+    if (!currentUser) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Delete ALL your notifications? This cannot be undone."
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                `${API_URL}/notifications/user/${encodeURIComponent(
+                    currentUser.id
+                )}`,
+
+                {
+                    method: "DELETE"
+                }
+
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                `Server error: ${response.status}`
+            );
+
+        }
+
+
+        if (
+            data.status !==
+            "success"
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to delete notifications."
+            );
+
+        }
+
+
+        await loadNotifications();
+
+
+    } catch (error) {
+
+        console.error(
+            "Unable to delete all notifications:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to delete notifications."
         );
 
     }
@@ -831,6 +1413,20 @@ if (markAllButton) {
 
 
 /* =========================================================
+   DELETE ALL BUTTON
+========================================================= */
+
+if (deleteAllButton) {
+
+    deleteAllButton.addEventListener(
+        "click",
+        deleteAllNotifications
+    );
+
+}
+
+
+/* =========================================================
    ESCAPE HTML
 ========================================================= */
 
@@ -843,8 +1439,10 @@ function escapeHTML(
             "div"
         );
 
+
     div.textContent =
         value ?? "";
+
 
     return div.innerHTML;
 
@@ -865,10 +1463,12 @@ function formatDate(
 
     }
 
+
     const date =
         new Date(
             dateValue
         );
+
 
     if (
         Number.isNaN(
@@ -881,6 +1481,7 @@ function formatDate(
         );
 
     }
+
 
     return date.toLocaleString(
         "en-IN",
@@ -904,9 +1505,15 @@ document.addEventListener(
     "DOMContentLoaded",
     function () {
 
-        setupNavbar(
-            currentUser
-        );
+        if (!currentUser) {
+
+            return;
+
+        }
+
+
+        setupNavbar();
+
 
         loadNotifications();
 
@@ -919,6 +1526,14 @@ document.addEventListener(
 ========================================================= */
 
 setInterval(
-    loadNotifications,
+    function () {
+
+        if (currentUser) {
+
+            loadNotifications();
+
+        }
+
+    },
     15000
 );

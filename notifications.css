@@ -9,11 +9,8 @@
 ========================================================= */
 
 .notifications-page {
-
     width: min(1100px, calc(100% - 40px));
-
     margin: 50px auto 80px;
-
 }
 
 
@@ -22,63 +19,48 @@
 ========================================================= */
 
 .notifications-hero {
-
     display: flex;
-
     justify-content: space-between;
-
     align-items: flex-end;
-
     gap: 30px;
-
     margin-bottom: 30px;
-
 }
-
 
 .notifications-title {
-
     flex: 1;
-
 }
-
 
 .notifications-eyebrow {
-
     display: inline-block;
-
     font-size: 12px;
-
     font-weight: 800;
-
     letter-spacing: 1.5px;
-
     opacity: 0.65;
-
     margin-bottom: 8px;
-
 }
-
 
 .notifications-title h1 {
-
     margin: 0;
-
     font-size: clamp(30px, 5vw, 42px);
-
     line-height: 1.1;
+}
 
+.notifications-title p {
+    margin: 10px 0 0;
+    font-size: 15px;
+    opacity: 0.65;
 }
 
 
-.notifications-title p {
+/* =========================================================
+   HEADER ACTIONS
+========================================================= */
 
-    margin: 10px 0 0;
-
-    font-size: 15px;
-
-    opacity: 0.65;
-
+.notification-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 
@@ -87,53 +69,63 @@
 ========================================================= */
 
 .mark-all-btn {
-
     border: none;
-
     padding: 12px 18px;
-
     border-radius: 10px;
-
     font-size: 14px;
-
     font-weight: 700;
-
     cursor: pointer;
-
     background: #111827;
-
     color: white;
-
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease,
         opacity 0.2s ease;
-
     white-space: nowrap;
-
 }
-
 
 .mark-all-btn span {
-
     margin-right: 5px;
-
 }
-
 
 .mark-all-btn:hover {
-
     transform: translateY(-2px);
-
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
 
+.mark-all-btn:active {
+    transform: translateY(0);
 }
 
 
-.mark-all-btn:active {
+/* =========================================================
+   DELETE ALL BUTTON
+========================================================= */
 
+.delete-all-btn {
+    border: 1px solid #fecaca;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #fff;
+    color: #dc2626;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+    white-space: nowrap;
+}
+
+.delete-all-btn:hover {
+    background: #fef2f2;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.10);
+}
+
+.delete-all-btn:active {
     transform: translateY(0);
-
 }
 
 
@@ -142,20 +134,13 @@
 ========================================================= */
 
 .notifications-container {
-
     width: 100%;
-
 }
 
-
 .notification-list {
-
     display: flex;
-
     flex-direction: column;
-
     gap: 14px;
-
 }
 
 
@@ -164,41 +149,27 @@
 ========================================================= */
 
 .notification-card {
-
     position: relative;
-
     display: flex;
-
     align-items: flex-start;
-
     gap: 18px;
-
     padding: 22px;
-
     border-radius: 16px;
-
     background: #ffffff;
-
     border: 1px solid #e5e7eb;
-
     box-shadow:
         0 3px 12px rgba(0, 0, 0, 0.05);
-
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease,
-        border-color 0.2s ease;
-
+        border-color 0.2s ease,
+        opacity 0.2s ease;
 }
 
-
 .notification-card:hover {
-
     transform: translateY(-2px);
-
     box-shadow:
         0 10px 28px rgba(0, 0, 0, 0.08);
-
 }
 
 
@@ -207,37 +178,34 @@
 ========================================================= */
 
 .notification-card.unread {
-
     border-color: #bfdbfe;
-
     background:
         linear-gradient(
             135deg,
             #ffffff 0%,
             #f8fbff 100%
         );
+}
 
+.notification-card.unread::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 18px;
+    bottom: 18px;
+    width: 4px;
+    border-radius: 0 5px 5px 0;
+    background: #2563eb;
 }
 
 
-.notification-card.unread::before {
+/* =========================================================
+   DELETING ANIMATION
+========================================================= */
 
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-
-    top: 18px;
-
-    bottom: 18px;
-
-    width: 4px;
-
-    border-radius: 0 5px 5px 0;
-
-    background: #2563eb;
-
+.notification-card.deleting {
+    opacity: 0;
+    transform: translateX(30px);
 }
 
 
@@ -246,34 +214,19 @@
 ========================================================= */
 
 .notification-icon {
-
     width: 52px;
-
     height: 52px;
-
     min-width: 52px;
-
     border-radius: 14px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     font-size: 23px;
-
     background: #f3f4f6;
-
 }
 
-
-/* Message */
-
-.notification-card:has(.notification-icon) .notification-icon {
-
+.notification-card.unread .notification-icon {
     background: #eff6ff;
-
 }
 
 
@@ -282,52 +235,30 @@
 ========================================================= */
 
 .notification-content {
-
     flex: 1;
-
     min-width: 0;
-
 }
-
 
 .notification-header {
-
     display: flex;
-
     justify-content: space-between;
-
     align-items: flex-start;
-
     gap: 15px;
-
 }
-
 
 .notification-header h3 {
-
     margin: 0;
-
     font-size: 17px;
-
     line-height: 1.35;
-
     color: #111827;
-
 }
 
-
 .notification-message {
-
     margin: 8px 0 15px;
-
     color: #4b5563;
-
     font-size: 14px;
-
     line-height: 1.6;
-
     max-width: 850px;
-
 }
 
 
@@ -336,50 +267,28 @@
 ========================================================= */
 
 .new-badge {
-
     display: inline-flex;
-
     align-items: center;
-
     padding: 5px 9px;
-
     border-radius: 999px;
-
     background: #dbeafe;
-
     color: #1d4ed8;
-
     font-size: 10px;
-
     font-weight: 800;
-
     letter-spacing: 0.5px;
-
     white-space: nowrap;
-
 }
 
-
 .read-label {
-
     display: inline-flex;
-
     align-items: center;
-
     padding: 5px 9px;
-
     border-radius: 999px;
-
     background: #f3f4f6;
-
     color: #6b7280;
-
     font-size: 11px;
-
     font-weight: 700;
-
     white-space: nowrap;
-
 }
 
 
@@ -388,26 +297,16 @@
 ========================================================= */
 
 .notification-footer {
-
     display: flex;
-
     align-items: center;
-
     flex-wrap: wrap;
-
     gap: 9px;
-
 }
 
-
 .notification-date {
-
     color: #9ca3af;
-
     font-size: 12px;
-
     margin-right: auto;
-
 }
 
 
@@ -416,40 +315,23 @@
 ========================================================= */
 
 .view-item-btn {
-
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
-
     padding: 8px 13px;
-
     border-radius: 8px;
-
     text-decoration: none;
-
     background: #eff6ff;
-
     color: #1d4ed8;
-
     border: 1px solid #dbeafe;
-
     font-size: 12px;
-
     font-weight: 700;
-
     transition: all 0.2s ease;
-
 }
 
-
 .view-item-btn:hover {
-
     background: #dbeafe;
-
     transform: translateY(-1px);
-
 }
 
 
@@ -458,20 +340,13 @@
 ========================================================= */
 
 .verification-action {
-
     background: #f0fdf4;
-
     color: #15803d;
-
     border-color: #bbf7d0;
-
 }
 
-
 .verification-action:hover {
-
     background: #dcfce7;
-
 }
 
 
@@ -480,36 +355,44 @@
 ========================================================= */
 
 .mark-read-btn {
-
     border: 1px solid #e5e7eb;
-
     background: #ffffff;
-
     color: #6b7280;
-
     padding: 8px 12px;
-
     border-radius: 8px;
-
     font-size: 12px;
-
     font-weight: 600;
-
     cursor: pointer;
-
     transition: all 0.2s ease;
+}
 
+.mark-read-btn:hover {
+    background: #f9fafb;
+    color: #111827;
+    border-color: #d1d5db;
 }
 
 
-.mark-read-btn:hover {
+/* =========================================================
+   DELETE ONE NOTIFICATION
+========================================================= */
 
-    background: #f9fafb;
+.delete-notification-btn {
+    border: 1px solid #fecaca;
+    background: #ffffff;
+    color: #dc2626;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
 
-    color: #111827;
-
-    border-color: #d1d5db;
-
+.delete-notification-btn:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #b91c1c;
 }
 
 
@@ -518,62 +401,35 @@
 ========================================================= */
 
 .empty-notifications {
-
     text-align: center;
-
     padding: 70px 25px;
-
     border: 1px dashed #d1d5db;
-
     border-radius: 18px;
-
     background: #fafafa;
-
 }
-
 
 .empty-icon {
-
     width: 70px;
-
     height: 70px;
-
     margin: 0 auto 18px;
-
     border-radius: 50%;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     font-size: 30px;
-
     background: #f3f4f6;
-
 }
-
 
 .empty-notifications h3 {
-
     margin: 0 0 8px;
-
     font-size: 20px;
-
     color: #111827;
-
 }
 
-
 .empty-notifications p {
-
     margin: 0;
-
     color: #6b7280;
-
     font-size: 14px;
-
 }
 
 
@@ -582,15 +438,10 @@
 ========================================================= */
 
 .loading {
-
     padding: 50px;
-
     text-align: center;
-
     color: #6b7280;
-
     font-size: 14px;
-
 }
 
 
@@ -599,33 +450,30 @@
 ========================================================= */
 
 .nav-notification-badge {
-
     min-width: 18px;
-
     height: 18px;
-
     padding: 0 5px;
-
     margin-left: 5px;
-
     border-radius: 999px;
-
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
-
     background: #ef4444;
-
     color: white;
-
     font-size: 10px;
-
     font-weight: 800;
-
     vertical-align: middle;
+}
 
+
+/* =========================================================
+   STATUS / SUMMARY
+========================================================= */
+
+.notification-summary {
+    margin-bottom: 18px;
+    color: #6b7280;
+    font-size: 14px;
 }
 
 
@@ -636,103 +484,65 @@
 @media (max-width: 800px) {
 
     .notifications-page {
-
         width: min(100% - 24px, 700px);
-
         margin-top: 30px;
-
     }
-
 
     .notifications-hero {
-
         flex-direction: column;
-
         align-items: stretch;
-
         gap: 18px;
-
     }
 
-
-    .mark-all-btn {
-
+    .notification-header-actions {
         width: 100%;
-
     }
 
+    .mark-all-btn,
+    .delete-all-btn {
+        flex: 1;
+    }
 
     .notification-card {
-
         padding: 17px;
-
         gap: 13px;
-
     }
-
 
     .notification-icon {
-
         width: 44px;
-
         height: 44px;
-
         min-width: 44px;
-
         font-size: 20px;
-
         border-radius: 12px;
-
     }
-
 
     .notification-header {
-
         flex-direction: column;
-
         gap: 7px;
-
     }
-
 
     .notification-header h3 {
-
         font-size: 15px;
-
     }
-
 
     .notification-message {
-
         font-size: 13px;
-
     }
-
 
     .notification-footer {
-
         align-items: stretch;
-
     }
-
 
     .notification-date {
-
         width: 100%;
-
         margin-right: 0;
-
     }
-
 
     .view-item-btn,
-
-    .mark-read-btn {
-
+    .mark-read-btn,
+    .delete-notification-btn {
         flex: 1;
-
     }
-
 }
 
 
@@ -743,50 +553,35 @@
 @media (max-width: 480px) {
 
     .notifications-title h1 {
-
         font-size: 29px;
-
     }
 
+    .notification-header-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
 
     .notification-card {
-
         padding: 15px;
-
     }
-
 
     .notification-card.unread::before {
-
         top: 14px;
-
         bottom: 14px;
-
     }
-
 
     .notification-footer {
-
         display: grid;
-
         grid-template-columns: 1fr 1fr;
-
     }
-
 
     .notification-date {
-
         grid-column: 1 / -1;
-
     }
-
 
     .view-item-btn,
-
-    .mark-read-btn {
-
+    .mark-read-btn,
+    .delete-notification-btn {
         width: 100%;
-
     }
-
 }
