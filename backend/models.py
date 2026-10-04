@@ -19,77 +19,30 @@ from .database import Base
 class Item(Base):
     __tablename__ = "items"
 
-    id = Column(
-        Integer,
-        primary_key=True,
-        index=True
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=True, index=True)
+
+    item_type = Column(String(20), nullable=False)
+
+    report_kind = Column(
+        String(30),
+        nullable=False,
+        default="item"
     )
 
-    user_id = Column(
-        Integer,
-        nullable=True,
-        index=True
-    )
+    item_name = Column(String(100), nullable=False)
+    category = Column(String(50), nullable=False)
+    description = Column(Text, nullable=False)
+    color = Column(String(50), nullable=True)
+    brand = Column(String(100), nullable=True)
+    location = Column(String(200), nullable=False)
 
-    item_type = Column(
-        String(20),
-        nullable=False
-    )
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
 
-    item_type = Column(
-        String(20),
-        nullable=False
-)
+    item_date = Column(Date, nullable=False)
 
-    item_name = Column(
-        String(100),
-        nullable=False
-    )
-
-    category = Column(
-        String(50),
-        nullable=False
-    )
-
-    description = Column(
-        Text,
-        nullable=False
-    )
-
-    color = Column(
-        String(50),
-        nullable=True
-    )
-
-    brand = Column(
-        String(100),
-        nullable=True
-    )
-
-    location = Column(
-        String(200),
-        nullable=False
-    )
-
-    latitude = Column(
-        Float,
-        nullable=True
-    )
-
-    longitude = Column(
-        Float,
-        nullable=True
-    )
-
-    item_date = Column(
-        Date,
-        nullable=False
-    )
-
-    image_name = Column(
-        String(255),
-        nullable=True
-    )
+    image_name = Column(String(255), nullable=True)
 
     status = Column(
         String(30),
@@ -97,9 +50,7 @@ class Item(Base):
         default="active"
     )
 
-    created_at = Column(
-        TIMESTAMP
-    )
+    created_at = Column(TIMESTAMP)
 # =========================================================
 # USER MODEL
 # =========================================================
