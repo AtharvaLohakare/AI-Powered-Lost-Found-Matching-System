@@ -176,7 +176,54 @@
 
     <script src="notifications.js"></script>
 
+<!-- =====================================================
+     DELETE CONFIRMATION MODAL
+===================================================== -->
 
+<div id="deleteConfirmModal" class="confirm-modal">
+
+    <div class="confirm-modal-overlay"></div>
+
+    <div class="confirm-modal-box">
+
+        <div class="confirm-modal-icon">
+            🗑️
+        </div>
+
+        <h3 id="confirmModalTitle">
+            Delete Notification?
+        </h3>
+
+        <p id="confirmModalMessage">
+            Are you sure you want to delete this notification?
+            This action cannot be undone.
+        </p>
+
+        <div class="confirm-modal-actions">
+
+            <button
+                type="button"
+                id="confirmCancelBtn"
+                class="confirm-cancel-btn">
+
+                Cancel
+
+            </button>
+
+            <button
+                type="button"
+                id="confirmDeleteBtn"
+                class="confirm-delete-btn">
+
+                🗑️ Delete
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 </body>
 
 </html>

@@ -22,6 +22,25 @@ const deleteAllButton =
 const navBadge =
     document.getElementById("navBadge");
 
+const deleteConfirmModal =
+    document.getElementById("deleteConfirmModal");
+
+const confirmCancelBtn =
+    document.getElementById("confirmCancelBtn");
+
+const confirmDeleteBtn =
+    document.getElementById("confirmDeleteBtn");
+
+const confirmModalTitle =
+    document.getElementById("confirmModalTitle");
+
+const confirmModalMessage =
+    document.getElementById("confirmModalMessage");
+
+let pendingDeleteNotificationId = null;
+let pendingDeleteCard = null;
+let pendingDeleteAll = false;
+
 
 /* =========================================================
    USER
@@ -1113,127 +1132,18 @@ async function markAllAsRead() {
    DELETE ONE NOTIFICATION
 ========================================================= */
 
-async function deleteNotification(
+function deleteNotification(
     notificationId,
     card
 ) {
-
     if (!currentUser) {
         return;
     }
 
-
-    const confirmed =
-        window.confirm(
-            "Delete this notification?"
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
-
-        const response =
-            await fetch(
-                `${API_URL}/notifications/${encodeURIComponent(
-                    notificationId
-                )}?user_id=${encodeURIComponent(
-                    currentUser.id
-                )}`,
-                {
-                    method: "DELETE"
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.detail ||
-                `Server error: ${response.status}`
-            );
-        }
-
-
-        if (
-            data.status !== "success"
-        ) {
-
-            throw new Error(
-                data.message ||
-                "Unable to delete notification."
-            );
-        }
-
-
-        /* REMOVE CARD IMMEDIATELY */
-
-        if (card) {
-
-            const wasUnread =
-                card.classList.contains(
-                    "unread"
-                );
-
-
-            card.remove();
-
-
-            if (
-                wasUnread &&
-                navBadge
-            ) {
-
-                const currentCount =
-                    Number(
-                        navBadge.textContent || 0
-                    );
-
-
-                const newCount =
-                    Math.max(
-                        0,
-                        currentCount - 1
-                    );
-
-
-                navBadge.textContent =
-                    newCount;
-
-
-                navBadge.style.display =
-                    newCount > 0
-                        ? "inline-flex"
-                        : "none";
-            }
-        }
-
-
-        checkEmptyState();
-
-        refreshSummaryFromDOM();
-
-
-    } catch (error) {
-
-        console.error(
-            "Unable to delete notification:",
-            error
-        );
-
-
-        alert(
-            error.message ||
-            "Unable to delete notification."
-        );
-    }
+    showDeleteConfirmation(
+        notificationId,
+        card
+    );
 }
 
 
@@ -1241,127 +1151,28 @@ async function deleteNotification(
    DELETE ALL NOTIFICATIONS
 ========================================================= */
 
-async function deleteAllNotifications() {
+function deleteAllNotifications() {
 
     if (!currentUser) {
         return;
     }
 
+    pendingDeleteNotificationId = null;
+    pendingDeleteCard = null;
+    pendingDeleteAll = true;
 
-    const confirmed =
-        window.confirm(
-            "Delete ALL your notifications? This cannot be undone."
-        );
-
-
-    if (!confirmed) {
-        return;
+    if (confirmModalTitle) {
+        confirmModalTitle.textContent =
+            "Delete All Notifications?";
     }
 
+    if (confirmModalMessage) {
+        confirmModalMessage.textContent =
+            "Are you sure you want to delete all your notifications? This action cannot be undone.";
+    }
 
-    try {
-
-        if (deleteAllButton) {
-            deleteAllButton.disabled = true;
-        }
-
-
-        const response =
-            await fetch(
-                `${API_URL}/notifications/user/${encodeURIComponent(
-                    currentUser.id
-                )}`,
-                {
-                    method: "DELETE"
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.detail ||
-                `Server error: ${response.status}`
-            );
-        }
-
-
-        if (
-            data.status !== "success"
-        ) {
-
-            throw new Error(
-                data.message ||
-                "Unable to delete notifications."
-            );
-        }
-
-
-        /* CLEAR UI IMMEDIATELY */
-
-        notificationList.innerHTML = `
-            <div class="empty-notifications">
-
-                <div class="empty-icon">
-                    🔔
-                </div>
-
-                <h3>
-                    No Notifications
-                </h3>
-
-                <p>
-                    You're all caught up!
-                </p>
-
-            </div>
-        `;
-
-
-        if (notificationSummary) {
-
-            notificationSummary.textContent =
-                "You're all caught up.";
-        }
-
-
-        if (navBadge) {
-
-            navBadge.textContent = "0";
-
-            navBadge.style.display =
-                "none";
-        }
-
-
-        if (markAllButton) {
-            markAllButton.disabled = true;
-        }
-
-
-    } catch (error) {
-
-        console.error(
-            "Unable to delete all notifications:",
-            error
-        );
-
-
-        alert(
-            error.message ||
-            "Unable to delete notifications."
-        );
-
-
-    } finally {
-
-        if (deleteAllButton) {
-            deleteAllButton.disabled = false;
-        }
+    if (deleteConfirmModal) {
+        deleteConfirmModal.classList.add("active");
     }
 }
 
@@ -1569,3 +1380,346 @@ document.addEventListener(
    Notifications now load once when the page opens.
 
 ========================================================= */
+
+function showDeleteConfirmation(
+    notificationId,
+    card
+) {
+
+    pendingDeleteNotificationId =
+        notificationId;
+
+    pendingDeleteCard =
+        card;
+
+    pendingDeleteAll =
+        false;
+
+    if (confirmModalTitle) {
+
+        confirmModalTitle.textContent =
+            "Delete Notification?";
+    }
+
+    if (confirmModalMessage) {
+
+        confirmModalMessage.textContent =
+            "Are you sure you want to delete this notification? This action cannot be undone.";
+    }
+
+    if (deleteConfirmModal) {
+
+        deleteConfirmModal.classList.add(
+            "active"
+        );
+    }
+}
+
+
+async function performDeleteNotification() {
+
+    if (!currentUser) {
+        closeDeleteConfirmation();
+        return;
+    }
+
+    try {
+
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.textContent = "Deleting...";
+        }
+
+
+        /* =====================================================
+           DELETE ALL
+        ===================================================== */
+
+        if (pendingDeleteAll) {
+
+            const response =
+                await fetch(
+                    `${API_URL}/notifications/user/${encodeURIComponent(
+                        currentUser.id
+                    )}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    `Server error: ${response.status}`
+                );
+            }
+
+
+            if (data.status !== "success") {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to delete notifications."
+                );
+            }
+
+
+            notificationList.innerHTML = `
+                <div class="empty-notifications">
+
+                    <div class="empty-icon">
+                        🔔
+                    </div>
+
+                    <h3>
+                        No Notifications
+                    </h3>
+
+                    <p>
+                        You're all caught up!
+                    </p>
+
+                </div>
+            `;
+
+
+            if (notificationSummary) {
+                notificationSummary.textContent =
+                    "You're all caught up.";
+            }
+
+
+            if (navBadge) {
+
+                navBadge.textContent = "0";
+
+                navBadge.style.display = "none";
+            }
+
+
+            if (markAllButton) {
+                markAllButton.disabled = true;
+            }
+
+
+            if (deleteAllButton) {
+                deleteAllButton.disabled = true;
+            }
+
+
+            closeDeleteConfirmation();
+
+            return;
+        }
+
+
+        /* =====================================================
+           DELETE ONE
+        ===================================================== */
+
+        if (!pendingDeleteNotificationId) {
+
+            closeDeleteConfirmation();
+            return;
+        }
+
+
+        const response =
+            await fetch(
+                `${API_URL}/notifications/${encodeURIComponent(
+                    pendingDeleteNotificationId
+                )}?user_id=${encodeURIComponent(
+                    currentUser.id
+                )}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                `Server error: ${response.status}`
+            );
+        }
+
+
+        if (data.status !== "success") {
+
+            throw new Error(
+                data.message ||
+                "Unable to delete notification."
+            );
+        }
+
+
+        /* Remove card immediately */
+
+        if (pendingDeleteCard) {
+
+            const wasUnread =
+                pendingDeleteCard.classList.contains(
+                    "unread"
+                );
+
+
+            pendingDeleteCard.remove();
+
+
+            if (
+                wasUnread &&
+                navBadge
+            ) {
+
+                const currentCount =
+                    Number(
+                        navBadge.textContent || 0
+                    );
+
+
+                const newCount =
+                    Math.max(
+                        0,
+                        currentCount - 1
+                    );
+
+
+                navBadge.textContent =
+                    newCount;
+
+
+                navBadge.style.display =
+                    newCount > 0
+                        ? "inline-flex"
+                        : "none";
+            }
+        }
+
+
+        closeDeleteConfirmation();
+
+        checkEmptyState();
+
+        refreshSummaryFromDOM();
+
+
+    } catch (error) {
+
+        console.error(
+            "Unable to delete notification:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to delete notification."
+        );
+
+
+        if (confirmDeleteBtn) {
+
+            confirmDeleteBtn.disabled =
+                false;
+
+            confirmDeleteBtn.textContent =
+                "🗑️ Delete";
+        }
+    }
+}
+
+
+function closeDeleteConfirmation() {
+
+    if (deleteConfirmModal) {
+
+        deleteConfirmModal.classList.remove(
+            "active"
+        );
+    }
+
+
+    pendingDeleteNotificationId =
+        null;
+
+    pendingDeleteCard =
+        null;
+
+    pendingDeleteAll =
+        false;
+
+
+    if (confirmDeleteBtn) {
+
+        confirmDeleteBtn.disabled =
+            false;
+
+        confirmDeleteBtn.textContent =
+            "🗑️ Delete";
+    }
+}
+
+if (confirmCancelBtn) {
+
+    confirmCancelBtn.addEventListener(
+        "click",
+        closeDeleteConfirmation
+    );
+}
+
+
+if (confirmDeleteBtn) {
+
+    confirmDeleteBtn.addEventListener(
+        "click",
+        performDeleteNotification
+    );
+}
+
+
+/* Close when clicking outside */
+
+const confirmModalOverlay =
+    document.querySelector(
+        ".confirm-modal-overlay"
+    );
+
+if (confirmModalOverlay) {
+
+    confirmModalOverlay.addEventListener(
+        "click",
+        closeDeleteConfirmation
+    );
+}
+
+
+/* Close with Escape */
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Escape" &&
+            deleteConfirmModal &&
+            deleteConfirmModal.classList.contains(
+                "active"
+            )
+        ) {
+
+            closeDeleteConfirmation();
+        }
+    }
+);
