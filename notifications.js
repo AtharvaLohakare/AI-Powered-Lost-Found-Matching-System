@@ -1,5 +1,5 @@
 /* =========================================================
-   NOTIFICATIONS SYSTEM
+   NOTIFICATIONS SYSTEM - OPTIMIZED
 ========================================================= */
 
 
@@ -8,29 +8,19 @@
 ========================================================= */
 
 const notificationList =
-    document.getElementById(
-        "notificationList"
-    );
+    document.getElementById("notificationList");
 
 const notificationSummary =
-    document.getElementById(
-        "notificationSummary"
-    );
+    document.getElementById("notificationSummary");
 
 const markAllButton =
-    document.getElementById(
-        "markAllBtn"
-    );
+    document.getElementById("markAllBtn");
 
 const deleteAllButton =
-    document.getElementById(
-        "deleteAllBtn"
-    );
+    document.getElementById("deleteAllBtn");
 
 const navBadge =
-    document.getElementById(
-        "navBadge"
-    );
+    document.getElementById("navBadge");
 
 
 /* =========================================================
@@ -55,21 +45,13 @@ if (!storedUser) {
 
     try {
 
-        currentUser =
-            JSON.parse(
-                storedUser
-            );
-
+        currentUser = JSON.parse(storedUser);
 
         if (
             !currentUser ||
             !currentUser.id
         ) {
-
-            throw new Error(
-                "Invalid user."
-            );
-
+            throw new Error("Invalid user.");
         }
 
     } catch (error) {
@@ -79,16 +61,12 @@ if (!storedUser) {
             error
         );
 
-        localStorage.removeItem(
-            "user"
-        );
+        localStorage.removeItem("user");
 
         currentUser = null;
 
         showInvalidSession();
-
     }
-
 }
 
 
@@ -98,41 +76,37 @@ if (!storedUser) {
 
 function showLoginRequired() {
 
-    if (notificationList) {
-
-        notificationList.innerHTML = `
-
-            <div class="empty-notifications">
-
-                <div class="empty-icon">
-                    🔒
-                </div>
-
-                <h3>
-                    Please Login
-                </h3>
-
-                <p>
-                    Please login to view your notifications.
-                </p>
-
-                <a
-                    href="login.html"
-                    class="view-item-btn">
-
-                    Login
-
-                </a>
-
-            </div>
-
-        `;
-
+    if (!notificationList) {
+        return;
     }
 
+    notificationList.innerHTML = `
+        <div class="empty-notifications">
+
+            <div class="empty-icon">
+                🔒
+            </div>
+
+            <h3>
+                Please Login
+            </h3>
+
+            <p>
+                Please login to view your notifications.
+            </p>
+
+            <a
+                href="login.html"
+                class="view-item-btn">
+
+                Login
+
+            </a>
+
+        </div>
+    `;
 
     disableNotificationButtons();
-
 }
 
 
@@ -142,41 +116,37 @@ function showLoginRequired() {
 
 function showInvalidSession() {
 
-    if (notificationList) {
-
-        notificationList.innerHTML = `
-
-            <div class="empty-notifications">
-
-                <div class="empty-icon">
-                    🔒
-                </div>
-
-                <h3>
-                    Invalid Login Session
-                </h3>
-
-                <p>
-                    Please login again.
-                </p>
-
-                <a
-                    href="login.html"
-                    class="view-item-btn">
-
-                    Login Again
-
-                </a>
-
-            </div>
-
-        `;
-
+    if (!notificationList) {
+        return;
     }
 
+    notificationList.innerHTML = `
+        <div class="empty-notifications">
+
+            <div class="empty-icon">
+                🔒
+            </div>
+
+            <h3>
+                Invalid Login Session
+            </h3>
+
+            <p>
+                Please login again.
+            </p>
+
+            <a
+                href="login.html"
+                class="view-item-btn">
+
+                Login Again
+
+            </a>
+
+        </div>
+    `;
 
     disableNotificationButtons();
-
 }
 
 
@@ -187,20 +157,12 @@ function showInvalidSession() {
 function disableNotificationButtons() {
 
     if (markAllButton) {
-
-        markAllButton.disabled =
-            true;
-
+        markAllButton.disabled = true;
     }
-
 
     if (deleteAllButton) {
-
-        deleteAllButton.disabled =
-            true;
-
+        deleteAllButton.disabled = true;
     }
-
 }
 
 
@@ -211,32 +173,21 @@ function disableNotificationButtons() {
 function setupNavbar() {
 
     const navButtons =
-        document.getElementById(
-            "navButtons"
-        );
-
+        document.getElementById("navButtons");
 
     if (
         !navButtons ||
         !currentUser
     ) {
-
         return;
-
     }
 
-
     navButtons.innerHTML = `
-
         <span class="user-welcome">
-
             Hi, ${escapeHTML(
-                currentUser.name ||
-                "User"
+                currentUser.name || "User"
             )} 👋
-
         </span>
-
 
         <a
             href="my-reports.html"
@@ -246,7 +197,6 @@ function setupNavbar() {
 
         </a>
 
-
         <a
             href="#"
             class="signup-btn"
@@ -255,15 +205,10 @@ function setupNavbar() {
             Logout
 
         </a>
-
     `;
 
-
     const logoutBtn =
-        document.getElementById(
-            "logoutBtn"
-        );
-
+        document.getElementById("logoutBtn");
 
     if (logoutBtn) {
 
@@ -273,20 +218,13 @@ function setupNavbar() {
 
                 event.preventDefault();
 
-
-                localStorage.removeItem(
-                    "user"
-                );
-
+                localStorage.removeItem("user");
 
                 window.location.href =
                     "index.html";
-
             }
         );
-
     }
-
 }
 
 
@@ -296,87 +234,49 @@ function setupNavbar() {
 
 async function loadNotifications() {
 
-    if (!currentUser) {
-
+    if (
+        !currentUser ||
+        !notificationList
+    ) {
         return;
-
     }
-
 
     try {
 
         notificationList.innerHTML = `
-
             <div class="loading">
-
                 Loading notifications...
-
             </div>
-
         `;
 
 
         /*
-         * FIRST:
+         * IMPORTANT
          *
-         * Check reports for possible matches.
+         * DO NOT call:
          *
-         * This allows older reports to generate
-         * notifications when the notification page
-         * is opened.
+         * /notifications/check-matches/{user_id}
+         *
+         * here.
+         *
+         * Match notifications are already created
+         * when reports are submitted.
+         *
+         * Calling the endpoint here makes notification
+         * loading unnecessarily slow.
          */
 
-        try {
-
-            const matchResponse =
-                await fetch(
-                    `${API_URL}/notifications/check-matches/${encodeURIComponent(
-                        currentUser.id
-                    )}`,
-                    {
-                        method: "POST"
-                    }
-                );
-
-
-            if (!matchResponse.ok) {
-
-                console.warn(
-                    "Match notification check failed:",
-                    matchResponse.status
-                );
-
-            }
-
-        } catch (matchError) {
-
-            console.warn(
-                "Match notification check error:",
-                matchError
-            );
-
-        }
-
-
-        /*
-         * SECOND:
-         *
-         * Get notifications belonging ONLY
-         * to the current user.
-         */
 
         const response =
             await fetch(
                 `${API_URL}/notifications/${encodeURIComponent(
                     currentUser.id
-                )}`
+                )}`,
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
             );
-
-
-        console.log(
-            "Notification API status:",
-            response.status
-        );
 
 
         if (!response.ok) {
@@ -384,18 +284,11 @@ async function loadNotifications() {
             throw new Error(
                 `Server error: ${response.status}`
             );
-
         }
 
 
         const data =
             await response.json();
-
-
-        console.log(
-            "Notifications API response:",
-            data
-        );
 
 
         if (
@@ -408,7 +301,6 @@ async function loadNotifications() {
             throw new Error(
                 "Invalid notification response."
             );
-
         }
 
 
@@ -431,7 +323,6 @@ async function loadNotifications() {
 
 
         notificationList.innerHTML = `
-
             <div class="empty-notifications">
 
                 <div class="empty-icon">
@@ -449,7 +340,6 @@ async function loadNotifications() {
                     )}
                 </p>
 
-
                 <button
                     type="button"
                     class="view-item-btn"
@@ -460,7 +350,6 @@ async function loadNotifications() {
                 </button>
 
             </div>
-
         `;
 
 
@@ -468,11 +357,8 @@ async function loadNotifications() {
 
             notificationSummary.textContent =
                 "Unable to load notifications.";
-
         }
-
     }
-
 }
 
 
@@ -484,11 +370,9 @@ function displayNotifications(
     notifications
 ) {
 
-
     if (!notifications.length) {
 
         notificationList.innerHTML = `
-
             <div class="empty-notifications">
 
                 <div class="empty-icon">
@@ -504,7 +388,6 @@ function displayNotifications(
                 </p>
 
             </div>
-
         `;
 
 
@@ -512,33 +395,43 @@ function displayNotifications(
 
             notificationSummary.textContent =
                 "You're all caught up.";
-
         }
 
 
-        return;
+        if (markAllButton) {
+            markAllButton.disabled = true;
+        }
 
+        if (deleteAllButton) {
+            deleteAllButton.disabled = true;
+        }
+
+        return;
     }
 
 
-    notificationList.innerHTML =
-        "";
+    notificationList.innerHTML = "";
+
+
+    if (markAllButton) {
+        markAllButton.disabled = false;
+    }
+
+    if (deleteAllButton) {
+        deleteAllButton.disabled = false;
+    }
 
 
     notifications.forEach(
         function (notification) {
 
-
             const card =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
 
             const notificationType =
                 String(
-                    notification.notification_type ||
-                    ""
+                    notification.notification_type || ""
                 ).toLowerCase();
 
 
@@ -552,19 +445,11 @@ function displayNotifications(
                 "notification-card";
 
 
-            if (isUnread) {
-
-                card.classList.add(
-                    "unread"
-                );
-
-            } else {
-
-                card.classList.add(
-                    "read"
-                );
-
-            }
+            card.classList.add(
+                isUnread
+                    ? "unread"
+                    : "read"
+            );
 
 
             const icon =
@@ -579,45 +464,30 @@ function displayNotifications(
                 );
 
 
-            /* =================================================
-               READ STATUS
-            ================================================= */
+            /* READ STATUS */
 
             const unreadBadge =
                 isUnread
 
                     ? `
-
-                        <span
-                            class="new-badge">
-
+                        <span class="new-badge">
                             NEW
-
                         </span>
-
                     `
 
                     : `
-
-                        <span
-                            class="read-label">
-
+                        <span class="read-label">
                             ✓ Read
-
                         </span>
-
                     `;
 
 
-            /* =================================================
-               MARK READ BUTTON
-            ================================================= */
+            /* MARK READ BUTTON */
 
             const markReadButton =
                 isUnread
 
                     ? `
-
                         <button
                             type="button"
                             class="mark-read-btn"
@@ -626,35 +496,24 @@ function displayNotifications(
                             ✓ Mark as read
 
                         </button>
-
                     `
 
                     : "";
 
 
-            /* =================================================
-               ACTION BUTTON
-            ================================================= */
+            /* ACTION BUTTON */
 
-            let actionButton =
-                "";
+            let actionButton = "";
 
 
             /* MESSAGE */
 
             if (
-
-                notificationType ===
-                    "message"
-
-                &&
-
+                notificationType === "message" &&
                 notification.item_id
-
             ) {
 
                 actionButton = `
-
                     <a
                         href="messages.html?item_id=${encodeURIComponent(
                             notification.item_id
@@ -664,23 +523,17 @@ function displayNotifications(
                         💬 Open Conversation
 
                     </a>
-
                 `;
-
             }
 
 
             /* OWNERSHIP CLAIM */
 
             else if (
-
-                notificationType ===
-                    "verification"
-
+                notificationType === "verification"
             ) {
 
                 actionButton = `
-
                     <a
                         href="verification-requests.html"
                         class="view-item-btn verification-action">
@@ -688,23 +541,18 @@ function displayNotifications(
                         🛡️ Review Ownership Claim
 
                     </a>
-
                 `;
-
             }
 
 
             /* OWNERSHIP RESPONSE */
 
             else if (
-
                 notificationType ===
-                    "verification_response"
-
+                "verification_response"
             ) {
 
                 actionButton = `
-
                     <a
                         href="my-reports.html"
                         class="view-item-btn verification-action">
@@ -712,27 +560,19 @@ function displayNotifications(
                         ✅ View Claim Result
 
                     </a>
-
                 `;
-
             }
 
 
             /* SIGHTING ALERT */
 
             else if (
-
                 notificationType ===
-                    "sighting_alert"
-
-                &&
-
+                    "sighting_alert" &&
                 notification.item_id
-
             ) {
 
                 actionButton = `
-
                     <a
                         href="item-detail.html?id=${encodeURIComponent(
                             notification.item_id
@@ -742,22 +582,17 @@ function displayNotifications(
                         👀 View Sighting
 
                     </a>
-
                 `;
-
             }
 
 
             /* NORMAL ITEM / MATCH */
 
             else if (
-
                 notification.item_id
-
             ) {
 
                 actionButton = `
-
                     <a
                         href="item-detail.html?id=${encodeURIComponent(
                             notification.item_id
@@ -767,22 +602,16 @@ function displayNotifications(
                         🔎 View Report
 
                     </a>
-
                 `;
-
             }
 
 
-            /* =================================================
-               CARD HTML
-            ================================================= */
+            /* CARD */
 
             card.innerHTML = `
 
                 <div class="notification-icon">
-
                     ${icon}
-
                 </div>
 
 
@@ -792,14 +621,11 @@ function displayNotifications(
                     <div class="notification-header">
 
                         <h3>
-
                             ${escapeHTML(
                                 notification.title ||
                                 "Notification"
                             )}
-
                         </h3>
-
 
                         ${unreadBadge}
 
@@ -810,8 +636,7 @@ function displayNotifications(
                         class="notification-message">
 
                         ${escapeHTML(
-                            notification.message ||
-                            ""
+                            notification.message || ""
                         )}
 
                     </p>
@@ -819,7 +644,6 @@ function displayNotifications(
 
                     <div
                         class="notification-footer">
-
 
                         <span
                             class="notification-date">
@@ -844,23 +668,16 @@ function displayNotifications(
 
                         </button>
 
-
                     </div>
 
-
                 </div>
-
             `;
 
 
-            notificationList.appendChild(
-                card
-            );
+            notificationList.appendChild(card);
 
 
-            /* =================================================
-               MARK READ EVENT
-            ================================================= */
+            /* MARK READ */
 
             const readButton =
                 card.querySelector(
@@ -880,18 +697,15 @@ function displayNotifications(
 
 
                         markAsRead(
-                            notificationId
+                            notificationId,
+                            card
                         );
-
                     }
                 );
-
             }
 
 
-            /* =================================================
-               DELETE EVENT
-            ================================================= */
+            /* DELETE */
 
             const deleteButton =
                 card.querySelector(
@@ -911,12 +725,11 @@ function displayNotifications(
 
 
                         deleteNotification(
-                            notificationId
+                            notificationId,
+                            card
                         );
-
                     }
                 );
-
             }
 
         }
@@ -926,7 +739,6 @@ function displayNotifications(
     updateSummary(
         notifications
     );
-
 }
 
 
@@ -934,53 +746,34 @@ function displayNotifications(
    NOTIFICATION ICON
 ========================================================= */
 
-function getNotificationIcon(
-    type
-) {
+function getNotificationIcon(type) {
 
     switch (
-
         String(type || "")
             .toLowerCase()
-
     ) {
 
         case "match":
-
             return "🔎";
 
-
         case "message":
-
             return "💬";
 
-
         case "verification":
-
             return "🛡️";
 
-
         case "verification_response":
-
             return "✅";
 
-
         case "item_returned":
-
             return "📦";
 
-
         case "sighting_alert":
-
             return "👀";
 
-
         default:
-
             return "🔔";
-
     }
-
 }
 
 
@@ -1009,14 +802,11 @@ function updateUnreadCount(
         navBadge.textContent =
             unread;
 
-
         navBadge.style.display =
             unread > 0
                 ? "inline-flex"
                 : "none";
-
     }
-
 }
 
 
@@ -1029,9 +819,7 @@ function updateSummary(
 ) {
 
     if (!notificationSummary) {
-
         return;
-
     }
 
 
@@ -1053,7 +841,6 @@ function updateSummary(
                 ? ""
                 : "s"
         } • ${unread} unread`;
-
 }
 
 
@@ -1062,30 +849,27 @@ function updateSummary(
 ========================================================= */
 
 async function markAsRead(
-    notificationId
+    notificationId,
+    card
 ) {
+
+    if (!currentUser) {
+        return;
+    }
+
 
     try {
 
-        /*
-         * IMPORTANT:
-         *
-         * user_id is required by backend.
-         */
-
         const response =
             await fetch(
-
                 `${API_URL}/notifications/${encodeURIComponent(
                     notificationId
                 )}/read?user_id=${encodeURIComponent(
                     currentUser.id
                 )}`,
-
                 {
                     method: "PUT"
                 }
-
             );
 
 
@@ -1099,24 +883,81 @@ async function markAsRead(
                 data.detail ||
                 `Server error: ${response.status}`
             );
-
         }
 
 
         if (
-            data.status !==
-            "success"
+            data.status !== "success"
         ) {
 
             throw new Error(
                 data.message ||
                 "Unable to mark notification as read."
             );
-
         }
 
 
-        await loadNotifications();
+        /* UPDATE UI WITHOUT RELOADING */
+
+        if (card) {
+
+            card.classList.remove("unread");
+
+            card.classList.add("read");
+
+
+            const badge =
+                card.querySelector(
+                    ".new-badge"
+                );
+
+            if (badge) {
+
+                badge.className =
+                    "read-label";
+
+                badge.textContent =
+                    "✓ Read";
+            }
+
+
+            const button =
+                card.querySelector(
+                    ".mark-read-btn"
+                );
+
+            if (button) {
+                button.remove();
+            }
+        }
+
+
+        /* UPDATE BADGE */
+
+        if (navBadge) {
+
+            const currentCount =
+                Number(
+                    navBadge.textContent || 0
+                );
+
+            const newCount =
+                Math.max(
+                    0,
+                    currentCount - 1
+                );
+
+            navBadge.textContent =
+                newCount;
+
+            navBadge.style.display =
+                newCount > 0
+                    ? "inline-flex"
+                    : "none";
+        }
+
+
+        refreshSummaryFromDOM();
 
 
     } catch (error) {
@@ -1131,9 +972,7 @@ async function markAsRead(
             error.message ||
             "Unable to mark notification as read."
         );
-
     }
-
 }
 
 
@@ -1144,25 +983,25 @@ async function markAsRead(
 async function markAllAsRead() {
 
     if (!currentUser) {
-
         return;
-
     }
 
 
     try {
 
+        if (markAllButton) {
+            markAllButton.disabled = true;
+        }
+
+
         const response =
             await fetch(
-
                 `${API_URL}/notifications/read-all/${encodeURIComponent(
                     currentUser.id
                 )}`,
-
                 {
                     method: "PUT"
                 }
-
             );
 
 
@@ -1176,24 +1015,75 @@ async function markAllAsRead() {
                 data.detail ||
                 `Server error: ${response.status}`
             );
-
         }
 
 
         if (
-            data.status !==
-            "success"
+            data.status !== "success"
         ) {
 
             throw new Error(
                 data.message ||
                 "Unable to mark notifications as read."
             );
-
         }
 
 
-        await loadNotifications();
+        /* UPDATE UI DIRECTLY */
+
+        document
+            .querySelectorAll(
+                ".notification-card.unread"
+            )
+            .forEach(
+                function (card) {
+
+                    card.classList.remove(
+                        "unread"
+                    );
+
+                    card.classList.add(
+                        "read"
+                    );
+
+
+                    const badge =
+                        card.querySelector(
+                            ".new-badge"
+                        );
+
+                    if (badge) {
+
+                        badge.className =
+                            "read-label";
+
+                        badge.textContent =
+                            "✓ Read";
+                    }
+
+
+                    const button =
+                        card.querySelector(
+                            ".mark-read-btn"
+                        );
+
+                    if (button) {
+                        button.remove();
+                    }
+                }
+            );
+
+
+        if (navBadge) {
+
+            navBadge.textContent = "0";
+
+            navBadge.style.display =
+                "none";
+        }
+
+
+        refreshSummaryFromDOM();
 
 
     } catch (error) {
@@ -1209,8 +1099,13 @@ async function markAllAsRead() {
             "Unable to mark all notifications as read."
         );
 
-    }
 
+    } finally {
+
+        if (markAllButton) {
+            markAllButton.disabled = false;
+        }
+    }
 }
 
 
@@ -1219,13 +1114,12 @@ async function markAllAsRead() {
 ========================================================= */
 
 async function deleteNotification(
-    notificationId
+    notificationId,
+    card
 ) {
 
     if (!currentUser) {
-
         return;
-
     }
 
 
@@ -1236,9 +1130,7 @@ async function deleteNotification(
 
 
     if (!confirmed) {
-
         return;
-
     }
 
 
@@ -1246,17 +1138,14 @@ async function deleteNotification(
 
         const response =
             await fetch(
-
                 `${API_URL}/notifications/${encodeURIComponent(
                     notificationId
                 )}?user_id=${encodeURIComponent(
                     currentUser.id
                 )}`,
-
                 {
                     method: "DELETE"
                 }
-
             );
 
 
@@ -1270,24 +1159,66 @@ async function deleteNotification(
                 data.detail ||
                 `Server error: ${response.status}`
             );
-
         }
 
 
         if (
-            data.status !==
-            "success"
+            data.status !== "success"
         ) {
 
             throw new Error(
                 data.message ||
                 "Unable to delete notification."
             );
-
         }
 
 
-        await loadNotifications();
+        /* REMOVE CARD IMMEDIATELY */
+
+        if (card) {
+
+            const wasUnread =
+                card.classList.contains(
+                    "unread"
+                );
+
+
+            card.remove();
+
+
+            if (
+                wasUnread &&
+                navBadge
+            ) {
+
+                const currentCount =
+                    Number(
+                        navBadge.textContent || 0
+                    );
+
+
+                const newCount =
+                    Math.max(
+                        0,
+                        currentCount - 1
+                    );
+
+
+                navBadge.textContent =
+                    newCount;
+
+
+                navBadge.style.display =
+                    newCount > 0
+                        ? "inline-flex"
+                        : "none";
+            }
+        }
+
+
+        checkEmptyState();
+
+        refreshSummaryFromDOM();
 
 
     } catch (error) {
@@ -1302,9 +1233,7 @@ async function deleteNotification(
             error.message ||
             "Unable to delete notification."
         );
-
     }
-
 }
 
 
@@ -1315,9 +1244,7 @@ async function deleteNotification(
 async function deleteAllNotifications() {
 
     if (!currentUser) {
-
         return;
-
     }
 
 
@@ -1328,25 +1255,25 @@ async function deleteAllNotifications() {
 
 
     if (!confirmed) {
-
         return;
-
     }
 
 
     try {
 
+        if (deleteAllButton) {
+            deleteAllButton.disabled = true;
+        }
+
+
         const response =
             await fetch(
-
                 `${API_URL}/notifications/user/${encodeURIComponent(
                     currentUser.id
                 )}`,
-
                 {
                     method: "DELETE"
                 }
-
             );
 
 
@@ -1360,24 +1287,60 @@ async function deleteAllNotifications() {
                 data.detail ||
                 `Server error: ${response.status}`
             );
-
         }
 
 
         if (
-            data.status !==
-            "success"
+            data.status !== "success"
         ) {
 
             throw new Error(
                 data.message ||
                 "Unable to delete notifications."
             );
-
         }
 
 
-        await loadNotifications();
+        /* CLEAR UI IMMEDIATELY */
+
+        notificationList.innerHTML = `
+            <div class="empty-notifications">
+
+                <div class="empty-icon">
+                    🔔
+                </div>
+
+                <h3>
+                    No Notifications
+                </h3>
+
+                <p>
+                    You're all caught up!
+                </p>
+
+            </div>
+        `;
+
+
+        if (notificationSummary) {
+
+            notificationSummary.textContent =
+                "You're all caught up.";
+        }
+
+
+        if (navBadge) {
+
+            navBadge.textContent = "0";
+
+            navBadge.style.display =
+                "none";
+        }
+
+
+        if (markAllButton) {
+            markAllButton.disabled = true;
+        }
 
 
     } catch (error) {
@@ -1393,36 +1356,97 @@ async function deleteAllNotifications() {
             "Unable to delete notifications."
         );
 
+
+    } finally {
+
+        if (deleteAllButton) {
+            deleteAllButton.disabled = false;
+        }
+    }
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+function checkEmptyState() {
+
+    const cards =
+        document.querySelectorAll(
+            ".notification-card"
+        );
+
+
+    if (cards.length === 0) {
+
+        notificationList.innerHTML = `
+            <div class="empty-notifications">
+
+                <div class="empty-icon">
+                    🔔
+                </div>
+
+                <h3>
+                    No Notifications
+                </h3>
+
+                <p>
+                    You're all caught up!
+                </p>
+
+            </div>
+        `;
+
+
+        if (notificationSummary) {
+
+            notificationSummary.textContent =
+                "You're all caught up.";
+        }
+
+
+        if (markAllButton) {
+            markAllButton.disabled = true;
+        }
+
+
+        if (deleteAllButton) {
+            deleteAllButton.disabled = true;
+        }
+    }
+}
+
+
+/* =========================================================
+   SUMMARY FROM CURRENT UI
+========================================================= */
+
+function refreshSummaryFromDOM() {
+
+    if (!notificationSummary) {
+        return;
     }
 
-}
+
+    const cards =
+        document.querySelectorAll(
+            ".notification-card"
+        );
 
 
-/* =========================================================
-   MARK ALL BUTTON
-========================================================= */
-
-if (markAllButton) {
-
-    markAllButton.addEventListener(
-        "click",
-        markAllAsRead
-    );
-
-}
+    const unread =
+        document.querySelectorAll(
+            ".notification-card.unread"
+        ).length;
 
 
-/* =========================================================
-   DELETE ALL BUTTON
-========================================================= */
-
-if (deleteAllButton) {
-
-    deleteAllButton.addEventListener(
-        "click",
-        deleteAllNotifications
-    );
-
+    notificationSummary.textContent =
+        `${cards.length} notification${
+            cards.length === 1
+                ? ""
+                : "s"
+        } • ${unread} unread`;
 }
 
 
@@ -1430,22 +1454,15 @@ if (deleteAllButton) {
    ESCAPE HTML
 ========================================================= */
 
-function escapeHTML(
-    value
-) {
+function escapeHTML(value) {
 
     const div =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     div.textContent =
         value ?? "";
 
-
     return div.innerHTML;
-
 }
 
 
@@ -1453,21 +1470,15 @@ function escapeHTML(
    FORMAT DATE
 ========================================================= */
 
-function formatDate(
-    dateValue
-) {
+function formatDate(dateValue) {
 
     if (!dateValue) {
-
         return "Just now";
-
     }
 
 
     const date =
-        new Date(
-            dateValue
-        );
+        new Date(dateValue);
 
 
     if (
@@ -1479,7 +1490,6 @@ function formatDate(
         return String(
             dateValue
         );
-
     }
 
 
@@ -1493,7 +1503,28 @@ function formatDate(
             minute: "2-digit"
         }
     );
+}
 
+
+/* =========================================================
+   BUTTON EVENTS
+========================================================= */
+
+if (markAllButton) {
+
+    markAllButton.addEventListener(
+        "click",
+        markAllAsRead
+    );
+}
+
+
+if (deleteAllButton) {
+
+    deleteAllButton.addEventListener(
+        "click",
+        deleteAllNotifications
+    );
 }
 
 
@@ -1506,34 +1537,35 @@ document.addEventListener(
     function () {
 
         if (!currentUser) {
-
             return;
-
         }
 
 
         setupNavbar();
 
 
-        loadNotifications();
+        /*
+         * Load notifications ONLY ONCE
+         * when page opens.
+         */
 
+        loadNotifications();
     }
 );
 
 
 /* =========================================================
-   AUTO REFRESH
+   IMPORTANT
+=========================================================
+
+   NO AUTO REFRESH.
+
+   Previously:
+
+   setInterval(loadNotifications, 15000);
+
+   That caused repeated backend requests.
+
+   Notifications now load once when the page opens.
+
 ========================================================= */
-
-setInterval(
-    function () {
-
-        if (currentUser) {
-
-            loadNotifications();
-
-        }
-
-    },
-    15000
-);
