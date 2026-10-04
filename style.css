@@ -181,111 +181,14 @@ textarea {
    RESPONSIVE NAVBAR
    ========================================================= */
 
-/* At screens below 1300px, use hamburger menu */
-@media (max-width: 1300px) {
+@media (min-width: 1301px) {
 
     .navbar {
-        min-height: 70px;
-        padding: 0 30px;
-    }
-
-    /* Show hamburger */
-    .menu-toggle {
-        display: block;
-    }
-
-    /* Mobile/tablet menu */
-    .nav-menu {
-        position: absolute;
-        top: 70px;
-        left: 0;
-        width: 100%;
-
-        background-color: white;
-
-        border-top: 1px solid #e5e7eb;
-        border-bottom: 1px solid #e5e7eb;
-
-        display: none;
-        flex-direction: column;
-        align-items: stretch;
-
-        gap: 0;
-
-        padding: 15px 30px;
-
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    }
-
-    /* Open menu */
-    .nav-menu.active {
         display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 50px;
     }
-
-    /* Navigation links */
-    .nav-links {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-
-        width: 100%;
-        gap: 0;
-    }
-
-    .nav-links a {
-        display: block;
-        width: 100%;
-
-        padding: 13px 5px;
-
-        font-size: 16px;
-
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    .nav-links a::after {
-        display: none;
-    }
-
-    .nav-links a:hover {
-        background-color: #f8fafc;
-    }
-
-    /* Login / Signup */
-    .nav-buttons {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-
-        width: 100%;
-
-        gap: 10px;
-
-        padding-top: 15px;
-    }
-
-    .nav-buttons a {
-        width: 100%;
-        text-align: center;
-        padding: 11px;
-    }
-
-    .login-btn {
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-    }
-
-    .signup-btn {
-        border-radius: 6px;
-    }
-}
-
-
-/* =========================================================
-   DESKTOP
-   ========================================================= */
-
-@media (min-width: 1301px) {
 
     .menu-toggle {
         display: none;
@@ -311,29 +214,264 @@ textarea {
 }
 
 
-/* =========================================================
-   SMALL MOBILE
-   ========================================================= */
+/* =========================
+   TABLET: 1300px - 701px
+   ========================= */
 
-@media (max-width: 600px) {
+@media (min-width: 701px) and (max-width: 1300px) {
 
     .navbar {
+        min-height: 70px;
+        padding: 0 30px;
+        position: relative;
+    }
+
+    /* Show hamburger */
+    .menu-toggle {
+        display: block;
+
+        border: none;
+        outline: none;
+        background: transparent;
+
+        font-size: 30px;
+        line-height: 1;
+
+        color: #1e3a8a;
+
+        cursor: pointer;
+
+        padding: 8px 10px;
+
+        z-index: 1002;
+    }
+
+    /* Hide menu by default */
+    .nav-menu {
+        position: absolute;
+
+        top: 70px;
+        left: 0;
+
+        width: 100%;
+
+        display: none;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        background: #ffffff;
+
+        padding: 20px 30px;
+
+        border-top: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+
+        z-index: 1001;
+    }
+
+    /* When hamburger is clicked */
+    .nav-menu.active {
+        display: flex;
+    }
+
+    /* Navigation links */
+    .nav-links {
+        width: 100%;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 0;
+    }
+
+    .nav-links a {
+        display: block;
+
+        width: 100%;
+
+        padding: 15px 5px;
+
+        font-size: 16px;
+
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* Remove underline animation on tablet */
+    .nav-links a::after {
+        display: none;
+    }
+
+    /* Login / signup */
+    .nav-buttons {
+        width: 100%;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 10px;
+
+        padding-top: 18px;
+    }
+
+    .nav-buttons a {
+        width: 100%;
+
+        text-align: center;
+
+        padding: 12px;
+    }
+
+    .login-btn {
+        border: 1px solid #e5e7eb;
+
+        border-radius: 6px;
+    }
+
+    .signup-btn {
+        border-radius: 6px;
+    }
+}
+
+
+/* =========================
+   MOBILE: 700px and below
+   ========================= */
+
+@media (max-width: 700px) {
+
+    .navbar {
+        min-height: 65px;
+
         padding: 0 20px;
+
+        position: relative;
+    }
+
+    /* Hamburger */
+    .menu-toggle {
+        display: block;
+
+        border: none;
+        outline: none;
+        background: transparent;
+
+        font-size: 28px;
+
+        color: #1e3a8a;
+
+        cursor: pointer;
+
+        padding: 7px;
+
+        z-index: 1002;
+    }
+
+    /* Menu */
+    .nav-menu {
+        position: absolute;
+
+        top: 65px;
+        left: 0;
+
+        width: 100%;
+
+        display: none;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        background: white;
+
+        padding: 15px 20px;
+
+        border-top: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+        z-index: 1001;
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .nav-links {
+        display: flex;
+
+        flex-direction: column;
+
+        width: 100%;
+
+        gap: 0;
+    }
+
+    .nav-links a {
+        display: block;
+
+        width: 100%;
+
+        padding: 13px 5px;
+
+        font-size: 15px;
+
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .nav-links a::after {
+        display: none;
+    }
+
+    .nav-buttons {
+        display: flex;
+
+        flex-direction: column;
+
+        width: 100%;
+
+        gap: 10px;
+
+        padding-top: 15px;
+    }
+
+    .nav-buttons a {
+        width: 100%;
+
+        text-align: center;
+
+        padding: 11px;
+    }
+
+    .login-btn {
+        border: 1px solid #e5e7eb;
+
+        border-radius: 6px;
+    }
+
+    .signup-btn {
+        border-radius: 6px;
     }
 
     .logo {
         font-size: 21px;
     }
-
-    .nav-menu {
-        padding: 15px 20px;
-    }
 }
 
 
-/* =========================================================
+/* =========================
    VERY SMALL MOBILE
-   ========================================================= */
+   ========================= */
 
 @media (max-width: 400px) {
 
@@ -346,7 +484,7 @@ textarea {
     }
 
     .menu-toggle {
-        font-size: 27px;
+        font-size: 26px;
     }
 }
 /* =========================================================
