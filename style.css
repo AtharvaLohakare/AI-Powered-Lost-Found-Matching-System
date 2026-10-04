@@ -1,4 +1,3 @@
-
 /* =========================
    GLOBAL
    ========================= */
@@ -487,6 +486,7 @@ textarea {
         font-size: 26px;
     }
 }
+
 /* =========================================================
    HOME PAGE
 ========================================================= */
@@ -864,11 +864,9 @@ textarea {
 }
 
 .ai-summary {
-    background: linear-gradient(
-        135deg,
-        #eff6ff,
-        #f8fafc
-    );
+    background: linear-gradient(135deg,
+            #eff6ff,
+            #f8fafc);
     border: 1px solid #dbeafe;
     border-radius: 12px;
     padding: 25px;
@@ -1154,6 +1152,7 @@ textarea {
 }
 
 @keyframes floatingCircle {
+
     0%,
     100% {
         transform: translateY(0);

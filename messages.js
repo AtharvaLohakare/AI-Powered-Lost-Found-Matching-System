@@ -1,3 +1,54 @@
+const menuToggle = document.getElementById("menuToggle");
+const navMenu = document.getElementById("navMenu");
+
+if (menuToggle && navMenu) {
+
+    menuToggle.addEventListener("click", function () {
+
+        navMenu.classList.toggle("active");
+
+        // Change hamburger icon
+        if (navMenu.classList.contains("active")) {
+            menuToggle.textContent = "✕";
+        } else {
+            menuToggle.textContent = "☰";
+        }
+
+    });
+
+
+    // Close menu after clicking a navigation link
+    const navLinks = navMenu.querySelectorAll("a");
+
+    navLinks.forEach(function (link) {
+
+        link.addEventListener("click", function () {
+
+            navMenu.classList.remove("active");
+
+            menuToggle.textContent = "☰";
+
+        });
+
+    });
+
+
+    // Close menu when screen becomes desktop
+    window.addEventListener("resize", function () {
+
+        if (window.innerWidth > 800) {
+
+            navMenu.classList.remove("active");
+
+            menuToggle.textContent = "☰";
+
+        }
+
+    });
+
+}
+
+
 // =========================================================
 // LOST & FOUND AI
 // MESSAGES / COMMUNICATION
@@ -268,16 +319,16 @@ async function loadItemInfo() {
                 <strong>
 
                     ${escapeHtml(
-                        item.item_name ||
-                        "Item"
-                    )}
+                item.item_name ||
+                "Item"
+            )}
 
                 </strong>
 
                 (${escapeHtml(
-                    item.item_type ||
-                    ""
-                )})
+                item.item_type ||
+                ""
+            )})
 
             `;
 
@@ -442,8 +493,8 @@ async function loadMessages() {
                                 <div class="message-name">
 
                                     ${escapeHtml(
-                                        senderName
-                                    )}
+                            senderName
+                        )}
 
                                 </div>
 
@@ -451,8 +502,8 @@ async function loadMessages() {
                                 <div>
 
                                     ${escapeHtml(
-                                        message.message
-                                    )}
+                            message.message
+                        )}
 
                                 </div>
 
@@ -460,10 +511,10 @@ async function loadMessages() {
                                 <div class="message-time">
 
                                     ${escapeHtml(
-                                        formatDate(
-                                            message.created_at
-                                        )
-                                    )}
+                            formatDate(
+                                message.created_at
+                            )
+                        )}
 
                                 </div>
 
@@ -505,9 +556,9 @@ async function loadMessages() {
                 <p>
 
                     ${escapeHtml(
-                        error.message ||
-                        "Something went wrong."
-                    )}
+            error.message ||
+            "Something went wrong."
+        )}
 
                 </p>
 
@@ -528,7 +579,7 @@ if (messageForm) {
 
     messageForm.addEventListener(
         "submit",
-        async function(event) {
+        async function (event) {
 
             event.preventDefault();
 

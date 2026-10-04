@@ -5,17 +5,11 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Lost & Found Items</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
@@ -31,40 +25,49 @@
             Lost & Found AI
         </div>
 
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+            ☰
+        </button>
 
-        <div class="nav-links">
+        <div class="nav-menu" id="navMenu">
 
-            <a href="index.html">
-                Home
-            </a>
+            <div class="nav-links">
 
-            <a href="items.html">
-                Items
-            </a>
+                <a href="index.html">Home</a>
 
-            <a href="report-lost.html">
-                Report Lost
-            </a>
+                <a href="items.html">Items</a>
 
-            <a href="report-found.html">
-                Report Found
-            </a>
+                <a href="report-lost.html">
+                    Report Lost
+                </a>
 
-            <a href="community.html">
-    Community
-</a>
+                <a href="report-found.html">
+                    Report Found
+                </a>
 
-            <a href="notifications.html">
-    🔔 Notifications
-    <span id="navBadge">0</span>
-</a>
+                <a href="community.html">
+                    Community
+                </a>
 
-        </div>
+                <a href="notifications.html">
+                    🔔 Notifications
+                    <span id="navBadge">0</span>
+                </a>
 
+            </div>
 
-        <div class="nav-buttons">
-            <a href="login.html" class="login-btn">Login</a>
-            <a href="signup.html" class="signup-btn">Sign Up</a>
+            <div class="nav-buttons">
+
+                <a href="login.html" class="login-btn">
+                    Login
+                </a>
+
+                <a href="signup.html" class="signup-btn">
+                    Sign Up
+                </a>
+
+            </div>
+
         </div>
 
     </nav>
@@ -91,10 +94,7 @@
 
         <!-- ITEMS WILL BE LOADED HERE -->
 
-        <div
-            id="items-container"
-            class="items-container"
-        >
+        <div id="items-container" class="items-container">
 
             <p>
                 Loading items...
@@ -114,20 +114,20 @@
     <!-- ITEMS JAVASCRIPT -->
 
     <script src="items.js"></script>
-<script>
-    const storedUser = localStorage.getItem("user");
+    <script>
+        const storedUser = localStorage.getItem("user");
 
-    const navButtons = document.querySelector(".nav-buttons");
+        const navButtons = document.querySelector(".nav-buttons");
 
-    if (storedUser && navButtons) {
+        if (storedUser && navButtons) {
 
-        try {
+            try {
 
-            const user = JSON.parse(storedUser);
+                const user = JSON.parse(storedUser);
 
-            if (user && user.id) {
+                if (user && user.id) {
 
-                navButtons.innerHTML = `
+                    navButtons.innerHTML = `
                     <span class="user-welcome">
                         Hi, ${user.name} 👋
                     </span>
@@ -141,32 +141,32 @@
                     </a>
                 `;
 
-                document
-                    .getElementById("logoutBtn")
-                    .addEventListener("click", function (event) {
+                    document
+                        .getElementById("logoutBtn")
+                        .addEventListener("click", function (event) {
 
-                        event.preventDefault();
+                            event.preventDefault();
 
-                        localStorage.removeItem("user");
+                            localStorage.removeItem("user");
 
-                        window.location.href = "index.html";
+                            window.location.href = "index.html";
 
-                    });
+                        });
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Invalid user data:",
+                    error
+                );
+
+                localStorage.removeItem("user");
+
             }
 
-        } catch (error) {
-
-            console.error(
-                "Invalid user data:",
-                error
-            );
-
-            localStorage.removeItem("user");
-
         }
-
-    }
-</script>
+    </script>
 
 </body>
 

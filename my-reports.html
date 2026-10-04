@@ -5,20 +5,13 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>My Reports - Lost & Found AI</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+    <link rel="stylesheet" href="style.css">
 
     <style>
-
         /* =====================================================
            MY REPORTS
         ===================================================== */
@@ -103,7 +96,7 @@
             overflow: hidden;
 
             box-shadow:
-                0 8px 30px rgba(0,0,0,0.08);
+                0 8px 30px rgba(0, 0, 0, 0.08);
 
             border: 1px solid #eee;
 
@@ -117,7 +110,7 @@
             transform: translateY(-4px);
 
             box-shadow:
-                0 14px 35px rgba(0,0,0,0.12);
+                0 14px 35px rgba(0, 0, 0, 0.12);
 
         }
 
@@ -356,7 +349,7 @@
             inset: 0;
 
             background:
-                rgba(0,0,0,0.68);
+                rgba(0, 0, 0, 0.68);
 
             display: none;
 
@@ -391,7 +384,7 @@
             border-radius: 20px;
 
             box-shadow:
-                0 25px 70px rgba(0,0,0,0.3);
+                0 25px 70px rgba(0, 0, 0, 0.3);
 
         }
 
@@ -494,9 +487,7 @@
             display: grid;
 
             grid-template-columns:
-                minmax(280px, 1.35fr)
-                minmax(130px, 0.45fr)
-                minmax(260px, 1fr);
+                minmax(280px, 1.35fr) minmax(130px, 0.45fr) minmax(260px, 1fr);
 
             gap: 22px;
 
@@ -509,7 +500,7 @@
             background: #fff;
 
             box-shadow:
-                0 5px 18px rgba(0,0,0,0.05);
+                0 5px 18px rgba(0, 0, 0, 0.05);
 
         }
 
@@ -947,7 +938,7 @@
             border-color: #3157d5;
 
             box-shadow:
-                0 0 0 3px rgba(49,87,213,.1);
+                0 0 0 3px rgba(49, 87, 213, .1);
 
         }
 
@@ -1249,7 +1240,6 @@
             }
 
         }
-
     </style>
 
 </head>
@@ -1258,155 +1248,134 @@
 <body>
 
 
-<!-- =====================================================
+    <!-- =====================================================
      NAVBAR
 ===================================================== -->
 
-<nav class="navbar">
+    <nav class="navbar">
 
-    <div class="logo">
-        Lost & Found AI
-    </div>
+        <div class="logo">
+            Lost & Found AI
+        </div>
 
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+            ☰
+        </button>
 
-    <div class="nav-links">
+        <div class="nav-menu" id="navMenu">
 
-        <a href="index.html">
-            Home
-        </a>
+            <div class="nav-links">
 
-        <a href="items.html">
-            Items
-        </a>
+                <a href="index.html">Home</a>
 
-        <a href="report-lost.html">
-            Report Lost
-        </a>
+                <a href="items.html">Items</a>
 
-        <a href="report-found.html">
-            Report Found
-        </a>
+                <a href="report-lost.html">
+                    Report Lost
+                </a>
 
-        <a href="community.html">
-    Community
-</a>
+                <a href="report-found.html">
+                    Report Found
+                </a>
 
-    </div>
+                <a href="community.html">
+                    Community
+                </a>
 
-
-    <div class="nav-buttons">
-
-        <span
-            class="user-welcome"
-            id="userWelcome"
-        ></span>
-
-        <a
-            href="my-reports.html"
-            class="login-btn"
-        >
-            My Reports
-        </a>
-
-        <a
-            href="#"
-            class="signup-btn"
-            id="logoutBtn"
-        >
-            Logout
-        </a>
-
-    </div>
-
-</nav>
-
-
-<!-- =====================================================
-     MY REPORTS
-===================================================== -->
-
-<main class="reports-page">
-
-    <div class="reports-header">
-
-        <h1>
-            My Reports
-        </h1>
-
-        <p>
-            Manage and track the items you have reported.
-        </p>
-
-        <span
-            class="reports-count"
-            id="reportsCount"
-        >
-            Loading reports...
-        </span>
-
-    </div>
-
-
-    <div
-        id="reports-container"
-        class="reports-grid"
-    ></div>
-
-</main>
-
-
-<!-- =====================================================
-     AI MATCH MODAL
-===================================================== -->
-
-<div
-    class="modal-overlay"
-    id="matchModal"
->
-
-    <div class="modal">
-
-        <div class="modal-header">
-
-            <div>
-
-                <h2>
-                    AI Match Results
-                </h2>
-
-                <p id="matchSubtitle">
-                    Searching for possible matches...
-                </p>
+                <a href="notifications.html">
+                    🔔 Notifications
+                    <span id="navBadge">0</span>
+                </a>
 
             </div>
 
+            <div class="nav-buttons">
 
-            <button
-                class="close-btn"
-                id="closeMatchModal"
-            >
-                ×
-            </button>
+                <a href="login.html" class="login-btn">
+                    Login
+                </a>
+
+                <a href="signup.html" class="signup-btn">
+                    Sign Up
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+     MY REPORTS
+===================================================== -->
+
+    <main class="reports-page">
+
+        <div class="reports-header">
+
+            <h1>
+                My Reports
+            </h1>
+
+            <p>
+                Manage and track the items you have reported.
+            </p>
+
+            <span class="reports-count" id="reportsCount">
+                Loading reports...
+            </span>
 
         </div>
 
 
-        <div class="modal-body">
+        <div id="reports-container" class="reports-grid"></div>
 
-            <div
-                id="matchMessage"
-                class="message-box"
-            ></div>
+    </main>
 
 
-            <div
-                id="matchesContainer"
-                class="matches-container"
-            >
+    <!-- =====================================================
+     AI MATCH MODAL
+===================================================== -->
 
-                <div class="loading-state">
+    <div class="modal-overlay" id="matchModal">
 
-                    Finding possible matches...
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2>
+                        AI Match Results
+                    </h2>
+
+                    <p id="matchSubtitle">
+                        Searching for possible matches...
+                    </p>
+
+                </div>
+
+
+                <button class="close-btn" id="closeMatchModal">
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div id="matchMessage" class="message-box"></div>
+
+
+                <div id="matchesContainer" class="matches-container">
+
+                    <div class="loading-state">
+
+                        Finding possible matches...
+
+                    </div>
 
                 </div>
 
@@ -1416,105 +1385,85 @@
 
     </div>
 
-</div>
 
-
-<!-- =====================================================
+    <!-- =====================================================
      VERIFY OWNERSHIP MODAL
 ===================================================== -->
 
-<div
-    class="modal-overlay"
-    id="verificationModal"
->
+    <div class="modal-overlay" id="verificationModal">
 
-    <div class="modal verification-modal">
+        <div class="modal verification-modal">
 
-        <div class="modal-header">
+            <div class="modal-header">
 
-            <div>
+                <div>
 
-                <h2>
-                    Verify Ownership
-                </h2>
+                    <h2>
+                        Verify Ownership
+                    </h2>
 
-                <p>
-                    Help the reporter confirm that this item belongs to you.
-                </p>
+                    <p>
+                        Help the reporter confirm that this item belongs to you.
+                    </p>
 
-            </div>
+                </div>
 
 
-            <button
-                class="close-btn"
-                id="closeVerificationModal"
-            >
-                ×
-            </button>
-
-        </div>
-
-
-        <div class="verification-content">
-
-            <div
-                id="verificationMessage"
-                class="message-box"
-            ></div>
-
-
-            <div class="verification-item">
-
-                <strong id="verificationItemName">
-                    Item
-                </strong>
-
-                <span>
-                    Found item matched with your lost report.
-                </span>
-
-            </div>
-
-
-            <label
-                class="verification-label"
-                for="proofInput"
-            >
-                Why do you believe this item belongs to you?
-            </label>
-
-
-            <textarea
-                id="proofInput"
-                placeholder="Example: The wallet contains my college ID. It also has a small scratch near the zipper and I lost it near the metro station."
-            ></textarea>
-
-
-            <div class="proof-help">
-
-                Give specific information that the person who found
-                the item can use to verify ownership. Do not share
-                passwords or other sensitive account information.
-
-            </div>
-
-
-            <div class="verification-actions">
-
-                <button
-                    class="cancel-btn"
-                    id="cancelVerificationBtn"
-                >
-                    Cancel
+                <button class="close-btn" id="closeVerificationModal">
+                    ×
                 </button>
 
+            </div>
 
-                <button
-                    class="submit-verification-btn"
-                    id="submitVerificationBtn"
-                >
-                    Submit Verification
-                </button>
+
+            <div class="verification-content">
+
+                <div id="verificationMessage" class="message-box"></div>
+
+
+                <div class="verification-item">
+
+                    <strong id="verificationItemName">
+                        Item
+                    </strong>
+
+                    <span>
+                        Found item matched with your lost report.
+                    </span>
+
+                </div>
+
+
+                <label class="verification-label" for="proofInput">
+                    Why do you believe this item belongs to you?
+                </label>
+
+
+                <textarea id="proofInput"
+                    placeholder="Example: The wallet contains my college ID. It also has a small scratch near the zipper and I lost it near the metro station."></textarea>
+
+
+                <div class="proof-help">
+
+                    Give specific information that the person who found
+                    the item can use to verify ownership. Do not share
+                    passwords or other sensitive account information.
+
+                </div>
+
+
+                <div class="verification-actions">
+
+                    <button class="cancel-btn" id="cancelVerificationBtn">
+                        Cancel
+                    </button>
+
+
+                    <button class="submit-verification-btn" id="submitVerificationBtn">
+                        Submit Verification
+                    </button>
+
+                </div>
 
             </div>
 
@@ -1522,297 +1471,344 @@
 
     </div>
 
-</div>
+
+    <script src="config.js"></script>
 
 
-<script src="config.js"></script>
+    <script>
+
+        const menuToggle = document.getElementById("menuToggle");
+        const navMenu = document.getElementById("navMenu");
+
+        if (menuToggle && navMenu) {
+
+            menuToggle.addEventListener("click", function () {
+
+                navMenu.classList.toggle("active");
+
+                // Change hamburger icon
+                if (navMenu.classList.contains("active")) {
+                    menuToggle.textContent = "✕";
+                } else {
+                    menuToggle.textContent = "☰";
+                }
+
+            });
 
 
-<script>
+            // Close menu after clicking a navigation link
+            const navLinks = navMenu.querySelectorAll("a");
 
-    /* =====================================================
-       USER
-    ===================================================== */
+            navLinks.forEach(function (link) {
 
-    const storedUser =
-        localStorage.getItem("user");
+                link.addEventListener("click", function () {
 
+                    navMenu.classList.remove("active");
 
-    if (!storedUser) {
+                    menuToggle.textContent = "☰";
 
-        window.location.href =
-            "login.html";
+                });
 
-    }
+            });
 
 
-    let user = null;
+            // Close menu when screen becomes desktop
+            window.addEventListener("resize", function () {
+
+                if (window.innerWidth > 800) {
+
+                    navMenu.classList.remove("active");
+
+                    menuToggle.textContent = "☰";
+
+                }
+
+            });
+
+        }
+
+        /* =====================================================
+           USER
+        ===================================================== */
+
+        const storedUser =
+            localStorage.getItem("user");
 
 
-    try {
-
-        user =
-            JSON.parse(storedUser);
-
-    } catch (error) {
-
-        console.error(
-            "Invalid user:",
-            error
-        );
-
-        localStorage.removeItem("user");
-
-        window.location.href =
-            "login.html";
-
-    }
-
-
-    if (!user || !user.id) {
-
-        localStorage.removeItem("user");
-
-        window.location.href =
-            "login.html";
-
-    }
-
-
-    /* =====================================================
-       NAVBAR
-    ===================================================== */
-
-    document.getElementById(
-        "userWelcome"
-    ).textContent =
-        `Hi, ${user.name} 👋`;
-
-
-    document.getElementById(
-        "logoutBtn"
-    ).addEventListener(
-        "click",
-        function(event) {
-
-            event.preventDefault();
-
-            localStorage.removeItem(
-                "user"
-            );
+        if (!storedUser) {
 
             window.location.href =
-                "index.html";
-
-        }
-    );
-
-
-    /* =====================================================
-       ELEMENTS
-    ===================================================== */
-
-    const reportsContainer =
-        document.getElementById(
-            "reports-container"
-        );
-
-
-    const reportsCount =
-        document.getElementById(
-            "reportsCount"
-        );
-
-
-    const matchModal =
-        document.getElementById(
-            "matchModal"
-        );
-
-
-    const matchesContainer =
-        document.getElementById(
-            "matchesContainer"
-        );
-
-
-    const matchSubtitle =
-        document.getElementById(
-            "matchSubtitle"
-        );
-
-
-    const matchMessage =
-        document.getElementById(
-            "matchMessage"
-        );
-
-
-    const verificationModal =
-        document.getElementById(
-            "verificationModal"
-        );
-
-
-    const verificationItemName =
-        document.getElementById(
-            "verificationItemName"
-        );
-
-
-    const proofInput =
-        document.getElementById(
-            "proofInput"
-        );
-
-
-    const verificationMessage =
-        document.getElementById(
-            "verificationMessage"
-        );
-
-
-    const submitVerificationBtn =
-        document.getElementById(
-            "submitVerificationBtn"
-        );
-
-
-    let verificationItemId =
-        null;
-
-
-    /* =====================================================
-       ESCAPE HTML
-    ===================================================== */
-
-    function escapeHTML(value) {
-
-        if (value === null ||
-            value === undefined) {
-
-            return "";
-
-        }
-
-        return String(value)
-
-            .replace(
-                /&/g,
-                "&amp;"
-            )
-
-            .replace(
-                /</g,
-                "&lt;"
-            )
-
-            .replace(
-                />/g,
-                "&gt;"
-            )
-
-            .replace(
-                /"/g,
-                "&quot;"
-            )
-
-            .replace(
-                /'/g,
-                "&#039;"
-            );
-
-    }
-
-
-    /* =====================================================
-       IMAGE URL
-    ===================================================== */
-
-    function getImageURL(item) {
-
-        if (item.image_url) {
-
-            if (
-                item.image_url.startsWith(
-                    "http"
-                )
-            ) {
-
-                return item.image_url;
-
-            }
-
-            return `${API_URL}${item.image_url}`;
+                "login.html";
 
         }
 
 
-        if (item.image_name) {
+        let user = null;
 
-            return (
-                `${API_URL}/uploads/` +
-                encodeURIComponent(
-                    item.image_name
-                )
-            );
-
-        }
-
-
-        return null;
-
-    }
-
-
-    /* =====================================================
-       LOAD MY REPORTS
-    ===================================================== */
-
-    async function loadMyReports() {
 
         try {
 
-            const response =
-                await fetch(
-                    `${API_URL}/my-items/${user.id}`
+            user =
+                JSON.parse(storedUser);
+
+        } catch (error) {
+
+            console.error(
+                "Invalid user:",
+                error
+            );
+
+            localStorage.removeItem("user");
+
+            window.location.href =
+                "login.html";
+
+        }
+
+
+        if (!user || !user.id) {
+
+            localStorage.removeItem("user");
+
+            window.location.href =
+                "login.html";
+
+        }
+
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        document.getElementById(
+            "userWelcome"
+        ).textContent =
+            `Hi, ${user.name} 👋`;
+
+
+        document.getElementById(
+            "logoutBtn"
+        ).addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                localStorage.removeItem(
+                    "user"
                 );
 
+                window.location.href =
+                    "index.html";
 
-            const data =
-                await response.json();
+            }
+        );
 
 
-            if (!response.ok) {
+        /* =====================================================
+           ELEMENTS
+        ===================================================== */
 
-                throw new Error(
-                    data.detail ||
-                    "Could not load reports."
+        const reportsContainer =
+            document.getElementById(
+                "reports-container"
+            );
+
+
+        const reportsCount =
+            document.getElementById(
+                "reportsCount"
+            );
+
+
+        const matchModal =
+            document.getElementById(
+                "matchModal"
+            );
+
+
+        const matchesContainer =
+            document.getElementById(
+                "matchesContainer"
+            );
+
+
+        const matchSubtitle =
+            document.getElementById(
+                "matchSubtitle"
+            );
+
+
+        const matchMessage =
+            document.getElementById(
+                "matchMessage"
+            );
+
+
+        const verificationModal =
+            document.getElementById(
+                "verificationModal"
+            );
+
+
+        const verificationItemName =
+            document.getElementById(
+                "verificationItemName"
+            );
+
+
+        const proofInput =
+            document.getElementById(
+                "proofInput"
+            );
+
+
+        const verificationMessage =
+            document.getElementById(
+                "verificationMessage"
+            );
+
+
+        const submitVerificationBtn =
+            document.getElementById(
+                "submitVerificationBtn"
+            );
+
+
+        let verificationItemId =
+            null;
+
+
+        /* =====================================================
+           ESCAPE HTML
+        ===================================================== */
+
+        function escapeHTML(value) {
+
+            if (value === null ||
+                value === undefined) {
+
+                return "";
+
+            }
+
+            return String(value)
+
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        /* =====================================================
+           IMAGE URL
+        ===================================================== */
+
+        function getImageURL(item) {
+
+            if (item.image_url) {
+
+                if (
+                    item.image_url.startsWith(
+                        "http"
+                    )
+                ) {
+
+                    return item.image_url;
+
+                }
+
+                return `${API_URL}${item.image_url}`;
+
+            }
+
+
+            if (item.image_name) {
+
+                return (
+                    `${API_URL}/uploads/` +
+                    encodeURIComponent(
+                        item.image_name
+                    )
                 );
 
             }
 
 
-            if (!Array.isArray(data)) {
+            return null;
 
-                throw new Error(
-                    "Invalid reports data."
-                );
-
-            }
+        }
 
 
-            reportsCount.textContent =
-                `${data.length} Report${
-                    data.length === 1
+        /* =====================================================
+           LOAD MY REPORTS
+        ===================================================== */
+
+        async function loadMyReports() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/my-items/${user.id}`
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Could not load reports."
+                    );
+
+                }
+
+
+                if (!Array.isArray(data)) {
+
+                    throw new Error(
+                        "Invalid reports data."
+                    );
+
+                }
+
+
+                reportsCount.textContent =
+                    `${data.length} Report${data.length === 1
                         ? ""
                         : "s"
-                }`;
+                    }`;
 
 
-            if (data.length === 0) {
+                if (data.length === 0) {
 
-                reportsContainer.innerHTML = `
+                    reportsContainer.innerHTML = `
 
                     <div class="empty-state">
 
@@ -1840,75 +1836,75 @@
 
                 `;
 
-                return;
+                    return;
 
-            }
-
-
-            reportsContainer.innerHTML = "";
+                }
 
 
-            data.forEach(
-                item => {
-
-                    const card =
-                        document.createElement(
-                            "article"
-                        );
+                reportsContainer.innerHTML = "";
 
 
-                    card.className =
-                        "report-card";
+                data.forEach(
+                    item => {
+
+                        const card =
+                            document.createElement(
+                                "article"
+                            );
 
 
-                    const itemStatus =
-                        item.item_status ||
-                        item.status ||
-                        "active";
-
-                    let status;
-                    let statusClass;
-
-                    if (item.item_type === "lost") {
-
-                        status = "Lost";
-                        statusClass = "status-lost";
-
-                    } else if (itemStatus === "claim_pending") {
-
-                        status = "Claim Pending";
-                        statusClass = "status-pending";
-
-                    } else if (
-                        itemStatus === "ownership_verified" ||
-                        itemStatus === "verified"
-                    ) {
-
-                        status = "Ownership Verified";
-                        statusClass = "status-verified";
-
-                    } else if (itemStatus === "returned") {
-
-                        status = "Returned";
-                        statusClass = "status-returned";
-
-                    } else {
-
-                        status = "Found";
-                        statusClass = "status-found";
-                    }
+                        card.className =
+                            "report-card";
 
 
-                    const imageURL =
-                        getImageURL(item);
+                        const itemStatus =
+                            item.item_status ||
+                            item.status ||
+                            "active";
+
+                        let status;
+                        let statusClass;
+
+                        if (item.item_type === "lost") {
+
+                            status = "Lost";
+                            statusClass = "status-lost";
+
+                        } else if (itemStatus === "claim_pending") {
+
+                            status = "Claim Pending";
+                            statusClass = "status-pending";
+
+                        } else if (
+                            itemStatus === "ownership_verified" ||
+                            itemStatus === "verified"
+                        ) {
+
+                            status = "Ownership Verified";
+                            statusClass = "status-verified";
+
+                        } else if (itemStatus === "returned") {
+
+                            status = "Returned";
+                            statusClass = "status-returned";
+
+                        } else {
+
+                            status = "Found";
+                            statusClass = "status-found";
+                        }
 
 
-                    let imageHTML;
+                        const imageURL =
+                            getImageURL(item);
 
 
-                    if (imageURL) {
+                        let imageHTML;
 
-                        imageHTML = `
+
+                        if (imageURL) {
+
+                            imageHTML = `
 
                             <img
                                 class="report-image"
@@ -1919,9 +1915,9 @@
 
                         `;
 
-                    } else {
+                        } else {
 
-                        imageHTML = `
+                            imageHTML = `
 
                             <div
                                 class="report-image"
@@ -1937,10 +1933,10 @@
 
                         `;
 
-                    }
+                        }
 
 
-                    card.innerHTML = `
+                        card.innerHTML = `
 
                         ${imageHTML}
 
@@ -1964,8 +1960,8 @@
                             <p class="report-description">
 
                                 ${escapeHTML(
-                                    item.description
-                                )}
+                            item.description
+                        )}
 
                             </p>
 
@@ -1980,8 +1976,8 @@
 
                                     <span class="info-value">
                                         ${escapeHTML(
-                                            item.location
-                                        )}
+                            item.location
+                        )}
                                     </span>
 
                                 </div>
@@ -1995,8 +1991,8 @@
 
                                     <span class="info-value">
                                         ${escapeHTML(
-                                            item.item_date
-                                        )}
+                            item.item_date
+                        )}
                                     </span>
 
                                 </div>
@@ -2010,9 +2006,9 @@
 
                                     <span class="info-value">
                                         ${escapeHTML(
-                                            item.color ||
-                                            "Not specified"
-                                        )}
+                            item.color ||
+                            "Not specified"
+                        )}
                                     </span>
 
                                 </div>
@@ -2026,9 +2022,9 @@
 
                                     <span class="info-value">
                                         ${escapeHTML(
-                                            item.brand ||
-                                            "Not specified"
-                                        )}
+                            item.brand ||
+                            "Not specified"
+                        )}
                                     </span>
 
                                 </div>
@@ -2038,9 +2034,8 @@
 
                             <div class="report-actions">
 
-                                ${
-                                    item.item_type === "lost"
-                                        ? `
+                                ${item.item_type === "lost"
+                                ? `
                                             <button
                                                 class="ai-match-btn"
                                                 onclick="
@@ -2048,24 +2043,23 @@
                                                     findAIMatches(
                                                         ${item.id},
                                                         '${escapeHTML(
-                                                            item.item_name
-                                                        )}'
+                                    item.item_name
+                                )}'
                                                     );
                                                 "
                                             >
                                                 🤖 Find AI Match
                                             </button>
                                         `
-                                        : ""
-                                }
+                                : ""
+                            }
 
-                                ${
-                                    item.item_type === "found"
-                                        ? (
-                                            itemStatus === "ownership_verified" ||
-                                            itemStatus === "verified"
-                                        )
-                                            ? `
+                                ${item.item_type === "found"
+                                ? (
+                                    itemStatus === "ownership_verified" ||
+                                    itemStatus === "verified"
+                                )
+                                    ? `
                                                 <button
                                                     id="return-btn-${item.id}"
                                                     class="returned-btn"
@@ -2077,8 +2071,8 @@
                                                     📦 Mark Item Returned
                                                 </button>
                                             `
-                                            : itemStatus === "returned"
-                                                ? `
+                                    : itemStatus === "returned"
+                                        ? `
                                                     <button
                                                         class="returned-btn returned"
                                                         disabled
@@ -2086,9 +2080,9 @@
                                                         ✅ Item Returned
                                                     </button>
                                                 `
-                                                : ""
                                         : ""
-                                }
+                                : ""
+                            }
 
                                 <a
                                     href="item-detail.html?id=${encodeURIComponent(item.id)}"
@@ -2105,26 +2099,26 @@
                     `;
 
 
-                    reportsContainer.appendChild(
-                        card
-                    );
+                        reportsContainer.appendChild(
+                            card
+                        );
 
-                }
-            );
+                    }
+                );
 
-        } catch (error) {
+            } catch (error) {
 
-            console.error(
-                "My Reports Error:",
-                error
-            );
-
-
-            reportsCount.textContent =
-                "Error";
+                console.error(
+                    "My Reports Error:",
+                    error
+                );
 
 
-            reportsContainer.innerHTML = `
+                reportsCount.textContent =
+                    "Error";
+
+
+                reportsContainer.innerHTML = `
 
                 <div class="empty-state">
 
@@ -2138,38 +2132,38 @@
 
                     <p>
                         ${escapeHTML(
-                            error.message
-                        )}
+                    error.message
+                )}
                     </p>
 
                 </div>
 
             `;
 
+            }
+
         }
 
-    }
+
+        /* =====================================================
+           FIND AI MATCHES
+        ===================================================== */
+
+        async function findAIMatches(
+            itemId,
+            itemName
+        ) {
+
+            matchModal.classList.add(
+                "active"
+            );
 
 
-    /* =====================================================
-       FIND AI MATCHES
-    ===================================================== */
-
-    async function findAIMatches(
-        itemId,
-        itemName
-    ) {
-
-        matchModal.classList.add(
-            "active"
-        );
+            matchSubtitle.textContent =
+                `Finding matches for "${itemName}"`;
 
 
-        matchSubtitle.textContent =
-            `Finding matches for "${itemName}"`;
-
-
-        matchesContainer.innerHTML = `
+            matchesContainer.innerHTML = `
 
             <div class="loading-state">
 
@@ -2180,41 +2174,41 @@
         `;
 
 
-        matchMessage.className =
-            "message-box";
+            matchMessage.className =
+                "message-box";
 
 
-        try {
+            try {
 
-            const response =
-                await fetch(
-                    `${API_URL}/match/${encodeURIComponent(itemId)}`
-                );
-
-
-            const data =
-                await response.json();
+                const response =
+                    await fetch(
+                        `${API_URL}/match/${encodeURIComponent(itemId)}`
+                    );
 
 
-            if (!response.ok) {
-
-                throw new Error(
-                    data.detail ||
-                    "Unable to find matches."
-                );
-
-            }
+                const data =
+                    await response.json();
 
 
-            const matches =
-                Array.isArray(data.matches)
-                    ? data.matches
-                    : [];
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Unable to find matches."
+                    );
+
+                }
 
 
-            if (matches.length === 0) {
+                const matches =
+                    Array.isArray(data.matches)
+                        ? data.matches
+                        : [];
 
-                matchesContainer.innerHTML = `
+
+                if (matches.length === 0) {
+
+                    matchesContainer.innerHTML = `
 
                     <div class="empty-match">
 
@@ -2235,47 +2229,46 @@
 
                 `;
 
-                return;
+                    return;
 
-            }
+                }
 
 
-            matchSubtitle.textContent =
-                `${matches.length} possible match${
-                    matches.length === 1
+                matchSubtitle.textContent =
+                    `${matches.length} possible match${matches.length === 1
                         ? ""
                         : "es"
-                } found`;
+                    } found`;
 
 
-            matchesContainer.innerHTML = "";
+                matchesContainer.innerHTML = "";
 
 
-            for (
-                const match of matches
-            ) {
+                for (
+                    const match of matches
+                ) {
 
-                const card =
-                    createMatchCard(
-                        match
+                    const card =
+                        createMatchCard(
+                            match
+                        );
+
+
+                    matchesContainer.appendChild(
+                        card
                     );
 
+                }
 
-                matchesContainer.appendChild(
-                    card
+            } catch (error) {
+
+                console.error(
+                    "AI Match Error:",
+                    error
                 );
 
-            }
 
-        } catch (error) {
-
-            console.error(
-                "AI Match Error:",
-                error
-            );
-
-
-            matchesContainer.innerHTML = `
+                matchesContainer.innerHTML = `
 
                 <div class="empty-match">
 
@@ -2289,54 +2282,54 @@
 
                     <p>
                         ${escapeHTML(
-                            error.message
-                        )}
+                    error.message
+                )}
                     </p>
 
                 </div>
 
             `;
 
+            }
+
         }
 
-    }
+
+        /* =====================================================
+           CREATE MATCH CARD
+        ===================================================== */
+
+        function createMatchCard(
+            match
+        ) {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
 
 
-    /* =====================================================
-       CREATE MATCH CARD
-    ===================================================== */
-
-    function createMatchCard(
-        match
-    ) {
-
-        const card =
-            document.createElement(
-                "div"
-            );
+            card.className =
+                "match-card";
 
 
-        card.className =
-            "match-card";
+            const imageURL =
+                getImageURL(match);
 
 
-        const imageURL =
-            getImageURL(match);
+            let imageHTML;
 
 
-        let imageHTML;
+            if (imageURL) {
 
-
-        if (imageURL) {
-
-            imageHTML = `
+                imageHTML = `
 
                 <img
                     class="match-image"
                     src="${escapeHTML(imageURL)}"
                     alt="${escapeHTML(
-                        match.item_name
-                    )}"
+                    match.item_name
+                )}"
                     onerror="
                         this.outerHTML =
                         '<div class=&quot;match-image-placeholder&quot;>📦</div>'
@@ -2345,9 +2338,9 @@
 
             `;
 
-        } else {
+            } else {
 
-            imageHTML = `
+                imageHTML = `
 
                 <div class="match-image-placeholder">
                     📦
@@ -2355,35 +2348,35 @@
 
             `;
 
-        }
+            }
 
 
-        const score =
-            Number(
-                match.match_score || 0
-            );
+            const score =
+                Number(
+                    match.match_score || 0
+                );
 
 
-        const reasons =
-            Array.isArray(match.reasons)
-                ? match.reasons
-                : [];
+            const reasons =
+                Array.isArray(match.reasons)
+                    ? match.reasons
+                    : [];
 
 
-        const reasonsHTML =
-            reasons.length > 0
+            const reasonsHTML =
+                reasons.length > 0
 
-                ? reasons
-                    .map(
-                        reason =>
-                            `<li>${escapeHTML(reason)}</li>`
-                    )
-                    .join("")
+                    ? reasons
+                        .map(
+                            reason =>
+                                `<li>${escapeHTML(reason)}</li>`
+                        )
+                        .join("")
 
-                : `<li>Possible match based on available information.</li>`;
+                    : `<li>Possible match based on available information.</li>`;
 
 
-        card.innerHTML = `
+            card.innerHTML = `
 
             <!-- FOUND ITEM -->
 
@@ -2395,18 +2388,18 @@
 
                     <h3>
                         ${escapeHTML(
-                            match.item_name ||
-                            "Found Item"
-                        )}
+                match.item_name ||
+                "Found Item"
+            )}
                     </h3>
 
 
                     <p class="match-description">
 
                         ${escapeHTML(
-                            match.description ||
-                            "No description available."
-                        )}
+                match.description ||
+                "No description available."
+            )}
 
                     </p>
 
@@ -2420,9 +2413,9 @@
                             </strong>
 
                             ${escapeHTML(
-                                match.category ||
-                                "—"
-                            )}
+                match.category ||
+                "—"
+            )}
 
                         </div>
 
@@ -2434,9 +2427,9 @@
                             </strong>
 
                             ${escapeHTML(
-                                match.color ||
-                                "—"
-                            )}
+                match.color ||
+                "—"
+            )}
 
                         </div>
 
@@ -2448,9 +2441,9 @@
                             </strong>
 
                             ${escapeHTML(
-                                match.brand ||
-                                "—"
-                            )}
+                match.brand ||
+                "—"
+            )}
 
                         </div>
 
@@ -2462,9 +2455,9 @@
                             </strong>
 
                             ${escapeHTML(
-                                match.location ||
-                                "—"
-                            )}
+                match.location ||
+                "—"
+            )}
 
                         </div>
 
@@ -2492,9 +2485,9 @@
                 <span class="match-level">
 
                     ${escapeHTML(
-                        match.match_level ||
-                        "Possible"
-                    )}
+                match.match_level ||
+                "Possible"
+            )}
 
                 </span>
 
@@ -2535,16 +2528,16 @@
                         class="action-btn verify-btn"
                         data-item-id="${Number(match.item_id)}"
                         data-item-name="${escapeHTML(
-                            match.item_name ||
-                            "Found Item"
-                        )}"
+                match.item_name ||
+                "Found Item"
+            )}"
                         onclick="
                             openVerification(
                                 ${Number(match.item_id)},
                                 '${escapeHTML(
-                                    match.item_name ||
-                                    "Found Item"
-                                )}',
+                match.item_name ||
+                "Found Item"
+            )}',
                                 this
                             );
                         "
@@ -2559,626 +2552,624 @@
         `;
 
 
-        /* Check current status */
+            /* Check current status */
 
-        updateVerificationButton(
-            match.item_id,
-            card.querySelector(
-                ".verify-btn"
-            )
-        );
-
-
-        return card;
-
-    }
-
-
-
-    /* =====================================================
-    MARK ITEM RETURNED
-    ===================================================== */
-
-    async function markItemReturned(itemId) {
-
-        const button = document.getElementById(
-            `return-btn-${itemId}`
-        );
-
-        if (!button) {
-            return;
-        }
-
-        const confirmed = confirm(
-            "Have you received the item back from the claimant?"
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        button.disabled = true;
-        button.textContent = "Updating...";
-
-        try {
-
-            const response = await fetch(
-                `${API_URL}/items/${encodeURIComponent(itemId)}/returned?user_id=${encodeURIComponent(user.id)}`,
-                {
-                    method: "PUT"
-                }
+            updateVerificationButton(
+                match.item_id,
+                card.querySelector(
+                    ".verify-btn"
+                )
             );
 
-            const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(
-                    data.detail ||
-                    "Unable to mark item as returned."
-                );
+            return card;
+
+        }
+
+
+
+        /* =====================================================
+        MARK ITEM RETURNED
+        ===================================================== */
+
+        async function markItemReturned(itemId) {
+
+            const button = document.getElementById(
+                `return-btn-${itemId}`
+            );
+
+            if (!button) {
+                return;
             }
 
-            button.textContent =
-                "✅ Item Returned";
-
-            button.classList.add(
-                "returned"
+            const confirmed = confirm(
+                "Have you received the item back from the claimant?"
             );
+
+            if (!confirmed) {
+                return;
+            }
 
             button.disabled = true;
-
-            alert(
-                "Item has been successfully marked as returned."
-            );
-
-            await loadMyReports();
-
-        } catch (error) {
-
-            console.error(
-                "Mark Returned Error:",
-                error
-            );
-
-            button.disabled = false;
-
-            button.textContent =
-                "📦 Mark Item Returned";
-
-            alert(
-                error.message
-            );
-        }
-    }
-
-
-    /* =====================================================
-       CONTACT REPORTER
-    ===================================================== */
-
-    async function contactReporter(
-        itemId
-    ) {
-
-        try {
-
-            const response =
-                await fetch(
-                    `${API_URL}/items/${encodeURIComponent(itemId)}`
-                );
-
-
-            const item =
-                await response.json();
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    item.detail ||
-                    "Unable to open reporter."
-                );
-
-            }
-
-
-            if (!item.user_id) {
-
-                throw new Error(
-                    "Reporter information is unavailable."
-                );
-
-            }
-
-
-            window.location.href =
-                `messages.html?item_id=${
-                    encodeURIComponent(itemId)
-                }`;
-
-        } catch (error) {
-
-            alert(
-                error.message
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       CHECK VERIFICATION STATUS
-    ===================================================== */
-
-    async function updateVerificationButton(
-        itemId,
-        button
-    ) {
-
-        if (!button) {
-            return;
-        }
-
-
-        try {
-
-            const response =
-                await fetch(
-                    `${API_URL}/items/${encodeURIComponent(itemId)}/status`
-                );
-
-
-            if (!response.ok) {
-                return;
-            }
-
-
-            const data =
-                await response.json();
-
-
-            const status =
-                data.item_status;
-
-
-            if (
-                status === "ownership_verified" ||
-                status === "verified"
-            ) {
-                button.textContent =
-                    "✓ Ownership Verified";
-
-                button.classList.add(
-                    "verified"
-                );
-
-                button.disabled = true;
-                button.onclick = null;
-
-                return;
-            }
-
-
-            if (status === "claim_pending") {
-
-                button.textContent =
-                    "⏳ Claim Pending";
-
-                button.classList.add(
-                    "pending"
-                );
-
-                /*
-                 * Keep the button visible.
-                 * Clicking it explains that a request
-                 * is already pending.
-                 */
-
-                button.onclick =
-                    function() {
-
-                        alert(
-                            "Your ownership verification request is already pending."
-                        );
-
-                    };
-
-                return;
-
-            }
-
-
-            button.textContent =
-                "🛡️ Verify Ownership";
-
-        } catch (error) {
-
-            console.error(
-                "Status check error:",
-                error
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       OPEN VERIFICATION
-    ===================================================== */
-
-    function openVerification(
-        itemId,
-        itemName,
-        button
-    ) {
-
-        verificationItemId =
-            itemId;
-
-
-        verificationItemName.textContent =
-            itemName;
-
-
-        proofInput.value =
-            "";
-
-
-        verificationMessage.className =
-            "message-box";
-
-
-        submitVerificationBtn.disabled =
-            false;
-
-
-        verificationModal.classList.add(
-            "active"
-        );
-
-
-        proofInput.focus();
-
-    }
-
-
-    /* =====================================================
-       SUBMIT VERIFICATION
-    ===================================================== */
-
-    submitVerificationBtn.addEventListener(
-        "click",
-        async function() {
-
-            const proof =
-                proofInput.value.trim();
-
-
-            if (!proof) {
-
-                showVerificationMessage(
-                    "Please provide some ownership proof.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            if (proof.length < 10) {
-
-                showVerificationMessage(
-                    "Please provide more specific ownership details.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            submitVerificationBtn.disabled =
-                true;
-
-
-            submitVerificationBtn.textContent =
-                "Submitting...";
-
+            button.textContent = "Updating...";
 
             try {
 
-                /*
-                 * Backend expects:
-                 * item_id
-                 * claimant_id
-                 * proof
-                 *
-                 * These are FastAPI parameters,
-                 * so send them in the query string.
-                 */
-
-                const params =
-                    new URLSearchParams();
-
-
-                params.append(
-                    "item_id",
-                    verificationItemId
+                const response = await fetch(
+                    `${API_URL}/items/${encodeURIComponent(itemId)}/returned?user_id=${encodeURIComponent(user.id)}`,
+                    {
+                        method: "PUT"
+                    }
                 );
 
+                const data = await response.json();
 
-                params.append(
-                    "claimant_id",
-                    user.id
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        "Unable to mark item as returned."
+                    );
+                }
+
+                button.textContent =
+                    "✅ Item Returned";
+
+                button.classList.add(
+                    "returned"
                 );
 
+                button.disabled = true;
 
-                params.append(
-                    "proof",
-                    proof
+                alert(
+                    "Item has been successfully marked as returned."
                 );
 
+                await loadMyReports();
+
+            } catch (error) {
+
+                console.error(
+                    "Mark Returned Error:",
+                    error
+                );
+
+                button.disabled = false;
+
+                button.textContent =
+                    "📦 Mark Item Returned";
+
+                alert(
+                    error.message
+                );
+            }
+        }
+
+
+        /* =====================================================
+           CONTACT REPORTER
+        ===================================================== */
+
+        async function contactReporter(
+            itemId
+        ) {
+
+            try {
 
                 const response =
                     await fetch(
-                        `${API_URL}/verification/request?${params.toString()}`,
-                        {
-                            method: "POST"
-                        }
+                        `${API_URL}/items/${encodeURIComponent(itemId)}`
                     );
 
 
-                const data =
+                const item =
                     await response.json();
 
 
                 if (!response.ok) {
 
                     throw new Error(
-                        data.detail ||
-                        "Unable to submit verification."
+                        item.detail ||
+                        "Unable to open reporter."
                     );
 
                 }
 
 
-                showVerificationMessage(
-                    "Ownership verification request submitted successfully.",
-                    "success"
+                if (!item.user_id) {
+
+                    throw new Error(
+                        "Reporter information is unavailable."
+                    );
+
+                }
+
+
+                window.location.href =
+                    `messages.html?item_id=${encodeURIComponent(itemId)
+                    }`;
+
+            } catch (error) {
+
+                alert(
+                    error.message
                 );
 
+            }
 
-                submitVerificationBtn.textContent =
-                    "Submitted ✓";
-
-
-                setTimeout(
-                    function() {
-
-                        verificationModal.classList.remove(
-                            "active"
-                        );
+        }
 
 
-                        /*
-                         * Refresh match results so
-                         * button becomes Claim Pending.
-                         */
+        /* =====================================================
+           CHECK VERIFICATION STATUS
+        ===================================================== */
 
-                        findAIMatches(
-                            window.currentLostItemId,
-                            window.currentLostItemName
-                        );
+        async function updateVerificationButton(
+            itemId,
+            button
+        ) {
 
-                    },
-                    1200
-                );
+            if (!button) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/items/${encodeURIComponent(itemId)}/status`
+                    );
+
+
+                if (!response.ok) {
+                    return;
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                const status =
+                    data.item_status;
+
+
+                if (
+                    status === "ownership_verified" ||
+                    status === "verified"
+                ) {
+                    button.textContent =
+                        "✓ Ownership Verified";
+
+                    button.classList.add(
+                        "verified"
+                    );
+
+                    button.disabled = true;
+                    button.onclick = null;
+
+                    return;
+                }
+
+
+                if (status === "claim_pending") {
+
+                    button.textContent =
+                        "⏳ Claim Pending";
+
+                    button.classList.add(
+                        "pending"
+                    );
+
+                    /*
+                     * Keep the button visible.
+                     * Clicking it explains that a request
+                     * is already pending.
+                     */
+
+                    button.onclick =
+                        function () {
+
+                            alert(
+                                "Your ownership verification request is already pending."
+                            );
+
+                        };
+
+                    return;
+
+                }
+
+
+                button.textContent =
+                    "🛡️ Verify Ownership";
 
             } catch (error) {
 
                 console.error(
-                    "Verification error:",
+                    "Status check error:",
                     error
                 );
 
-
-                showVerificationMessage(
-                    error.message,
-                    "error"
-                );
-
-
-                submitVerificationBtn.disabled =
-                    false;
-
-
-                submitVerificationBtn.textContent =
-                    "Submit Verification";
-
             }
 
         }
-    );
 
 
-    /* =====================================================
-       VERIFICATION MESSAGE
-    ===================================================== */
+        /* =====================================================
+           OPEN VERIFICATION
+        ===================================================== */
 
-    function showVerificationMessage(
-        message,
-        type
-    ) {
-
-        verificationMessage.textContent =
-            message;
-
-
-        verificationMessage.className =
-            `message-box show ${
-                type === "success"
-                    ? "message-success"
-                    : "message-error"
-            }`;
-
-    }
-
-
-    /* =====================================================
-       CLOSE MATCH MODAL
-    ===================================================== */
-
-    document.getElementById(
-        "closeMatchModal"
-    ).addEventListener(
-        "click",
-        function() {
-
-            matchModal.classList.remove(
-                "active"
-            );
-
-        }
-    );
-
-
-    /* =====================================================
-       CLOSE VERIFICATION MODAL
-    ===================================================== */
-
-    document.getElementById(
-        "closeVerificationModal"
-    ).addEventListener(
-        "click",
-        function() {
-
-            verificationModal.classList.remove(
-                "active"
-            );
-
-        }
-    );
-
-
-    document.getElementById(
-        "cancelVerificationBtn"
-    ).addEventListener(
-        "click",
-        function() {
-
-            verificationModal.classList.remove(
-                "active"
-            );
-
-        }
-    );
-
-
-    /* =====================================================
-       CLOSE WHEN CLICKING OUTSIDE
-    ===================================================== */
-
-    matchModal.addEventListener(
-        "click",
-        function(event) {
-
-            if (
-                event.target ===
-                matchModal
-            ) {
-
-                matchModal.classList.remove(
-                    "active"
-                );
-
-            }
-
-        }
-    );
-
-
-    verificationModal.addEventListener(
-        "click",
-        function(event) {
-
-            if (
-                event.target ===
-                verificationModal
-            ) {
-
-                verificationModal.classList.remove(
-                    "active"
-                );
-
-            }
-
-        }
-    );
-
-
-    /* =====================================================
-       ESC KEY
-    ===================================================== */
-
-    document.addEventListener(
-        "keydown",
-        function(event) {
-
-            if (event.key === "Escape") {
-
-                matchModal.classList.remove(
-                    "active"
-                );
-
-                verificationModal.classList.remove(
-                    "active"
-                );
-
-            }
-
-        }
-    );
-
-
-    /* =====================================================
-       KEEP CURRENT MATCH FOR REFRESH
-    ===================================================== */
-
-    const originalFindAIMatches =
-        findAIMatches;
-
-
-    findAIMatches =
-        async function(
+        function openVerification(
             itemId,
-            itemName
+            itemName,
+            button
         ) {
 
-            window.currentLostItemId =
+            verificationItemId =
                 itemId;
 
-            window.currentLostItemName =
+
+            verificationItemName.textContent =
                 itemName;
 
 
-            return originalFindAIMatches(
-                itemId,
-                itemName
+            proofInput.value =
+                "";
+
+
+            verificationMessage.className =
+                "message-box";
+
+
+            submitVerificationBtn.disabled =
+                false;
+
+
+            verificationModal.classList.add(
+                "active"
             );
 
-        };
+
+            proofInput.focus();
+
+        }
 
 
-    /* =====================================================
-       START
-    ===================================================== */
+        /* =====================================================
+           SUBMIT VERIFICATION
+        ===================================================== */
 
-    loadMyReports();
+        submitVerificationBtn.addEventListener(
+            "click",
+            async function () {
 
-</script>
+                const proof =
+                    proofInput.value.trim();
+
+
+                if (!proof) {
+
+                    showVerificationMessage(
+                        "Please provide some ownership proof.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                if (proof.length < 10) {
+
+                    showVerificationMessage(
+                        "Please provide more specific ownership details.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                submitVerificationBtn.disabled =
+                    true;
+
+
+                submitVerificationBtn.textContent =
+                    "Submitting...";
+
+
+                try {
+
+                    /*
+                     * Backend expects:
+                     * item_id
+                     * claimant_id
+                     * proof
+                     *
+                     * These are FastAPI parameters,
+                     * so send them in the query string.
+                     */
+
+                    const params =
+                        new URLSearchParams();
+
+
+                    params.append(
+                        "item_id",
+                        verificationItemId
+                    );
+
+
+                    params.append(
+                        "claimant_id",
+                        user.id
+                    );
+
+
+                    params.append(
+                        "proof",
+                        proof
+                    );
+
+
+                    const response =
+                        await fetch(
+                            `${API_URL}/verification/request?${params.toString()}`,
+                            {
+                                method: "POST"
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.detail ||
+                            "Unable to submit verification."
+                        );
+
+                    }
+
+
+                    showVerificationMessage(
+                        "Ownership verification request submitted successfully.",
+                        "success"
+                    );
+
+
+                    submitVerificationBtn.textContent =
+                        "Submitted ✓";
+
+
+                    setTimeout(
+                        function () {
+
+                            verificationModal.classList.remove(
+                                "active"
+                            );
+
+
+                            /*
+                             * Refresh match results so
+                             * button becomes Claim Pending.
+                             */
+
+                            findAIMatches(
+                                window.currentLostItemId,
+                                window.currentLostItemName
+                            );
+
+                        },
+                        1200
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "Verification error:",
+                        error
+                    );
+
+
+                    showVerificationMessage(
+                        error.message,
+                        "error"
+                    );
+
+
+                    submitVerificationBtn.disabled =
+                        false;
+
+
+                    submitVerificationBtn.textContent =
+                        "Submit Verification";
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           VERIFICATION MESSAGE
+        ===================================================== */
+
+        function showVerificationMessage(
+            message,
+            type
+        ) {
+
+            verificationMessage.textContent =
+                message;
+
+
+            verificationMessage.className =
+                `message-box show ${type === "success"
+                    ? "message-success"
+                    : "message-error"
+                }`;
+
+        }
+
+
+        /* =====================================================
+           CLOSE MATCH MODAL
+        ===================================================== */
+
+        document.getElementById(
+            "closeMatchModal"
+        ).addEventListener(
+            "click",
+            function () {
+
+                matchModal.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           CLOSE VERIFICATION MODAL
+        ===================================================== */
+
+        document.getElementById(
+            "closeVerificationModal"
+        ).addEventListener(
+            "click",
+            function () {
+
+                verificationModal.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+
+        document.getElementById(
+            "cancelVerificationBtn"
+        ).addEventListener(
+            "click",
+            function () {
+
+                verificationModal.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           CLOSE WHEN CLICKING OUTSIDE
+        ===================================================== */
+
+        matchModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target ===
+                    matchModal
+                ) {
+
+                    matchModal.classList.remove(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
+
+
+        verificationModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target ===
+                    verificationModal
+                ) {
+
+                    verificationModal.classList.remove(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           ESC KEY
+        ===================================================== */
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key === "Escape") {
+
+                    matchModal.classList.remove(
+                        "active"
+                    );
+
+                    verificationModal.classList.remove(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           KEEP CURRENT MATCH FOR REFRESH
+        ===================================================== */
+
+        const originalFindAIMatches =
+            findAIMatches;
+
+
+        findAIMatches =
+            async function (
+                itemId,
+                itemName
+            ) {
+
+                window.currentLostItemId =
+                    itemId;
+
+                window.currentLostItemName =
+                    itemName;
+
+
+                return originalFindAIMatches(
+                    itemId,
+                    itemName
+                );
+
+            };
+
+
+        /* =====================================================
+           START
+        ===================================================== */
+
+        loadMyReports();
+
+    </script>
 
 
 </body>

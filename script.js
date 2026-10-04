@@ -771,7 +771,7 @@ if (lostForm) {
 
     lostForm.addEventListener(
         "submit",
-        function(event) {
+        function (event) {
 
             handleFormSubmit(
                 event,
@@ -792,7 +792,7 @@ if (foundForm) {
 
     foundForm.addEventListener(
         "submit",
-        function(event) {
+        function (event) {
 
             handleFormSubmit(
                 event,

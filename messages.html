@@ -4,17 +4,13 @@
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Messages | Lost & Found AI</title>
 
     <link rel="stylesheet" href="style.css">
 
     <style>
-
         /* =====================================================
            MESSAGES SECTION
         ===================================================== */
@@ -32,8 +28,7 @@
             padding: 25px;
 
             box-shadow:
-                0 5px 20px
-                rgba(0, 0, 0, 0.08);
+                0 5px 20px rgba(0, 0, 0, 0.08);
         }
 
 
@@ -225,7 +220,6 @@
             }
 
         }
-
     </style>
 
 </head>
@@ -244,79 +238,70 @@
             Lost & Found AI
         </div>
 
-
-        <div class="nav-links">
-
-            <a href="index.html">
-                Home
-            </a>
-
-            <a href="items.html">
-                Items
-            </a>
-
-            <a href="report-lost.html">
-                Report Lost
-            </a>
-
-            <a href="report-found.html">
-                Report Found
-            </a>
-
-            <a href="community.html">
-    Community
-</a>
-
-        </div>
+        <!-- Hamburger -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+            ☰
+        </button>
 
 
-        <div class="nav-buttons">
+        <!-- Navigation Menu -->
+        <div class="nav-menu" id="navMenu">
 
-            <!-- Logged-in user -->
-            <span
-                class="user-welcome"
-                id="userWelcome"
-            ></span>
+            <div class="nav-links">
 
+                <a href="index.html">
+                    Home
+                </a>
 
-            <!-- My Reports -->
-            <a
-                href="my-reports.html"
-                class="login-btn"
-                id="myReportsBtn"
-            >
-                My Reports
-            </a>
+                <a href="items.html">
+                    Items
+                </a>
 
+                <a href="report-lost.html">
+                    Report Lost
+                </a>
 
-            <!-- Logout -->
-            <a
-                href="#"
-                class="signup-btn"
-                id="logoutBtn"
-            >
-                Logout
-            </a>
+                <a href="report-found.html">
+                    Report Found
+                </a>
 
+                <a href="community.html">
+                    Community
+                </a>
 
-            <!-- Login -->
-            <a
-                href="login.html"
-                class="login-btn"
-                id="loginBtn"
-            >
-                Login
-            </a>
+            </div>
 
 
-            <!-- Sign Up -->
-            <a
-                href="signup.html"
-                class="signup-btn"
-                id="signupBtn"
-            >
-                Sign Up
-            </a>
+            <div class="nav-buttons">
+
+                <!-- Logged-in user -->
+                <span class="user-welcome" id="userWelcome"></span>
+
+
+                <!-- My Reports -->
+                <a href="my-reports.html" class="login-btn" id="myReportsBtn">
+                    My Reports
+                </a>
+
+
+                <!-- Logout -->
+                <a href="#" class="signup-btn" id="logoutBtn">
+                    Logout
+                </a>
+
+
+                <!-- Login -->
+                <a href="login.html" class="login-btn" id="loginBtn">
+                    Login
+                </a>
+
+
+                <!-- Sign Up -->
+                <a href="signup.html" class="signup-btn" id="signupBtn">
+                    Sign Up
+                </a>
+
+            </div>
 
         </div>
 
@@ -330,10 +315,7 @@
     <section class="messages-section">
 
 
-        <a
-            href="javascript:history.back()"
-            class="back-btn"
-        >
+        <a href="javascript:history.back()" class="back-btn">
             ← Back
         </a>
 
@@ -375,16 +357,9 @@
                  MESSAGE FORM
             ================================================= -->
 
-            <form
-                id="messageForm"
-                class="message-form"
-            >
+            <form id="messageForm" class="message-form">
 
-                <textarea
-                    id="messageInput"
-                    placeholder="Type your message..."
-                    required
-                ></textarea>
+                <textarea id="messageInput" placeholder="Type your message..." required></textarea>
 
 
                 <button type="submit">

@@ -5,17 +5,13 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Report Lost | Lost & Found AI</title>
 
     <link rel="stylesheet" href="style.css">
 
     <style>
-
         /* =====================================================
            REPORT PAGE
         ===================================================== */
@@ -30,7 +26,7 @@
             background: white;
             padding: 35px;
             border-radius: 20px;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
         }
 
         .form-container h1 {
@@ -220,7 +216,6 @@
             }
 
         }
-
     </style>
 
 </head>
@@ -229,436 +224,417 @@
 <body>
 
 
-<!-- =====================================================
+    <!-- =====================================================
      NAVBAR
 ===================================================== -->
 
-<nav class="navbar">
+    <nav class="navbar">
 
-    <div class="logo">
-        Lost & Found AI
-    </div>
+        <div class="logo">
+            Lost & Found AI
+        </div>
 
-    <div class="nav-links">
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+            ☰
+        </button>
 
-        <a href="index.html">
-            Home
-        </a>
+        <div class="nav-menu" id="navMenu">
 
-        <a href="items.html">
-            Items
-        </a>
+            <div class="nav-links">
 
-        <a href="report-lost.html">
-            Report Lost
-        </a>
+                <a href="index.html">Home</a>
 
-        <a href="report-found.html">
-            Report Found
-        </a>
+                <a href="items.html">Items</a>
 
-        <a href="community.html">
-            Community
-        </a>
+                <a href="report-lost.html">
+                    Report Lost
+                </a>
 
-    </div>
+                <a href="report-found.html">
+                    Report Found
+                </a>
 
-    <div class="nav-buttons">
+                <a href="community.html">
+                    Community
+                </a>
 
-        <a
-            href="login.html"
-            class="login-btn"
-        >
-            Login
-        </a>
+                <a href="notifications.html">
+                    🔔 Notifications
+                    <span id="navBadge">0</span>
+                </a>
 
-        <a
-            href="signup.html"
-            class="signup-btn"
-        >
-            Sign Up
-        </a>
+            </div>
 
-    </div>
+            <div class="nav-buttons">
 
-</nav>
+                <a href="login.html" class="login-btn">
+                    Login
+                </a>
+
+                <a href="signup.html" class="signup-btn">
+                    Sign Up
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
 
 
-<!-- =====================================================
+    <!-- =====================================================
      FORM
 ===================================================== -->
 
-<section class="form-section">
+    <section class="form-section">
 
-    <div class="form-container">
+        <div class="form-container">
 
-        <h1>
-            Report a Lost Item
-        </h1>
+            <h1>
+                Report a Lost Item
+            </h1>
 
-        <p class="form-description">
-            Report what you lost and let our AI-powered matching
-            system help connect it with related reports.
-        </p>
-
-
-        <form id="lost-item-form">
+            <p class="form-description">
+                Report what you lost and let our AI-powered matching
+                system help connect it with related reports.
+            </p>
 
 
-            <!-- =================================================
+            <form id="lost-item-form">
+
+
+                <!-- =================================================
                  REPORT TYPE
             ================================================== -->
 
-            <div class="report-type-box">
+                <div class="report-type-box">
 
-                <label for="report_kind">
-                    What did you lose?
-                </label>
+                    <label for="report_kind">
+                        What did you lose?
+                    </label>
 
-                <select
-                    id="report_kind"
-                    name="report_kind"
-                    required
-                >
+                    <select id="report_kind" name="report_kind" required>
 
-                    <option value="item">
-                        📦 Item
-                    </option>
+                        <option value="item">
+                            📦 Item
+                        </option>
 
-                    <option value="pet">
-                        🐕 Pet
-                    </option>
+                        <option value="pet">
+                            🐕 Pet
+                        </option>
 
-                    <option value="person">
-                        👤 Person
-                    </option>
+                        <option value="person">
+                            👤 Person
+                        </option>
 
-                    <option value="vehicle">
-                        🚗 Vehicle
-                    </option>
+                        <option value="vehicle">
+                            🚗 Vehicle
+                        </option>
 
-                    <option value="document">
-                        📄 Document
-                    </option>
+                        <option value="document">
+                            📄 Document
+                        </option>
 
-                </select>
+                    </select>
 
-                <div
-                    class="type-description"
-                    id="type-description"
-                >
-                    Report a lost physical item.
+                    <div class="type-description" id="type-description">
+                        Report a lost physical item.
+                    </div>
+
                 </div>
 
-            </div>
 
-
-            <!-- =================================================
+                <!-- =================================================
                  PRIVACY NOTE
             ================================================== -->
 
-            <div
-                class="privacy-note"
-                id="privacy-note"
-            >
-                ⚠️ <strong>Privacy notice:</strong>
-                Exact location information for missing-person reports
-                is protected and is not publicly displayed.
-                Only use this feature for a genuine missing-person report.
-            </div>
+                <div class="privacy-note" id="privacy-note">
+                    ⚠️ <strong>Privacy notice:</strong>
+                    Exact location information for missing-person reports
+                    is protected and is not publicly displayed.
+                    Only use this feature for a genuine missing-person report.
+                </div>
 
 
-            <!-- =================================================
+                <!-- =================================================
                  NAME
             ================================================== -->
 
-            <div class="form-group">
+                <div class="form-group">
 
-                <label id="name-label">
-                    Item Name
-                </label>
+                    <label id="name-label">
+                        Item Name
+                    </label>
 
-                <input
-                    type="text"
-                    id="item_name"
-                    name="item_name"
-                    placeholder="e.g. Black Backpack"
-                    required
-                >
+                    <input type="text" id="item_name" name="item_name" placeholder="e.g. Black Backpack" required>
 
-            </div>
+                </div>
 
 
-            <!-- =================================================
+                <!-- =================================================
                  CATEGORY
             ================================================== -->
 
-            <div class="form-group">
+                <div class="form-group">
 
-                <label id="category-label">
-                    Category
-                </label>
+                    <label id="category-label">
+                        Category
+                    </label>
 
-                <select
-                    id="category"
-                    name="category"
-                    required
-                >
+                    <select id="category" name="category" required>
 
-                    <option value="">
-                        Select Category
-                    </option>
+                        <option value="">
+                            Select Category
+                        </option>
 
-                    <option value="Electronics">
-                        Electronics
-                    </option>
+                        <option value="Electronics">
+                            Electronics
+                        </option>
 
-                    <option value="Bags">
-                        Bags
-                    </option>
+                        <option value="Bags">
+                            Bags
+                        </option>
 
-                    <option value="Documents">
-                        Documents
-                    </option>
+                        <option value="Documents">
+                            Documents
+                        </option>
 
-                    <option value="Clothing">
-                        Clothing
-                    </option>
+                        <option value="Clothing">
+                            Clothing
+                        </option>
 
-                    <option value="Accessories">
-                        Accessories
-                    </option>
+                        <option value="Accessories">
+                            Accessories
+                        </option>
 
-                    <option value="Other">
-                        Other
-                    </option>
+                        <option value="Other">
+                            Other
+                        </option>
 
-                </select>
+                    </select>
 
-            </div>
+                </div>
 
 
-            <!-- =================================================
+                <!-- =================================================
                  DESCRIPTION
             ================================================== -->
 
-            <div class="form-group">
+                <div class="form-group">
 
-                <label>
-                    Description
-                </label>
+                    <label>
+                        Description
+                    </label>
 
-                <textarea
-                    id="description"
-                    name="description"
-                    rows="5"
-                    placeholder="Describe what was lost..."
-                    required
-                ></textarea>
+                    <textarea id="description" name="description" rows="5" placeholder="Describe what was lost..."
+                        required></textarea>
 
-            </div>
+                </div>
 
 
-            <!-- =================================================
+                <!-- =================================================
                  COLOR + BRAND
             ================================================== -->
 
-            <div class="form-row">
+                <div class="form-row">
 
-                <div class="form-group">
+                    <div class="form-group">
 
-                    <label id="color-label">
-                        Color
-                    </label>
+                        <label id="color-label">
+                            Color
+                        </label>
 
-                    <input
-                        type="text"
-                        id="color"
-                        name="color"
-                        placeholder="e.g. Black"
-                    >
+                        <input type="text" id="color" name="color" placeholder="e.g. Black">
 
-                </div>
+                    </div>
 
 
-                <div class="form-group">
+                    <div class="form-group">
 
-                    <label id="brand-label">
-                        Brand
-                    </label>
+                        <label id="brand-label">
+                            Brand
+                        </label>
 
-                    <input
-                        type="text"
-                        id="brand"
-                        name="brand"
-                        placeholder="e.g. Nike"
-                    >
+                        <input type="text" id="brand" name="brand" placeholder="e.g. Nike">
+
+                    </div>
 
                 </div>
 
-            </div>
 
-
-            <!-- =================================================
+                <!-- =================================================
                  LOCATION
             ================================================== -->
 
-            <div class="form-group">
+                <div class="form-group">
 
-                <label>
-                    Lost Location
-                </label>
+                    <label>
+                        Lost Location
+                    </label>
 
-                <div class="location-row">
+                    <div class="location-row">
 
-                    <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        placeholder="e.g. College Library"
-                        required
-                    >
+                        <input type="text" id="location" name="location" placeholder="e.g. College Library" required>
 
-                    <button
-                        type="button"
-                        class="location-btn"
-                        id="location-btn"
-                    >
-                        📍 Use Current Location
-                    </button>
+                        <button type="button" class="location-btn" id="location-btn">
+                            📍 Use Current Location
+                        </button>
+
+                    </div>
+
+                    <div class="gps-status" id="gps-status">
+                        You can enter the location manually or use GPS.
+                    </div>
 
                 </div>
 
-                <div
-                    class="gps-status"
-                    id="gps-status"
-                >
-                    You can enter the location manually or use GPS.
-                </div>
 
-            </div>
-
-
-            <!-- =================================================
+                <!-- =================================================
                  HIDDEN GPS
             ================================================== -->
 
-            <input
-                type="hidden"
-                id="latitude"
-                name="latitude"
-            >
+                <input type="hidden" id="latitude" name="latitude">
 
-            <input
-                type="hidden"
-                id="longitude"
-                name="longitude"
-            >
+                <input type="hidden" id="longitude" name="longitude">
 
 
-            <!-- =================================================
+                <!-- =================================================
                  DATE
             ================================================== -->
 
-            <div class="form-group">
+                <div class="form-group">
 
-                <label>
-                    Date Lost
-                </label>
+                    <label>
+                        Date Lost
+                    </label>
 
-                <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    required
-                >
+                    <input type="date" id="date" name="date" required>
 
-            </div>
+                </div>
 
 
-            <!-- =================================================
+                <!-- =================================================
                  IMAGE
             ================================================== -->
 
-            <div class="form-group">
+                <div class="form-group">
 
-                <label>
-                    Upload Image
-                </label>
+                    <label>
+                        Upload Image
+                    </label>
 
-                <input
-                    type="file"
-                    id="image"
-                    name="image"
-                    accept="image/*"
-                    required
-                >
+                    <input type="file" id="image" name="image" accept="image/*" required>
 
-                <div class="image-note">
-                    Upload a clear image to improve AI matching.
+                    <div class="image-note">
+                        Upload a clear image to improve AI matching.
+                    </div>
+
                 </div>
 
-            </div>
 
-
-            <!-- =================================================
+                <!-- =================================================
                  SUBMIT
             ================================================== -->
 
-            <button
-                type="submit"
-                class="submit-btn"
-                id="submit-btn"
-            >
-                Report Lost
-            </button>
+                <button type="submit" class="submit-btn" id="submit-btn">
+                    Report Lost
+                </button>
 
 
-            <div
-                class="status-message"
-                id="status-message"
-            ></div>
+                <div class="status-message" id="status-message"></div>
 
 
-        </form>
+            </form>
 
-    </div>
+        </div>
 
-</section>
-
-
-<script src="config.js"></script>
+    </section>
 
 
-<script>
-
-/* =========================================================
-   LOGIN / NAVBAR
-========================================================= */
-
-const storedUser =
-    localStorage.getItem("user");
-
-const navButtons =
-    document.querySelector(".nav-buttons");
+    <script src="config.js"></script>
 
 
-let currentUser = null;
+    <script>
+        const menuToggle = document.getElementById("menuToggle");
+        const navMenu = document.getElementById("navMenu");
+
+        if (menuToggle && navMenu) {
+
+            menuToggle.addEventListener("click", function () {
+
+                navMenu.classList.toggle("active");
+
+                // Change hamburger icon
+                if (navMenu.classList.contains("active")) {
+                    menuToggle.textContent = "✕";
+                } else {
+                    menuToggle.textContent = "☰";
+                }
+
+            });
 
 
-if (storedUser && navButtons) {
+            // Close menu after clicking a navigation link
+            const navLinks = navMenu.querySelectorAll("a");
 
-    try {
+            navLinks.forEach(function (link) {
 
-        const user =
-            JSON.parse(storedUser);
+                link.addEventListener("click", function () {
 
-        if (user && user.id) {
+                    navMenu.classList.remove("active");
 
-            currentUser =
-                user;
+                    menuToggle.textContent = "☰";
 
-            navButtons.innerHTML = `
+                });
+
+            });
+
+
+            // Close menu when screen becomes desktop
+            window.addEventListener("resize", function () {
+
+                if (window.innerWidth > 800) {
+
+                    navMenu.classList.remove("active");
+
+                    menuToggle.textContent = "☰";
+
+                }
+
+            });
+
+        }
+
+
+
+
+        /* =========================================================
+           LOGIN / NAVBAR
+        ========================================================= */
+
+        const storedUser =
+            localStorage.getItem("user");
+
+        const navButtons =
+            document.querySelector(".nav-buttons");
+
+
+        let currentUser = null;
+
+
+        if (storedUser && navButtons) {
+
+            try {
+
+                const user =
+                    JSON.parse(storedUser);
+
+                if (user && user.id) {
+
+                    currentUser =
+                        user;
+
+                    navButtons.innerHTML = `
 
                 <span class="user-welcome">
                     Hi, ${user.name} 👋
@@ -682,735 +658,735 @@ if (storedUser && navButtons) {
             `;
 
 
-            document
-                .getElementById("logoutBtn")
-                .addEventListener(
-                    "click",
-                    function(event) {
+                    document
+                        .getElementById("logoutBtn")
+                        .addEventListener(
+                            "click",
+                            function (event) {
 
-                        event.preventDefault();
+                                event.preventDefault();
 
-                        localStorage.removeItem(
-                            "user"
+                                localStorage.removeItem(
+                                    "user"
+                                );
+
+                                window.location.href =
+                                    "index.html";
+
+                            }
                         );
 
-                        window.location.href =
-                            "index.html";
+                }
 
-                    }
+            }
+            catch (error) {
+
+                console.error(
+                    "Invalid user data:",
+                    error
                 );
+
+                localStorage.removeItem(
+                    "user"
+                );
+
+            }
 
         }
 
-    }
-    catch (error) {
 
-        console.error(
-            "Invalid user data:",
-            error
-        );
+        /* =========================================================
+           FORM ELEMENTS
+        ========================================================= */
 
-        localStorage.removeItem(
-            "user"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   FORM ELEMENTS
-========================================================= */
-
-const form =
-    document.getElementById(
-        "lost-item-form"
-    );
-
-const reportKind =
-    document.getElementById(
-        "report_kind"
-    );
-
-const nameInput =
-    document.getElementById(
-        "item_name"
-    );
-
-const category =
-    document.getElementById(
-        "category"
-    );
-
-const description =
-    document.getElementById(
-        "description"
-    );
-
-const color =
-    document.getElementById(
-        "color"
-    );
-
-const brand =
-    document.getElementById(
-        "brand"
-    );
-
-const locationInput =
-    document.getElementById(
-        "location"
-    );
-
-const dateInput =
-    document.getElementById(
-        "date"
-    );
-
-const imageInput =
-    document.getElementById(
-        "image"
-    );
-
-const latitude =
-    document.getElementById(
-        "latitude"
-    );
-
-const longitude =
-    document.getElementById(
-        "longitude"
-    );
-
-const typeDescription =
-    document.getElementById(
-        "type-description"
-    );
-
-const privacyNote =
-    document.getElementById(
-        "privacy-note"
-    );
-
-const nameLabel =
-    document.getElementById(
-        "name-label"
-    );
-
-const categoryLabel =
-    document.getElementById(
-        "category-label"
-    );
-
-const colorLabel =
-    document.getElementById(
-        "color-label"
-    );
-
-const brandLabel =
-    document.getElementById(
-        "brand-label"
-    );
-
-const submitBtn =
-    document.getElementById(
-        "submit-btn"
-    );
-
-const statusMessage =
-    document.getElementById(
-        "status-message"
-    );
-
-
-/* =========================================================
-   DEFAULT DATE
-========================================================= */
-
-dateInput.value =
-    new Date()
-        .toISOString()
-        .split("T")[0];
-
-
-/* =========================================================
-   CATEGORY OPTIONS
-========================================================= */
-
-const categories = {
-
-    item: [
-        "Electronics",
-        "Bags",
-        "Documents",
-        "Clothing",
-        "Accessories",
-        "Other"
-    ],
-
-    pet: [
-        "Dog",
-        "Cat",
-        "Bird",
-        "Rabbit",
-        "Other"
-    ],
-
-    person: [
-        "Child",
-        "Adult",
-        "Senior",
-        "Other"
-    ],
-
-    vehicle: [
-        "Car",
-        "Bike",
-        "Motorcycle",
-        "Scooter",
-        "Bicycle",
-        "Other"
-    ],
-
-    document: [
-        "Aadhaar Card",
-        "PAN Card",
-        "Driving License",
-        "Passport",
-        "College ID",
-        "Other"
-    ]
-
-};
-
-
-/* =========================================================
-   UPDATE FORM BASED ON TYPE
-========================================================= */
-
-function updateReportType() {
-
-    const type =
-        reportKind.value;
-
-
-    category.innerHTML =
-        `<option value="">Select Category</option>`;
-
-
-    categories[type].forEach(
-        function(value) {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                value;
-
-            option.textContent =
-                value;
-
-            category.appendChild(
-                option
+        const form =
+            document.getElementById(
+                "lost-item-form"
             );
 
-        }
-    );
+        const reportKind =
+            document.getElementById(
+                "report_kind"
+            );
+
+        const nameInput =
+            document.getElementById(
+                "item_name"
+            );
+
+        const category =
+            document.getElementById(
+                "category"
+            );
+
+        const description =
+            document.getElementById(
+                "description"
+            );
+
+        const color =
+            document.getElementById(
+                "color"
+            );
+
+        const brand =
+            document.getElementById(
+                "brand"
+            );
+
+        const locationInput =
+            document.getElementById(
+                "location"
+            );
+
+        const dateInput =
+            document.getElementById(
+                "date"
+            );
+
+        const imageInput =
+            document.getElementById(
+                "image"
+            );
+
+        const latitude =
+            document.getElementById(
+                "latitude"
+            );
+
+        const longitude =
+            document.getElementById(
+                "longitude"
+            );
+
+        const typeDescription =
+            document.getElementById(
+                "type-description"
+            );
+
+        const privacyNote =
+            document.getElementById(
+                "privacy-note"
+            );
+
+        const nameLabel =
+            document.getElementById(
+                "name-label"
+            );
+
+        const categoryLabel =
+            document.getElementById(
+                "category-label"
+            );
+
+        const colorLabel =
+            document.getElementById(
+                "color-label"
+            );
+
+        const brandLabel =
+            document.getElementById(
+                "brand-label"
+            );
+
+        const submitBtn =
+            document.getElementById(
+                "submit-btn"
+            );
+
+        const statusMessage =
+            document.getElementById(
+                "status-message"
+            );
+
+
+        /* =========================================================
+           DEFAULT DATE
+        ========================================================= */
+
+        dateInput.value =
+            new Date()
+                .toISOString()
+                .split("T")[0];
 
 
-    if (type === "item") {
+        /* =========================================================
+           CATEGORY OPTIONS
+        ========================================================= */
 
-        nameLabel.textContent =
-            "Item Name";
+        const categories = {
 
-        nameInput.placeholder =
-            "e.g. Black Backpack";
+            item: [
+                "Electronics",
+                "Bags",
+                "Documents",
+                "Clothing",
+                "Accessories",
+                "Other"
+            ],
 
-        categoryLabel.textContent =
-            "Category";
+            pet: [
+                "Dog",
+                "Cat",
+                "Bird",
+                "Rabbit",
+                "Other"
+            ],
 
-        colorLabel.textContent =
-            "Color";
+            person: [
+                "Child",
+                "Adult",
+                "Senior",
+                "Other"
+            ],
 
-        brandLabel.textContent =
-            "Brand";
+            vehicle: [
+                "Car",
+                "Bike",
+                "Motorcycle",
+                "Scooter",
+                "Bicycle",
+                "Other"
+            ],
 
-        brand.placeholder =
-            "e.g. Nike";
+            document: [
+                "Aadhaar Card",
+                "PAN Card",
+                "Driving License",
+                "Passport",
+                "College ID",
+                "Other"
+            ]
 
-        description.placeholder =
-            "Describe your lost item...";
+        };
 
-        typeDescription.textContent =
-            "Report a lost physical item.";
 
-        privacyNote.style.display =
-            "none";
+        /* =========================================================
+           UPDATE FORM BASED ON TYPE
+        ========================================================= */
 
-    }
+        function updateReportType() {
 
+            const type =
+                reportKind.value;
 
-    else if (type === "pet") {
 
-        nameLabel.textContent =
-            "Pet Name";
+            category.innerHTML =
+                `<option value="">Select Category</option>`;
 
-        nameInput.placeholder =
-            "e.g. Bruno";
 
-        categoryLabel.textContent =
-            "Pet Type";
+            categories[type].forEach(
+                function (value) {
 
-        colorLabel.textContent =
-            "Color / Appearance";
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
 
-        brandLabel.textContent =
-            "Breed";
+                    option.value =
+                        value;
 
-        brand.placeholder =
-            "e.g. Labrador";
+                    option.textContent =
+                        value;
 
-        description.placeholder =
-            "Describe your pet, markings, collar, behaviour, etc.";
+                    category.appendChild(
+                        option
+                    );
 
-        typeDescription.textContent =
-            "Report a lost pet and help nearby users identify it.";
+                }
+            );
 
-        privacyNote.style.display =
-            "none";
 
-    }
+            if (type === "item") {
 
+                nameLabel.textContent =
+                    "Item Name";
 
-    else if (type === "person") {
+                nameInput.placeholder =
+                    "e.g. Black Backpack";
 
-        nameLabel.textContent =
-            "Person Name";
+                categoryLabel.textContent =
+                    "Category";
 
-        nameInput.placeholder =
-            "Enter name or identifying description";
+                colorLabel.textContent =
+                    "Color";
 
-        categoryLabel.textContent =
-            "Person Type";
+                brandLabel.textContent =
+                    "Brand";
 
-        colorLabel.textContent =
-            "Appearance";
+                brand.placeholder =
+                    "e.g. Nike";
 
-        brandLabel.textContent =
-            "Additional Identifier";
+                description.placeholder =
+                    "Describe your lost item...";
 
-        brand.placeholder =
-            "e.g. clothing, distinguishing feature";
+                typeDescription.textContent =
+                    "Report a lost physical item.";
 
-        description.placeholder =
-            "Provide useful identifying details without sharing sensitive information.";
-
-        typeDescription.textContent =
-            "Report a missing person. Exact public location coordinates are protected.";
-
-        privacyNote.style.display =
-            "block";
-
-    }
-
-
-    else if (type === "vehicle") {
-
-        nameLabel.textContent =
-            "Vehicle Name";
-
-        nameInput.placeholder =
-            "e.g. Black Honda Activa";
-
-        categoryLabel.textContent =
-            "Vehicle Type";
-
-        colorLabel.textContent =
-            "Vehicle Color";
-
-        brandLabel.textContent =
-            "Brand / Model";
-
-        brand.placeholder =
-            "e.g. Honda Activa";
-
-        description.placeholder =
-            "Describe registration details, stickers, damage, identifying features, etc.";
-
-        typeDescription.textContent =
-            "Report a lost or missing vehicle.";
-
-        privacyNote.style.display =
-            "none";
-
-    }
-
-
-    else if (type === "document") {
-
-        nameLabel.textContent =
-            "Document Name";
-
-        nameInput.placeholder =
-            "e.g. College ID Card";
-
-        categoryLabel.textContent =
-            "Document Type";
-
-        colorLabel.textContent =
-            "Document Color";
-
-        brandLabel.textContent =
-            "Issuer";
-
-        brand.placeholder =
-            "e.g. College / Government";
-
-        description.placeholder =
-            "Describe the document and any safe identifying information.";
-
-        typeDescription.textContent =
-            "Report a lost document. Avoid entering sensitive ID numbers.";
-
-        privacyNote.style.display =
-            "none";
-
-    }
-
-}
-
-
-reportKind.addEventListener(
-    "change",
-    updateReportType
-);
-
-updateReportType();
-
-
-/* =========================================================
-   GPS
-========================================================= */
-
-document
-    .getElementById("location-btn")
-    .addEventListener(
-        "click",
-        function() {
-
-            const gpsStatus =
-                document.getElementById(
-                    "gps-status"
-                );
-
-
-            if (!navigator.geolocation) {
-
-                gpsStatus.textContent =
-                    "❌ GPS is not supported by this browser.";
-
-                return;
+                privacyNote.style.display =
+                    "none";
 
             }
 
 
-            gpsStatus.textContent =
-                "📍 Getting your current location...";
+            else if (type === "pet") {
+
+                nameLabel.textContent =
+                    "Pet Name";
+
+                nameInput.placeholder =
+                    "e.g. Bruno";
+
+                categoryLabel.textContent =
+                    "Pet Type";
+
+                colorLabel.textContent =
+                    "Color / Appearance";
+
+                brandLabel.textContent =
+                    "Breed";
+
+                brand.placeholder =
+                    "e.g. Labrador";
+
+                description.placeholder =
+                    "Describe your pet, markings, collar, behaviour, etc.";
+
+                typeDescription.textContent =
+                    "Report a lost pet and help nearby users identify it.";
+
+                privacyNote.style.display =
+                    "none";
+
+            }
 
 
-            navigator.geolocation.getCurrentPosition(
+            else if (type === "person") {
 
-                function(position) {
+                nameLabel.textContent =
+                    "Person Name";
 
-                    latitude.value =
-                        position.coords.latitude;
+                nameInput.placeholder =
+                    "Enter name or identifying description";
 
-                    longitude.value =
-                        position.coords.longitude;
+                categoryLabel.textContent =
+                    "Person Type";
+
+                colorLabel.textContent =
+                    "Appearance";
+
+                brandLabel.textContent =
+                    "Additional Identifier";
+
+                brand.placeholder =
+                    "e.g. clothing, distinguishing feature";
+
+                description.placeholder =
+                    "Provide useful identifying details without sharing sensitive information.";
+
+                typeDescription.textContent =
+                    "Report a missing person. Exact public location coordinates are protected.";
+
+                privacyNote.style.display =
+                    "block";
+
+            }
 
 
-                    locationInput.value =
-                        `Current Location (${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)})`;
+            else if (type === "vehicle") {
+
+                nameLabel.textContent =
+                    "Vehicle Name";
+
+                nameInput.placeholder =
+                    "e.g. Black Honda Activa";
+
+                categoryLabel.textContent =
+                    "Vehicle Type";
+
+                colorLabel.textContent =
+                    "Vehicle Color";
+
+                brandLabel.textContent =
+                    "Brand / Model";
+
+                brand.placeholder =
+                    "e.g. Honda Activa";
+
+                description.placeholder =
+                    "Describe registration details, stickers, damage, identifying features, etc.";
+
+                typeDescription.textContent =
+                    "Report a lost or missing vehicle.";
+
+                privacyNote.style.display =
+                    "none";
+
+            }
+
+
+            else if (type === "document") {
+
+                nameLabel.textContent =
+                    "Document Name";
+
+                nameInput.placeholder =
+                    "e.g. College ID Card";
+
+                categoryLabel.textContent =
+                    "Document Type";
+
+                colorLabel.textContent =
+                    "Document Color";
+
+                brandLabel.textContent =
+                    "Issuer";
+
+                brand.placeholder =
+                    "e.g. College / Government";
+
+                description.placeholder =
+                    "Describe the document and any safe identifying information.";
+
+                typeDescription.textContent =
+                    "Report a lost document. Avoid entering sensitive ID numbers.";
+
+                privacyNote.style.display =
+                    "none";
+
+            }
+
+        }
+
+
+        reportKind.addEventListener(
+            "change",
+            updateReportType
+        );
+
+        updateReportType();
+
+
+        /* =========================================================
+           GPS
+        ========================================================= */
+
+        document
+            .getElementById("location-btn")
+            .addEventListener(
+                "click",
+                function () {
+
+                    const gpsStatus =
+                        document.getElementById(
+                            "gps-status"
+                        );
+
+
+                    if (!navigator.geolocation) {
+
+                        gpsStatus.textContent =
+                            "❌ GPS is not supported by this browser.";
+
+                        return;
+
+                    }
 
 
                     gpsStatus.textContent =
-                        "✅ Current GPS location added.";
+                        "📍 Getting your current location...";
 
-                },
 
-                function(error) {
+                    navigator.geolocation.getCurrentPosition(
+
+                        function (position) {
+
+                            latitude.value =
+                                position.coords.latitude;
+
+                            longitude.value =
+                                position.coords.longitude;
+
+
+                            locationInput.value =
+                                `Current Location (${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)})`;
+
+
+                            gpsStatus.textContent =
+                                "✅ Current GPS location added.";
+
+                        },
+
+                        function (error) {
+
+                            console.error(
+                                "GPS error:",
+                                error
+                            );
+
+                            gpsStatus.textContent =
+                                "❌ Could not get GPS location. You can enter the location manually.";
+
+                        },
+
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+
+                    );
+
+                }
+            );
+
+
+        /* =========================================================
+           SUBMIT
+        ========================================================= */
+
+        form.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                if (!currentUser || !currentUser.id) {
+
+                    alert(
+                        "Please login before submitting a report."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                if (!imageInput.files.length) {
+
+                    alert(
+                        "Please upload an image."
+                    );
+
+                    return;
+
+                }
+
+
+                submitBtn.disabled =
+                    true;
+
+                submitBtn.textContent =
+                    "Submitting...";
+
+
+                statusMessage.style.display =
+                    "block";
+
+                statusMessage.style.background =
+                    "#eef2ff";
+
+                statusMessage.textContent =
+                    "Submitting your lost report...";
+
+
+                try {
+
+                    const formData =
+                        new FormData();
+
+
+                    formData.append(
+                        "user_id",
+                        currentUser.id
+                    );
+
+                    formData.append(
+                        "item_type",
+                        "lost"
+                    );
+
+                    formData.append(
+                        "report_kind",
+                        reportKind.value
+                    );
+
+                    formData.append(
+                        "item_name",
+                        nameInput.value.trim()
+                    );
+
+                    formData.append(
+                        "category",
+                        category.value
+                    );
+
+                    formData.append(
+                        "description",
+                        description.value.trim()
+                    );
+
+                    formData.append(
+                        "color",
+                        color.value.trim()
+                    );
+
+                    formData.append(
+                        "brand",
+                        brand.value.trim()
+                    );
+
+                    formData.append(
+                        "location",
+                        locationInput.value.trim()
+                    );
+
+                    formData.append(
+                        "date",
+                        dateInput.value
+                    );
+
+                    formData.append(
+                        "image",
+                        imageInput.files[0]
+                    );
+
+
+                    if (latitude.value) {
+
+                        formData.append(
+                            "latitude",
+                            latitude.value
+                        );
+
+                    }
+
+
+                    if (longitude.value) {
+
+                        formData.append(
+                            "longitude",
+                            longitude.value
+                        );
+
+                    }
+
+
+                    const response =
+                        await fetch(
+                            `${API_URL}/report-item`,
+                            {
+                                method: "POST",
+                                body: formData
+                            }
+                        );
+
+
+                    let result = null;
+
+
+                    try {
+
+                        result =
+                            await response.json();
+
+                    }
+                    catch {
+
+                        result = null;
+
+                    }
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            result?.detail ||
+                            result?.message ||
+                            `Server error: ${response.status}`
+                        );
+
+                    }
+
+
+                    statusMessage.style.background =
+                        "#e5f8ed";
+
+                    statusMessage.textContent =
+                        "✅ Lost report submitted successfully! AI matching is now checking for related reports.";
+
+
+                    form.reset();
+
+                    updateReportType();
+
+
+                    dateInput.value =
+                        new Date()
+                            .toISOString()
+                            .split("T")[0];
+
+
+                    setTimeout(
+                        function () {
+
+                            if (
+                                result &&
+                                (result.item_id || result.id)
+                            ) {
+
+                                const id =
+                                    result.item_id ||
+                                    result.id;
+
+                                window.location.href =
+                                    `item-detail.html?id=${encodeURIComponent(id)}`;
+
+                            }
+                            else {
+
+                                window.location.href =
+                                    "my-reports.html";
+
+                            }
+
+                        },
+                        1200
+                    );
+
+                }
+                catch (error) {
 
                     console.error(
-                        "GPS error:",
+                        "Report submission error:",
                         error
                     );
 
-                    gpsStatus.textContent =
-                        "❌ Could not get GPS location. You can enter the location manually.";
+                    statusMessage.style.background =
+                        "#ffe8e8";
 
-                },
+                    statusMessage.textContent =
+                        `❌ ${error.message || "Could not submit report."}`;
 
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
+                }
+                finally {
+
+                    submitBtn.disabled =
+                        false;
+
+                    submitBtn.textContent =
+                        "Report Lost";
+
                 }
 
-            );
-
-        }
-    );
-
-
-/* =========================================================
-   SUBMIT
-========================================================= */
-
-form.addEventListener(
-    "submit",
-    async function(event) {
-
-        event.preventDefault();
-
-
-        if (!currentUser || !currentUser.id) {
-
-            alert(
-                "Please login before submitting a report."
-            );
-
-            window.location.href =
-                "login.html";
-
-            return;
-
-        }
-
-
-        if (!imageInput.files.length) {
-
-            alert(
-                "Please upload an image."
-            );
-
-            return;
-
-        }
-
-
-        submitBtn.disabled =
-            true;
-
-        submitBtn.textContent =
-            "Submitting...";
-
-
-        statusMessage.style.display =
-            "block";
-
-        statusMessage.style.background =
-            "#eef2ff";
-
-        statusMessage.textContent =
-            "Submitting your lost report...";
-
-
-        try {
-
-            const formData =
-                new FormData();
-
-
-            formData.append(
-                "user_id",
-                currentUser.id
-            );
-
-            formData.append(
-                "item_type",
-                "lost"
-            );
-
-            formData.append(
-                "report_kind",
-                reportKind.value
-            );
-
-            formData.append(
-                "item_name",
-                nameInput.value.trim()
-            );
-
-            formData.append(
-                "category",
-                category.value
-            );
-
-            formData.append(
-                "description",
-                description.value.trim()
-            );
-
-            formData.append(
-                "color",
-                color.value.trim()
-            );
-
-            formData.append(
-                "brand",
-                brand.value.trim()
-            );
-
-            formData.append(
-                "location",
-                locationInput.value.trim()
-            );
-
-            formData.append(
-                "date",
-                dateInput.value
-            );
-
-            formData.append(
-                "image",
-                imageInput.files[0]
-            );
-
-
-            if (latitude.value) {
-
-                formData.append(
-                    "latitude",
-                    latitude.value
-                );
-
             }
+        );
 
-
-            if (longitude.value) {
-
-                formData.append(
-                    "longitude",
-                    longitude.value
-                );
-
-            }
-
-
-            const response =
-                await fetch(
-                    `${API_URL}/report-item`,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
-
-
-            let result = null;
-
-
-            try {
-
-                result =
-                    await response.json();
-
-            }
-            catch {
-
-                result = null;
-
-            }
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    result?.detail ||
-                    result?.message ||
-                    `Server error: ${response.status}`
-                );
-
-            }
-
-
-            statusMessage.style.background =
-                "#e5f8ed";
-
-            statusMessage.textContent =
-                "✅ Lost report submitted successfully! AI matching is now checking for related reports.";
-
-
-            form.reset();
-
-            updateReportType();
-
-
-            dateInput.value =
-                new Date()
-                    .toISOString()
-                    .split("T")[0];
-
-
-            setTimeout(
-                function() {
-
-                    if (
-                        result &&
-                        (result.item_id || result.id)
-                    ) {
-
-                        const id =
-                            result.item_id ||
-                            result.id;
-
-                        window.location.href =
-                            `item-detail.html?id=${encodeURIComponent(id)}`;
-
-                    }
-                    else {
-
-                        window.location.href =
-                            "my-reports.html";
-
-                    }
-
-                },
-                1200
-            );
-
-        }
-        catch (error) {
-
-            console.error(
-                "Report submission error:",
-                error
-            );
-
-            statusMessage.style.background =
-                "#ffe8e8";
-
-            statusMessage.textContent =
-                `❌ ${error.message || "Could not submit report."}`;
-
-        }
-        finally {
-
-            submitBtn.disabled =
-                false;
-
-            submitBtn.textContent =
-                "Report Lost";
-
-        }
-
-    }
-);
-
-</script>
+    </script>
 
 
 </body>

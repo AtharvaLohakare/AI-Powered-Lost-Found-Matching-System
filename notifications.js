@@ -1,3 +1,53 @@
+const menuToggle = document.getElementById("menuToggle");
+const navMenu = document.getElementById("navMenu");
+
+if (menuToggle && navMenu) {
+
+    menuToggle.addEventListener("click", function () {
+
+        navMenu.classList.toggle("active");
+
+        // Change hamburger icon
+        if (navMenu.classList.contains("active")) {
+            menuToggle.textContent = "✕";
+        } else {
+            menuToggle.textContent = "☰";
+        }
+
+    });
+
+
+    // Close menu after clicking a navigation link
+    const navLinks = navMenu.querySelectorAll("a");
+
+    navLinks.forEach(function (link) {
+
+        link.addEventListener("click", function () {
+
+            navMenu.classList.remove("active");
+
+            menuToggle.textContent = "☰";
+
+        });
+
+    });
+
+
+    // Close menu when screen becomes desktop
+    window.addEventListener("resize", function () {
+
+        if (window.innerWidth > 800) {
+
+            navMenu.classList.remove("active");
+
+            menuToggle.textContent = "☰";
+
+        }
+
+    });
+
+}
+
 /* =========================================================
    NOTIFICATIONS SYSTEM - OPTIMIZED
 ========================================================= */
@@ -204,8 +254,8 @@ function setupNavbar() {
     navButtons.innerHTML = `
         <span class="user-welcome">
             Hi, ${escapeHTML(
-                currentUser.name || "User"
-            )} 👋
+        currentUser.name || "User"
+    )} 👋
         </span>
 
         <a
@@ -354,9 +404,9 @@ async function loadNotifications() {
 
                 <p>
                     ${escapeHTML(
-                        error.message ||
-                        "Please try again."
-                    )}
+            error.message ||
+            "Please try again."
+        )}
                 </p>
 
                 <button
@@ -535,8 +585,8 @@ function displayNotifications(
                 actionButton = `
                     <a
                         href="messages.html?item_id=${encodeURIComponent(
-                            notification.item_id
-                        )}"
+                    notification.item_id
+                )}"
                         class="view-item-btn">
 
                         💬 Open Conversation
@@ -587,15 +637,15 @@ function displayNotifications(
 
             else if (
                 notificationType ===
-                    "sighting_alert" &&
+                "sighting_alert" &&
                 notification.item_id
             ) {
 
                 actionButton = `
                     <a
                         href="item-detail.html?id=${encodeURIComponent(
-                            notification.item_id
-                        )}"
+                    notification.item_id
+                )}"
                         class="view-item-btn">
 
                         👀 View Sighting
@@ -614,8 +664,8 @@ function displayNotifications(
                 actionButton = `
                     <a
                         href="item-detail.html?id=${encodeURIComponent(
-                            notification.item_id
-                        )}"
+                    notification.item_id
+                )}"
                         class="view-item-btn">
 
                         🔎 View Report
@@ -641,9 +691,9 @@ function displayNotifications(
 
                         <h3>
                             ${escapeHTML(
-                                notification.title ||
-                                "Notification"
-                            )}
+                notification.title ||
+                "Notification"
+            )}
                         </h3>
 
                         ${unreadBadge}
@@ -655,8 +705,8 @@ function displayNotifications(
                         class="notification-message">
 
                         ${escapeHTML(
-                            notification.message || ""
-                        )}
+                notification.message || ""
+            )}
 
                     </p>
 
@@ -768,8 +818,8 @@ function displayNotifications(
 function getNotificationIcon(type) {
 
     switch (
-        String(type || "")
-            .toLowerCase()
+    String(type || "")
+        .toLowerCase()
     ) {
 
         case "match":
@@ -855,10 +905,9 @@ function updateSummary(
 
 
     notificationSummary.textContent =
-        `${notifications.length} notification${
-            notifications.length === 1
-                ? ""
-                : "s"
+        `${notifications.length} notification${notifications.length === 1
+            ? ""
+            : "s"
         } • ${unread} unread`;
 }
 
@@ -1253,10 +1302,9 @@ function refreshSummaryFromDOM() {
 
 
     notificationSummary.textContent =
-        `${cards.length} notification${
-            cards.length === 1
-                ? ""
-                : "s"
+        `${cards.length} notification${cards.length === 1
+            ? ""
+            : "s"
         } • ${unread} unread`;
 }
 

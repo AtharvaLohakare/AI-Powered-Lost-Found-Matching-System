@@ -5,20 +5,13 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Verification Requests | Lost & Found AI</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+    <link rel="stylesheet" href="style.css">
 
     <style>
-
         body {
             background: #f6f8fc;
         }
@@ -66,7 +59,7 @@
             border: 1px solid #e3e7ee;
             border-radius: 16px;
             padding: 22px;
-            box-shadow: 0 6px 22px rgba(0,0,0,.06);
+            box-shadow: 0 6px 22px rgba(0, 0, 0, .06);
         }
 
         .request-top {
@@ -227,7 +220,7 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,.65);
+            background: rgba(0, 0, 0, .65);
             display: none;
             align-items: center;
             justify-content: center;
@@ -244,7 +237,7 @@
             background: white;
             border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 25px 70px rgba(0,0,0,.3);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, .3);
         }
 
         .modal-header {
@@ -295,7 +288,7 @@
 
         #responseMessage:focus {
             border-color: #3157d5;
-            box-shadow: 0 0 0 3px rgba(49,87,213,.1);
+            box-shadow: 0 0 0 3px rgba(49, 87, 213, .1);
         }
 
         .modal-actions {
@@ -359,7 +352,6 @@
             }
 
         }
-
     </style>
 
 </head>
@@ -368,155 +360,129 @@
 <body>
 
 
-<nav class="navbar">
+    <nav class="navbar">
 
-    <div class="logo">
-        Lost & Found AI
-    </div>
-
-    <div class="nav-links">
-
-        <a href="index.html">
-            Home
-        </a>
-
-        <a href="items.html">
-            Items
-        </a>
-
-        <a href="report-lost.html">
-            Report Lost
-        </a>
-
-        <a href="report-found.html">
-            Report Found
-        </a>
-
-        <a href="my-reports.html">
-            My Reports
-        </a>
-
-        <a href="notifications.html">
-            🔔 Notifications
-        </a>
-
-    </div>
-
-    <div class="nav-buttons">
-
-        <span
-            class="user-welcome"
-            id="userWelcome"
-        ></span>
-
-        <a
-            href="#"
-            class="signup-btn"
-            id="logoutBtn"
-        >
-            Logout
-        </a>
-
-    </div>
-
-</nav>
-
-
-<main class="verification-page">
-
-
-    <div class="page-header">
-
-        <h1>
-            Ownership Verification
-        </h1>
-
-        <p>
-            Review ownership claims submitted for your found items.
-        </p>
-
-        <span
-            class="request-count"
-            id="requestCount"
-        >
-            Loading...
-        </span>
-
-    </div>
-
-
-    <div
-        id="requestsList"
-        class="requests-list"
-    >
-
-        <div class="loading">
-            Loading verification requests...
+        <div class="logo">
+            Lost & Found AI
         </div>
 
-    </div>
+        <div class="nav-links">
 
+            <a href="index.html">
+                Home
+            </a>
 
-</main>
+            <a href="items.html">
+                Items
+            </a>
 
+            <a href="report-lost.html">
+                Report Lost
+            </a>
 
-<!-- RESPONSE MODAL -->
+            <a href="report-found.html">
+                Report Found
+            </a>
 
-<div
-    class="modal-overlay"
-    id="responseModal"
->
+            <a href="my-reports.html">
+                My Reports
+            </a>
 
-    <div class="modal">
-
-        <div class="modal-header">
-
-            <h2 id="modalTitle">
-                Review Claim
-            </h2>
-
-            <button
-                class="close-btn"
-                id="closeModal"
-            >
-                ×
-            </button>
+            <a href="notifications.html">
+                🔔 Notifications
+            </a>
 
         </div>
 
+        <div class="nav-buttons">
 
-        <div class="modal-body">
+            <span class="user-welcome" id="userWelcome"></span>
 
-            <p id="modalDescription">
-                Review the ownership proof before responding.
+            <a href="#" class="signup-btn" id="logoutBtn">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <main class="verification-page">
+
+
+        <div class="page-header">
+
+            <h1>
+                Ownership Verification
+            </h1>
+
+            <p>
+                Review ownership claims submitted for your found items.
             </p>
 
+            <span class="request-count" id="requestCount">
+                Loading...
+            </span>
 
-            <label for="responseMessage">
-                Response message
-            </label>
-
-            <textarea
-                id="responseMessage"
-                placeholder="Optional message to the claimant..."
-            ></textarea>
+        </div>
 
 
-            <div class="modal-actions">
+        <div id="requestsList" class="requests-list">
 
-                <button
-                    class="cancel-btn"
-                    id="cancelBtn"
-                >
-                    Cancel
+            <div class="loading">
+                Loading verification requests...
+            </div>
+
+        </div>
+
+
+    </main>
+
+
+    <!-- RESPONSE MODAL -->
+
+    <div class="modal-overlay" id="responseModal">
+
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <h2 id="modalTitle">
+                    Review Claim
+                </h2>
+
+                <button class="close-btn" id="closeModal">
+                    ×
                 </button>
 
-                <button
-                    class="confirm-btn"
-                    id="confirmBtn"
-                >
-                    Confirm
-                </button>
+            </div>
+
+
+            <div class="modal-body">
+
+                <p id="modalDescription">
+                    Review the ownership proof before responding.
+                </p>
+
+
+                <label for="responseMessage">
+                    Response message
+                </label>
+
+                <textarea id="responseMessage" placeholder="Optional message to the claimant..."></textarea>
+
+
+                <div class="modal-actions">
+
+                    <button class="cancel-btn" id="cancelBtn">
+                        Cancel
+                    </button>
+
+                    <button class="confirm-btn" id="confirmBtn">
+                        Confirm
+                    </button>
+
+                </div>
 
             </div>
 
@@ -524,177 +490,175 @@
 
     </div>
 
-</div>
+
+    <script src="config.js"></script>
 
 
-<script src="config.js"></script>
+    <script>
+
+        /* =====================================================
+           USER
+        ===================================================== */
+
+        const storedUser =
+            localStorage.getItem("user");
 
 
-<script>
+        if (!storedUser) {
 
-    /* =====================================================
-       USER
-    ===================================================== */
+            window.location.href =
+                "login.html";
 
-    const storedUser =
-        localStorage.getItem("user");
+        }
 
 
-    if (!storedUser) {
-
-        window.location.href =
-            "login.html";
-
-    }
+        let currentUser;
 
 
-    let currentUser;
+        try {
 
+            currentUser =
+                JSON.parse(storedUser);
 
-    try {
-
-        currentUser =
-            JSON.parse(storedUser);
-
-    } catch (error) {
-
-        localStorage.removeItem("user");
-
-        window.location.href =
-            "login.html";
-
-    }
-
-
-    if (!currentUser || !currentUser.id) {
-
-        localStorage.removeItem("user");
-
-        window.location.href =
-            "login.html";
-
-    }
-
-
-    document.getElementById(
-        "userWelcome"
-    ).textContent =
-        `Hi, ${currentUser.name} 👋`;
-
-
-    document.getElementById(
-        "logoutBtn"
-    ).addEventListener(
-        "click",
-        function(event) {
-
-            event.preventDefault();
+        } catch (error) {
 
             localStorage.removeItem("user");
 
             window.location.href =
-                "index.html";
+                "login.html";
 
         }
-    );
 
 
-    /* =====================================================
-       ELEMENTS
-    ===================================================== */
+        if (!currentUser || !currentUser.id) {
 
-    const requestsList =
+            localStorage.removeItem("user");
+
+            window.location.href =
+                "login.html";
+
+        }
+
+
         document.getElementById(
-            "requestsList"
-        );
+            "userWelcome"
+        ).textContent =
+            `Hi, ${currentUser.name} 👋`;
 
 
-    const requestCount =
         document.getElementById(
-            "requestCount"
+            "logoutBtn"
+        ).addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                localStorage.removeItem("user");
+
+                window.location.href =
+                    "index.html";
+
+            }
         );
 
 
-    const responseModal =
-        document.getElementById(
-            "responseModal"
-        );
+        /* =====================================================
+           ELEMENTS
+        ===================================================== */
+
+        const requestsList =
+            document.getElementById(
+                "requestsList"
+            );
 
 
-    const modalTitle =
-        document.getElementById(
-            "modalTitle"
-        );
+        const requestCount =
+            document.getElementById(
+                "requestCount"
+            );
 
 
-    const modalDescription =
-        document.getElementById(
-            "modalDescription"
-        );
+        const responseModal =
+            document.getElementById(
+                "responseModal"
+            );
 
 
-    const responseMessage =
-        document.getElementById(
-            "responseMessage"
-        );
+        const modalTitle =
+            document.getElementById(
+                "modalTitle"
+            );
 
 
-    const confirmBtn =
-        document.getElementById(
-            "confirmBtn"
-        );
+        const modalDescription =
+            document.getElementById(
+                "modalDescription"
+            );
 
 
-    let selectedRequestId = null;
-
-    let selectedStatus = null;
-
-
-    /* =====================================================
-       ESCAPE HTML
-    ===================================================== */
-
-    function escapeHTML(value) {
-
-        return String(
-            value ?? ""
-        )
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-    }
+        const responseMessage =
+            document.getElementById(
+                "responseMessage"
+            );
 
 
-    /* =====================================================
-       LOAD REQUESTS
-    ===================================================== */
+        const confirmBtn =
+            document.getElementById(
+                "confirmBtn"
+            );
 
-    async function loadRequests() {
 
-        requestsList.innerHTML = `
+        let selectedRequestId = null;
+
+        let selectedStatus = null;
+
+
+        /* =====================================================
+           ESCAPE HTML
+        ===================================================== */
+
+        function escapeHTML(value) {
+
+            return String(
+                value ?? ""
+            )
+
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        /* =====================================================
+           LOAD REQUESTS
+        ===================================================== */
+
+        async function loadRequests() {
+
+            requestsList.innerHTML = `
 
             <div class="loading">
                 Loading verification requests...
@@ -703,61 +667,60 @@
         `;
 
 
-        try {
+            try {
 
-            const response =
-                await fetch(
-                    `${API_URL}/verification/user/${encodeURIComponent(currentUser.id)}`
-                );
-
-
-            const data =
-                await response.json();
+                const response =
+                    await fetch(
+                        `${API_URL}/verification/user/${encodeURIComponent(currentUser.id)}`
+                    );
 
 
-            if (!response.ok) {
-
-                throw new Error(
-                    data.detail ||
-                    "Unable to load verification requests."
-                );
-
-            }
+                const data =
+                    await response.json();
 
 
-            const requests =
-                Array.isArray(
-                    data.requests
-                )
-                    ? data.requests
-                    : [];
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Unable to load verification requests."
+                    );
+
+                }
 
 
-            const reporterRequests =
-                requests.filter(
-                    request =>
-                        Number(
-                            request.reporter_id
-                        ) ===
-                        Number(
-                            currentUser.id
-                        )
-                );
+                const requests =
+                    Array.isArray(
+                        data.requests
+                    )
+                        ? data.requests
+                        : [];
 
 
-            requestCount.textContent =
-                `${reporterRequests.length} request${
-                    reporterRequests.length === 1
+                const reporterRequests =
+                    requests.filter(
+                        request =>
+                            Number(
+                                request.reporter_id
+                            ) ===
+                            Number(
+                                currentUser.id
+                            )
+                    );
+
+
+                requestCount.textContent =
+                    `${reporterRequests.length} request${reporterRequests.length === 1
                         ? ""
                         : "s"
-                }`;
+                    }`;
 
 
-            if (
-                reporterRequests.length === 0
-            ) {
+                if (
+                    reporterRequests.length === 0
+                ) {
 
-                requestsList.innerHTML = `
+                    requestsList.innerHTML = `
 
                     <div class="empty-state">
 
@@ -778,117 +741,117 @@
 
                 `;
 
-                return;
-
-            }
-
-
-            requestsList.innerHTML = "";
-
-
-            reporterRequests.forEach(
-                request => {
-
-                    requestsList.appendChild(
-                        createRequestCard(
-                            request
-                        )
-                    );
+                    return;
 
                 }
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Verification requests error:",
-                error
-            );
 
 
-            requestsList.innerHTML = `
+                requestsList.innerHTML = "";
+
+
+                reporterRequests.forEach(
+                    request => {
+
+                        requestsList.appendChild(
+                            createRequestCard(
+                                request
+                            )
+                        );
+
+                    }
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Verification requests error:",
+                    error
+                );
+
+
+                requestsList.innerHTML = `
 
                 <div class="error">
 
                     ${escapeHTML(
-                        error.message
-                    )}
+                    error.message
+                )}
 
                 </div>
 
             `;
 
-            requestCount.textContent =
-                "Error";
+                requestCount.textContent =
+                    "Error";
 
-        }
-
-    }
-
-
-    /* =====================================================
-       CREATE REQUEST CARD
-    ===================================================== */
-
-    function createRequestCard(
-        request
-    ) {
-
-        const card =
-            document.createElement(
-                "article"
-            );
-
-
-        card.className =
-            "request-card";
-
-
-        let statusClass =
-            "status-pending";
-
-
-        let statusText =
-            "Pending";
-
-
-        if (
-            request.status ===
-            "approved"
-        ) {
-
-            statusClass =
-                "status-approved";
-
-            statusText =
-                "Approved";
+            }
 
         }
 
 
-        if (
-            request.status ===
-            "rejected"
+        /* =====================================================
+           CREATE REQUEST CARD
+        ===================================================== */
+
+        function createRequestCard(
+            request
         ) {
 
-            statusClass =
-                "status-rejected";
-
-            statusText =
-                "Rejected";
-
-        }
+            const card =
+                document.createElement(
+                    "article"
+                );
 
 
-        let actionsHTML = "";
+            card.className =
+                "request-card";
 
 
-        if (
-            request.status ===
-            "pending"
-        ) {
+            let statusClass =
+                "status-pending";
 
-            actionsHTML = `
+
+            let statusText =
+                "Pending";
+
+
+            if (
+                request.status ===
+                "approved"
+            ) {
+
+                statusClass =
+                    "status-approved";
+
+                statusText =
+                    "Approved";
+
+            }
+
+
+            if (
+                request.status ===
+                "rejected"
+            ) {
+
+                statusClass =
+                    "status-rejected";
+
+                statusText =
+                    "Rejected";
+
+            }
+
+
+            let actionsHTML = "";
+
+
+            if (
+                request.status ===
+                "pending"
+            ) {
+
+                actionsHTML = `
 
                 <div class="actions">
 
@@ -899,11 +862,11 @@
                                 ${Number(request.id)},
                                 'approved',
                                 '${escapeHTML(
-                                    request.item_name
-                                )}',
+                    request.item_name
+                )}',
                                 '${escapeHTML(
-                                    request.claimant_name
-                                )}'
+                    request.claimant_name
+                )}'
                             );
                         "
                     >
@@ -918,11 +881,11 @@
                                 ${Number(request.id)},
                                 'rejected',
                                 '${escapeHTML(
-                                    request.item_name
-                                )}',
+                    request.item_name
+                )}',
                                 '${escapeHTML(
-                                    request.claimant_name
-                                )}'
+                    request.claimant_name
+                )}'
                             );
                         "
                     >
@@ -933,10 +896,10 @@
 
             `;
 
-        }
+            }
 
 
-        card.innerHTML = `
+            card.innerHTML = `
 
             <div class="request-top">
 
@@ -944,8 +907,8 @@
 
                     <h2 class="item-title">
                         ${escapeHTML(
-                            request.item_name
-                        )}
+                request.item_name
+            )}
                     </h2>
 
                     <div class="claimant">
@@ -954,8 +917,8 @@
 
                         <strong>
                             ${escapeHTML(
-                                request.claimant_name
-                            )}
+                request.claimant_name
+            )}
                         </strong>
 
                     </div>
@@ -982,16 +945,16 @@
 
                         <strong>
                             ${escapeHTML(
-                                request.claimant_name
-                            )}
+                request.claimant_name
+            )}
                         </strong>
 
                         <br>
 
                         ${escapeHTML(
-                            request.claimant_email ||
-                            "Email unavailable"
-                        )}
+                request.claimant_email ||
+                "Email unavailable"
+            )}
 
                     </div>
 
@@ -1007,8 +970,8 @@
                     <div class="proof">
 
                         ${escapeHTML(
-                            request.proof
-                        )}
+                request.proof
+            )}
 
                     </div>
 
@@ -1017,8 +980,7 @@
             </div>
 
 
-            ${
-                request.response_message
+            ${request.response_message
                     ? `
                         <div class="response-box">
 
@@ -1027,13 +989,13 @@
                             </div>
 
                             ${escapeHTML(
-                                request.response_message
-                            )}
+                        request.response_message
+                    )}
 
                         </div>
                     `
                     : ""
-            }
+                }
 
 
             ${actionsHTML}
@@ -1041,257 +1003,257 @@
         `;
 
 
-        return card;
-
-    }
-
-
-    /* =====================================================
-       OPEN RESPONSE MODAL
-    ===================================================== */
-
-    function openResponseModal(
-        requestId,
-        status,
-        itemName,
-        claimantName
-    ) {
-
-        selectedRequestId =
-            requestId;
-
-
-        selectedStatus =
-            status;
-
-
-        responseMessage.value =
-            "";
-
-
-        if (
-            status ===
-            "approved"
-        ) {
-
-            modalTitle.textContent =
-                "Approve Ownership";
-
-
-            modalDescription.textContent =
-                `Approve ${claimantName}'s ownership claim for ${itemName}?`;
-
-
-            confirmBtn.textContent =
-                "✓ Approve Ownership";
-
-
-            confirmBtn.className =
-                "confirm-btn confirm-approve";
-
-        } else {
-
-            modalTitle.textContent =
-                "Reject Ownership Claim";
-
-
-            modalDescription.textContent =
-                `Reject ${claimantName}'s ownership claim for ${itemName}?`;
-
-
-            confirmBtn.textContent =
-                "✕ Reject Claim";
-
-
-            confirmBtn.className =
-                "confirm-btn confirm-reject";
+            return card;
 
         }
 
 
-        responseModal.classList.add(
-            "active"
-        );
+        /* =====================================================
+           OPEN RESPONSE MODAL
+        ===================================================== */
 
-    }
+        function openResponseModal(
+            requestId,
+            status,
+            itemName,
+            claimantName
+        ) {
+
+            selectedRequestId =
+                requestId;
 
 
-    /* =====================================================
-       SEND RESPONSE
-    ===================================================== */
+            selectedStatus =
+                status;
 
-    confirmBtn.addEventListener(
-        "click",
-        async function() {
+
+            responseMessage.value =
+                "";
+
 
             if (
-                !selectedRequestId ||
-                !selectedStatus
+                status ===
+                "approved"
             ) {
 
-                return;
+                modalTitle.textContent =
+                    "Approve Ownership";
+
+
+                modalDescription.textContent =
+                    `Approve ${claimantName}'s ownership claim for ${itemName}?`;
+
+
+                confirmBtn.textContent =
+                    "✓ Approve Ownership";
+
+
+                confirmBtn.className =
+                    "confirm-btn confirm-approve";
+
+            } else {
+
+                modalTitle.textContent =
+                    "Reject Ownership Claim";
+
+
+                modalDescription.textContent =
+                    `Reject ${claimantName}'s ownership claim for ${itemName}?`;
+
+
+                confirmBtn.textContent =
+                    "✕ Reject Claim";
+
+
+                confirmBtn.className =
+                    "confirm-btn confirm-reject";
 
             }
 
 
-            confirmBtn.disabled =
-                true;
+            responseModal.classList.add(
+                "active"
+            );
+
+        }
 
 
-            confirmBtn.textContent =
-                "Processing...";
+        /* =====================================================
+           SEND RESPONSE
+        ===================================================== */
 
+        confirmBtn.addEventListener(
+            "click",
+            async function () {
 
-            try {
+                if (
+                    !selectedRequestId ||
+                    !selectedStatus
+                ) {
 
-                const params =
-                    new URLSearchParams();
-
-
-                params.append(
-                    "reporter_id",
-                    currentUser.id
-                );
-
-
-                params.append(
-                    "status",
-                    selectedStatus
-                );
-
-
-                params.append(
-                    "response_message",
-                    responseMessage.value.trim()
-                );
-
-
-                const response =
-                    await fetch(
-                        `${API_URL}/verification/${encodeURIComponent(selectedRequestId)}/respond?${params.toString()}`,
-                        {
-                            method: "PUT"
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        data.detail ||
-                        "Unable to process request."
-                    );
+                    return;
 
                 }
 
 
-                responseModal.classList.remove(
-                    "active"
-                );
-
-
-                alert(
-                    selectedStatus === "approved"
-                        ? "Ownership claim approved successfully."
-                        : "Ownership claim rejected."
-                );
-
-
-                selectedRequestId =
-                    null;
-
-                selectedStatus =
-                    null;
-
-
-                await loadRequests();
-
-            } catch (error) {
-
-                console.error(
-                    "Verification response error:",
-                    error
-                );
-
-
-                alert(
-                    error.message
-                );
-
-            } finally {
-
                 confirmBtn.disabled =
-                    false;
+                    true;
+
+
+                confirmBtn.textContent =
+                    "Processing...";
+
+
+                try {
+
+                    const params =
+                        new URLSearchParams();
+
+
+                    params.append(
+                        "reporter_id",
+                        currentUser.id
+                    );
+
+
+                    params.append(
+                        "status",
+                        selectedStatus
+                    );
+
+
+                    params.append(
+                        "response_message",
+                        responseMessage.value.trim()
+                    );
+
+
+                    const response =
+                        await fetch(
+                            `${API_URL}/verification/${encodeURIComponent(selectedRequestId)}/respond?${params.toString()}`,
+                            {
+                                method: "PUT"
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.detail ||
+                            "Unable to process request."
+                        );
+
+                    }
+
+
+                    responseModal.classList.remove(
+                        "active"
+                    );
+
+
+                    alert(
+                        selectedStatus === "approved"
+                            ? "Ownership claim approved successfully."
+                            : "Ownership claim rejected."
+                    );
+
+
+                    selectedRequestId =
+                        null;
+
+                    selectedStatus =
+                        null;
+
+
+                    await loadRequests();
+
+                } catch (error) {
+
+                    console.error(
+                        "Verification response error:",
+                        error
+                    );
+
+
+                    alert(
+                        error.message
+                    );
+
+                } finally {
+
+                    confirmBtn.disabled =
+                        false;
+
+                }
 
             }
-
-        }
-    );
-
-
-    /* =====================================================
-       CLOSE MODAL
-    ===================================================== */
-
-    function closeModal() {
-
-        responseModal.classList.remove(
-            "active"
         );
 
-        selectedRequestId =
-            null;
 
-        selectedStatus =
-            null;
+        /* =====================================================
+           CLOSE MODAL
+        ===================================================== */
 
-    }
+        function closeModal() {
 
+            responseModal.classList.remove(
+                "active"
+            );
 
-    document.getElementById(
-        "closeModal"
-    ).addEventListener(
-        "click",
-        closeModal
-    );
+            selectedRequestId =
+                null;
 
-
-    document.getElementById(
-        "cancelBtn"
-    ).addEventListener(
-        "click",
-        closeModal
-    );
-
-
-    responseModal.addEventListener(
-        "click",
-        function(event) {
-
-            if (
-                event.target ===
-                responseModal
-            ) {
-
-                closeModal();
-
-            }
+            selectedStatus =
+                null;
 
         }
-    );
 
 
-    /* =====================================================
-       START
-    ===================================================== */
+        document.getElementById(
+            "closeModal"
+        ).addEventListener(
+            "click",
+            closeModal
+        );
 
-    loadRequests();
 
-</script>
+        document.getElementById(
+            "cancelBtn"
+        ).addEventListener(
+            "click",
+            closeModal
+        );
+
+
+        responseModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target ===
+                    responseModal
+                ) {
+
+                    closeModal();
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           START
+        ===================================================== */
+
+        loadRequests();
+
+    </script>
 
 
 </body>

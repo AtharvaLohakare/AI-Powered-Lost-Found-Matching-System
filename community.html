@@ -513,23 +513,56 @@
 
 <nav class="navbar">
 
-    <div class="logo">
-        Lost & Found AI
-    </div>
+        <div class="logo">
+            Lost & Found AI
+        </div>
 
-    <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="community.html">Community</a>
-        <a href="items.html">Items</a>
-        <a href="report-lost.html">Report Lost</a>
-        <a href="report-found.html">Report Found</a>
-        <a href="my-reports.html">My Reports</a>
-        <a href="notifications.html">🔔 Notifications</a>
-    </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+            ☰
+        </button>
 
-    <div class="nav-buttons" id="navButtons"></div>
+        <div class="nav-menu" id="navMenu">
 
-</nav>
+            <div class="nav-links">
+
+                <a href="index.html">Home</a>
+
+                <a href="items.html">Items</a>
+
+                <a href="report-lost.html">
+                    Report Lost
+                </a>
+
+                <a href="report-found.html">
+                    Report Found
+                </a>
+
+                <a href="community.html">
+                    Community
+                </a>
+
+                <a href="notifications.html">
+                    🔔 Notifications
+                    <span id="navBadge">0</span>
+                </a>
+
+            </div>
+
+            <div class="nav-buttons">
+
+                <a href="login.html" class="login-btn">
+                    Login
+                </a>
+
+                <a href="signup.html" class="signup-btn">
+                    Sign Up
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
 
 
 <main class="community-page">
@@ -1176,6 +1209,57 @@
 
 
 <script>
+
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+
+    if (menuToggle && navMenu) {
+
+        menuToggle.addEventListener("click", function () {
+
+            navMenu.classList.toggle("active");
+
+            // Change hamburger icon
+            if (navMenu.classList.contains("active")) {
+                menuToggle.textContent = "✕";
+            } else {
+                menuToggle.textContent = "☰";
+            }
+
+        });
+
+
+        // Close menu after clicking a navigation link
+        const navLinks = navMenu.querySelectorAll("a");
+
+        navLinks.forEach(function (link) {
+
+            link.addEventListener("click", function () {
+
+                navMenu.classList.remove("active");
+
+                menuToggle.textContent = "☰";
+
+            });
+
+        });
+
+
+        // Close menu when screen becomes desktop
+        window.addEventListener("resize", function () {
+
+            if (window.innerWidth > 800) {
+
+                navMenu.classList.remove("active");
+
+                menuToggle.textContent = "☰";
+
+            }
+
+        });
+
+    }
+
 
     /* =====================================================
        BASIC ELEMENTS

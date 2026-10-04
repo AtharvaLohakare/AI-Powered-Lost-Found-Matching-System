@@ -5,19 +5,13 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Notifications | Lost & Found AI</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css">
+    <link rel="stylesheet" href="style.css">
 
-    <link
-        rel="stylesheet"
-        href="notifications.css">
+    <link rel="stylesheet" href="notifications.css">
 
 </head>
 
@@ -35,56 +29,46 @@
             Lost & Found AI
         </div>
 
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+            ☰
+        </button>
 
-        <div class="nav-links">
+        <div class="nav-menu" id="navMenu">
 
-            <a href="index.html">
-                Home
-            </a>
+            <div class="nav-links">
 
-            <a href="items.html">
-                Items
-            </a>
+                <a href="index.html">Home</a>
 
-            <a href="report-lost.html">
-                Report Lost
-            </a>
+                <a href="items.html">Items</a>
 
-            <a href="report-found.html">
-                Report Found
-            </a>
+                <a href="report-lost.html">
+                    Report Lost
+                </a>
 
-            <a href="my-reports.html">
-                My Reports
-            </a>
+                <a href="report-found.html">
+                    Report Found
+                </a>
 
-            <a href="community.html">
-                Community
-            </a>
+                <a href="community.html">
+                    Community
+                </a>
 
-            <a
-                href="notifications.html"
-                class="notification-link active">
+                <a href="notifications.html" class="notification-link active"> 🔔 Notifications <span id="navBadge"
+                        class="nav-notification-badge" style="display: none;"> 0 </span> </a>
 
-                🔔 Notifications
+            </div>
 
-                <span
-                    id="navBadge"
-                    class="nav-notification-badge"
-                    style="display: none;">
+            <div class="nav-buttons">
 
-                    0
+                <a href="login.html" class="login-btn">
+                    Login
+                </a>
 
-                </span>
+                <a href="signup.html" class="signup-btn">
+                    Sign Up
+                </a>
 
-            </a>
-
-        </div>
-
-
-        <div
-            class="nav-buttons"
-            id="navButtons">
+            </div>
 
         </div>
 
@@ -124,20 +108,14 @@
 
             <div class="notification-actions">
 
-                <button
-                    id="markAllBtn"
-                    class="mark-all-btn"
-                    type="button">
+                <button id="markAllBtn" class="mark-all-btn" type="button">
 
                     ✓ Mark all as read
 
                 </button>
 
 
-                <button
-                    id="deleteAllBtn"
-                    class="delete-all-btn"
-                    type="button">
+                <button id="deleteAllBtn" class="delete-all-btn" type="button">
 
                     🗑️ Delete all
 
@@ -155,9 +133,7 @@
 
         <section class="notifications-container">
 
-            <div
-                id="notificationList"
-                class="notification-list">
+            <div id="notificationList" class="notification-list">
 
             </div>
 
@@ -172,7 +148,7 @@
          SCRIPTS
     ====================================================== -->
 
-        <!-- =====================================================
+    <!-- =====================================================
          DELETE CONFIRMATION MODAL
     ====================================================== -->
 
@@ -197,17 +173,11 @@
 
             <div class="confirm-modal-actions">
 
-                <button
-                    type="button"
-                    id="confirmCancelBtn"
-                    class="confirm-cancel-btn">
+                <button type="button" id="confirmCancelBtn" class="confirm-cancel-btn">
                     Cancel
                 </button>
 
-                <button
-                    type="button"
-                    id="confirmDeleteBtn"
-                    class="confirm-delete-btn">
+                <button type="button" id="confirmDeleteBtn" class="confirm-delete-btn">
                     🗑️ Delete
                 </button>
 
@@ -226,4 +196,5 @@
     <script src="notifications.js"></script>
 
 </body>
+
 </html>
