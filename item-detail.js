@@ -1,4 +1,54 @@
 
+const menuToggle = document.getElementById("menuToggle");
+const navMenu = document.getElementById("navMenu");
+
+if (menuToggle && navMenu) {
+
+    menuToggle.addEventListener("click", function () {
+
+        navMenu.classList.toggle("active");
+
+        // Change hamburger icon
+        if (navMenu.classList.contains("active")) {
+            menuToggle.textContent = "✕";
+        } else {
+            menuToggle.textContent = "☰";
+        }
+
+    });
+
+
+    // Close menu after clicking a navigation link
+    const navLinks = navMenu.querySelectorAll("a");
+
+    navLinks.forEach(function (link) {
+
+        link.addEventListener("click", function () {
+
+            navMenu.classList.remove("active");
+
+            menuToggle.textContent = "☰";
+
+        });
+
+    });
+
+
+    // Close menu when screen becomes desktop
+    window.addEventListener("resize", function () {
+
+        if (window.innerWidth > 800) {
+
+            navMenu.classList.remove("active");
+
+            menuToggle.textContent = "☰";
+
+        }
+
+    });
+
+}
+
 // =========================================================
 // LOST & FOUND AI
 // ITEM DETAIL + AI MATCHING + LOCATION MAP
@@ -287,11 +337,11 @@ async function createMatchMap(item, matches) {
             marker.bindPopup(`
                 <strong>Current Item</strong><br>
                 ${escapeHtml(
-                    item.item_name || "Reported Item"
-                )}<br>
+                item.item_name || "Reported Item"
+            )}<br>
                 ${escapeHtml(
-                    item.location || "Location unavailable"
-                )}
+                item.location || "Location unavailable"
+            )}
             `);
 
             mapPoints.push([lat, lon]);
@@ -320,12 +370,12 @@ async function createMatchMap(item, matches) {
             marker.bindPopup(`
                 <strong>Possible Match #${index + 1}</strong><br>
                 ${escapeHtml(
-                    match.item_name || "Possible Match"
-                )}<br>
+                match.item_name || "Possible Match"
+            )}<br>
                 Match: ${score.toFixed(1)}%<br>
                 ${escapeHtml(
-                    match.location || "Location unavailable"
-                )}
+                match.location || "Location unavailable"
+            )}
             `);
 
             mapPoints.push([lat, lon]);
@@ -489,10 +539,10 @@ async function loadItem() {
                     <span class="item-type">
 
                         ${escapeHtml(
-                            String(
-                                item.item_type || ""
-                            ).toUpperCase()
-                        )}
+            String(
+                item.item_type || ""
+            ).toUpperCase()
+        )}
 
                     </span>
 
@@ -500,9 +550,9 @@ async function loadItem() {
                     <h1>
 
                         ${escapeHtml(
-                            item.item_name ||
-                            "Unnamed Item"
-                        )}
+            item.item_name ||
+            "Unnamed Item"
+        )}
 
                     </h1>
 
@@ -512,9 +562,9 @@ async function loadItem() {
                         <strong>Category:</strong>
 
                         ${escapeHtml(
-                            item.category ||
-                            "Not specified"
-                        )}
+            item.category ||
+            "Not specified"
+        )}
 
                     </p>
 
@@ -524,9 +574,9 @@ async function loadItem() {
                         <strong>Description:</strong>
 
                         ${escapeHtml(
-                            item.description ||
-                            "Not specified"
-                        )}
+            item.description ||
+            "Not specified"
+        )}
 
                     </p>
 
@@ -536,9 +586,9 @@ async function loadItem() {
                         <strong>Color:</strong>
 
                         ${escapeHtml(
-                            item.color ||
-                            "Not specified"
-                        )}
+            item.color ||
+            "Not specified"
+        )}
 
                     </p>
 
@@ -548,9 +598,9 @@ async function loadItem() {
                         <strong>Brand:</strong>
 
                         ${escapeHtml(
-                            item.brand ||
-                            "Not specified"
-                        )}
+            item.brand ||
+            "Not specified"
+        )}
 
                     </p>
 
@@ -560,9 +610,9 @@ async function loadItem() {
                         <strong>Location:</strong>
 
                         ${escapeHtml(
-                            item.location ||
-                            "Not specified"
-                        )}
+            item.location ||
+            "Not specified"
+        )}
 
                     </p>
 
@@ -572,20 +622,19 @@ async function loadItem() {
                         <strong>Date:</strong>
 
                         ${escapeHtml(
-                            item.item_date ||
-                            "Not specified"
-                        )}
+            item.item_date ||
+            "Not specified"
+        )}
 
                     </p>
 
 
-                    ${
-                        item.item_type === "lost" ||
-                        item.item_type === "found"
+                    ${item.item_type === "lost" ||
+                item.item_type === "found"
 
-                        ?
+                ?
 
-                        `
+                `
                             <button
                                 class="match-btn"
                                 onclick="findMatches(${item.id})"
@@ -594,10 +643,10 @@ async function loadItem() {
                             </button>
                         `
 
-                        :
+                :
 
-                        ""
-                    }
+                ""
+            }
 
                 </div>
 
@@ -629,9 +678,9 @@ async function loadItem() {
                 <p>
 
                     ${escapeHtml(
-                        error.message ||
-                        "Something went wrong while loading the item."
-                    )}
+            error.message ||
+            "Something went wrong while loading the item."
+        )}
 
                 </p>
 
@@ -794,11 +843,10 @@ async function findMatches(id) {
                             ${data.matches.length}
                         </strong>
 
-                        possible match${
-                            data.matches.length === 1
-                                ? ""
-                                : "es"
-                        }
+                        possible match${data.matches.length === 1
+                ? ""
+                : "es"
+            }
 
                         for this lost item.
 
@@ -841,102 +889,101 @@ async function findMatches(id) {
                 </p>
 
 
-                ${
-                    topMatches.map(match => {
+                ${topMatches.map(match => {
 
-                        const score =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    100,
-                                    Number(
-                                        match.match_score || 0
-                                    )
-                                )
-                            );
-
-
-                        const imageScore =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    100,
-                                    Number(
-                                        match.image_similarity || 0
-                                    )
-                                )
-                            );
+                const score =
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            Number(
+                                match.match_score || 0
+                            )
+                        )
+                    );
 
 
-                        const textScore =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    100,
-                                    Number(
-                                        match.text_similarity || 0
-                                    )
-                                )
-                            );
+                const imageScore =
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            Number(
+                                match.image_similarity || 0
+                            )
+                        )
+                    );
 
 
-                        const metadataScore =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    100,
-                                    Number(
-                                        match.metadata_score || 0
-                                    )
-                                )
-                            );
+                const textScore =
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            Number(
+                                match.text_similarity || 0
+                            )
+                        )
+                    );
 
 
-                        let confidence =
-                            "Low Match";
+                const metadataScore =
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            Number(
+                                match.metadata_score || 0
+                            )
+                        )
+                    );
 
 
-                        if (score >= 90) {
-
-                            confidence =
-                                "Very High Match";
-
-                        }
-                        else if (score >= 75) {
-
-                            confidence =
-                                "High Match";
-
-                        }
-                        else if (score >= 50) {
-
-                            confidence =
-                                "Possible Match";
-                        }
+                let confidence =
+                    "Low Match";
 
 
-                        const imageUrl =
-                            getImageUrl(match);
+                if (score >= 90) {
+
+                    confidence =
+                        "Very High Match";
+
+                }
+                else if (score >= 75) {
+
+                    confidence =
+                        "High Match";
+
+                }
+                else if (score >= 50) {
+
+                    confidence =
+                        "Possible Match";
+                }
 
 
-                        const matchImage = imageUrl
+                const imageUrl =
+                    getImageUrl(match);
 
-                            ?
 
-                            `
+                const matchImage = imageUrl
+
+                    ?
+
+                    `
                                 <img
                                     src="${escapeHtml(imageUrl)}"
                                     alt="${escapeHtml(
-                                        match.item_name ||
-                                        "Possible match"
-                                    )}"
+                        match.item_name ||
+                        "Possible match"
+                    )}"
                                     onerror="imageErrorHandler(this)"
                                 >
                             `
 
-                            :
+                    :
 
-                            `
+                    `
                                 <div class="image-placeholder">
 
                                     📦
@@ -949,13 +996,13 @@ async function findMatches(id) {
                             `;
 
 
-                        const reasons =
-                            Array.isArray(match.reasons)
-                                ? match.reasons
-                                : [];
+                const reasons =
+                    Array.isArray(match.reasons)
+                        ? match.reasons
+                        : [];
 
 
-                        return `
+                return `
 
                             <div class="match-card">
 
@@ -973,9 +1020,9 @@ async function findMatches(id) {
                                     <h3>
 
                                         ${escapeHtml(
-                                            match.item_name ||
-                                            "Possible Match"
-                                        )}
+                    match.item_name ||
+                    "Possible Match"
+                )}
 
                                     </h3>
 
@@ -1035,56 +1082,63 @@ async function findMatches(id) {
 
                                     <ul>
 
-                                        ${
-                                            reasons.length > 0
+                                        ${reasons.length > 0
 
-                                                ?
+                        ?
 
-                                                reasons
-                                                    .map(
-                                                        reason =>
-                                                            `
+                        reasons
+                            .map(
+                                reason =>
+                                    `
                                                             <li>
                                                                 ${escapeHtml(reason)}
                                                             </li>
                                                             `
-                                                    )
-                                                    .join("")
+                            )
+                            .join("")
 
-                                                :
+                        :
 
-                                                `
+                        `
                                                     <li>
                                                         No strong matching features found.
                                                     </li>
                                                 `
-                                        }
+                    }
 
                                     </ul>
 
 
                                     <div class="match-actions">
 
-
                                         <button
                                             class="view-match-btn"
                                             onclick="viewItem(${Number(match.item_id)})"
                                         >
-
                                             View Possible Match
-
                                         </button>
-
 
                                         <button
                                             class="contact-btn"
                                             onclick="contactReporter(${Number(match.item_id)})"
                                         >
-
                                             📩 Contact Reporter
-
                                         </button>
 
+                                        <button
+                                            class="verify-ownership-btn"
+                                            data-item-id="${Number(match.item_id)}"
+                                            data-item-name="${escapeHtml(
+                        match.item_name || "Found Item"
+                    )}"
+                                            onclick="openVerification(
+                                                ${Number(match.item_id)},
+                                                this.dataset.itemName,
+                                                this
+                                            )"
+                                        >
+                                            🛡️ Verify Ownership
+                                        </button>
 
                                     </div>
 
@@ -1094,8 +1148,8 @@ async function findMatches(id) {
                             </div>
 
                         `;
-                    }).join("")
-                }
+            }).join("")
+            }
 
 
                 <!-- MAP -->
@@ -1139,6 +1193,19 @@ async function findMatches(id) {
         );
 
 
+        // =================================================
+        // CHECK OWNERSHIP STATUS
+        // =================================================
+
+        document
+            .querySelectorAll(".verify-ownership-btn")
+            .forEach(function (button) {
+
+                // Keep the button ready for the ownership flow.
+                // Backend status checking can be added here
+                // once the exact item-status endpoint is confirmed.
+
+            });
         // =================================================
         // MATCH ALERT
         // =================================================
@@ -1213,9 +1280,9 @@ async function findMatches(id) {
                 <p>
 
                     ${escapeHtml(
-                        error.message ||
-                        "The AI matching service could not be reached."
-                    )}
+            error.message ||
+            "The AI matching service could not be reached."
+        )}
 
                 </p>
 
@@ -1235,6 +1302,718 @@ async function findMatches(id) {
     }
 }
 
+
+// =========================================================
+// OWNERSHIP VERIFICATION
+// =========================================================
+
+let verificationItemId = null;
+
+
+// =========================================================
+// GET LOGGED-IN USER
+// =========================================================
+
+function getLoggedInUser() {
+
+    const storedUser = localStorage.getItem("user");
+
+    if (!storedUser) {
+        return null;
+    }
+
+    try {
+
+        return JSON.parse(storedUser);
+
+    }
+    catch (error) {
+
+        console.error(
+            "Invalid stored user:",
+            error
+        );
+
+        return null;
+    }
+}
+
+
+// =========================================================
+// CREATE VERIFICATION MODAL
+// =========================================================
+
+function ensureVerificationModal() {
+
+    let modal =
+        document.getElementById(
+            "ownership-verification-modal"
+        );
+
+    if (modal) {
+        return modal;
+    }
+
+
+    const style =
+        document.createElement("style");
+
+    style.textContent = `
+
+        .verify-ownership-btn {
+
+            background: #16804b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+
+        }
+
+
+        .verify-ownership-btn:hover {
+
+            background: #116b3e;
+
+        }
+
+
+        .verify-ownership-btn.pending {
+
+            background: #9aa0a6;
+            cursor: default;
+
+        }
+
+
+        .verify-ownership-btn.verified {
+
+            background: #16804b;
+            cursor: default;
+
+        }
+
+
+        .ownership-modal-overlay {
+
+            position: fixed;
+            inset: 0;
+
+            background: rgba(0,0,0,.65);
+
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            z-index: 10000;
+
+        }
+
+
+        .ownership-modal-overlay.active {
+
+            display: flex;
+
+        }
+
+
+        .ownership-modal {
+
+            width: min(600px, 100%);
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 25px;
+
+            box-shadow:
+                0 20px 60px
+                rgba(0,0,0,.25);
+
+        }
+
+
+        .ownership-modal h2 {
+
+            margin-top: 0;
+            color: #1d3557;
+
+        }
+
+
+        .ownership-item {
+
+            background: #f5f7fb;
+
+            padding: 14px;
+
+            border-radius: 10px;
+
+            margin: 15px 0;
+
+        }
+
+
+        #ownership-proof {
+
+            width: 100%;
+
+            min-height: 140px;
+
+            box-sizing: border-box;
+
+            resize: vertical;
+
+            padding: 12px;
+
+            border: 1px solid #d8dce5;
+
+            border-radius: 10px;
+
+            font-family: inherit;
+
+        }
+
+
+        .ownership-message {
+
+            margin: 10px 0;
+
+            padding: 10px;
+
+            border-radius: 8px;
+
+            display: none;
+
+        }
+
+
+        .ownership-message.show {
+
+            display: block;
+
+        }
+
+
+        .ownership-message.success {
+
+            background: #e5f8ed;
+            color: #16804b;
+
+        }
+
+
+        .ownership-message.error {
+
+            background: #ffe8e8;
+            color: #c62828;
+
+        }
+
+
+        .ownership-actions {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 18px;
+
+        }
+
+
+        .ownership-actions button {
+
+            flex: 1;
+
+            padding: 12px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        #ownership-cancel {
+
+            background: #eef0f3;
+
+        }
+
+
+        #ownership-submit {
+
+            background: #3157d5;
+
+            color: white;
+
+        }
+
+    `;
+
+
+    document.head.appendChild(style);
+
+
+    modal =
+        document.createElement("div");
+
+    modal.id =
+        "ownership-verification-modal";
+
+    modal.className =
+        "ownership-modal-overlay";
+
+
+    modal.innerHTML = `
+
+        <div class="ownership-modal">
+
+            <h2>
+                🛡️ Verify Ownership
+            </h2>
+
+            <p>
+                Explain why you believe
+                this found item belongs to you.
+            </p>
+
+
+            <div class="ownership-item">
+
+                <strong id="ownership-item-name">
+                    Found Item
+                </strong>
+
+            </div>
+
+
+            <div
+                id="ownership-message"
+                class="ownership-message"
+            ></div>
+
+
+            <label for="ownership-proof">
+
+                Ownership proof
+
+            </label>
+
+
+            <textarea
+                id="ownership-proof"
+                placeholder="Example: The wallet contains my college ID. It also has a small scratch near the zipper."
+            ></textarea>
+
+
+            <div class="ownership-actions">
+
+                <button
+                    id="ownership-cancel"
+                    type="button"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    id="ownership-submit"
+                    type="button"
+                >
+                    Submit Claim
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(modal);
+
+
+    document.getElementById(
+        "ownership-cancel"
+    ).addEventListener(
+        "click",
+        function () {
+
+            modal.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    document.getElementById(
+        "ownership-submit"
+    ).addEventListener(
+        "click",
+        submitOwnershipVerification
+    );
+
+
+    modal.addEventListener(
+        "click",
+        function (event) {
+
+            if (event.target === modal) {
+
+                modal.classList.remove(
+                    "active"
+                );
+
+            }
+
+        }
+    );
+
+
+    return modal;
+}
+
+
+// =========================================================
+// OPEN VERIFICATION
+// =========================================================
+
+function openVerification(
+    foundItemId,
+    foundItemName,
+    button
+) {
+
+    const user =
+        getLoggedInUser();
+
+
+    if (!user || !user.id) {
+
+        alert(
+            "Please login before submitting an ownership claim."
+        );
+
+        window.location.href =
+            "login.html";
+
+        return;
+    }
+
+
+    verificationItemId =
+        foundItemId;
+
+
+    const modal =
+        ensureVerificationModal();
+
+
+    document.getElementById(
+        "ownership-item-name"
+    ).textContent =
+        foundItemName ||
+        "Found Item";
+
+
+    document.getElementById(
+        "ownership-proof"
+    ).value = "";
+
+
+    const message =
+        document.getElementById(
+            "ownership-message"
+        );
+
+
+    message.textContent = "";
+
+    message.className =
+        "ownership-message";
+
+
+    const submitButton =
+        document.getElementById(
+            "ownership-submit"
+        );
+
+
+    submitButton.disabled = false;
+
+    submitButton.textContent =
+        "Submit Claim";
+
+
+    modal.classList.add(
+        "active"
+    );
+
+
+    document.getElementById(
+        "ownership-proof"
+    ).focus();
+}
+
+
+// =========================================================
+// SUBMIT OWNERSHIP CLAIM
+// =========================================================
+
+async function submitOwnershipVerification() {
+
+    const user =
+        getLoggedInUser();
+
+
+    if (!user || !user.id) {
+
+        alert(
+            "Please login before submitting an ownership claim."
+        );
+
+        return;
+    }
+
+
+    if (!verificationItemId) {
+
+        showOwnershipMessage(
+            "No found item was selected.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    const proof =
+        document.getElementById(
+            "ownership-proof"
+        ).value.trim();
+
+
+    if (!proof) {
+
+        showOwnershipMessage(
+            "Please provide ownership proof.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    if (proof.length < 10) {
+
+        showOwnershipMessage(
+            "Please provide more specific ownership details.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    const submitButton =
+        document.getElementById(
+            "ownership-submit"
+        );
+
+
+    submitButton.disabled = true;
+
+    submitButton.textContent =
+        "Submitting...";
+
+
+    try {
+
+        const params =
+            new URLSearchParams();
+
+
+        params.append(
+            "item_id",
+            verificationItemId
+        );
+
+
+        params.append(
+            "claimant_id",
+            user.id
+        );
+
+
+        params.append(
+            "proof",
+            proof
+        );
+
+
+        const response =
+            await fetch(
+                `${API_URL}/verification/request?${params.toString()}`,
+                {
+                    method: "POST"
+                }
+            );
+
+
+        let data = null;
+
+
+        try {
+
+            data =
+                await response.json();
+
+        }
+        catch {
+
+            data = null;
+
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data?.detail ||
+                data?.message ||
+                "Unable to submit ownership claim."
+            );
+
+        }
+
+
+        showOwnershipMessage(
+            "Ownership verification request submitted successfully.",
+            "success"
+        );
+
+
+        submitButton.textContent =
+            "Submitted ✓";
+
+
+        const currentButton =
+            document.querySelector(
+                `.verify-ownership-btn[data-item-id="${verificationItemId}"]`
+            );
+
+
+        if (currentButton) {
+
+            currentButton.textContent =
+                "⏳ Claim Pending";
+
+
+            currentButton.classList.add(
+                "pending"
+            );
+
+
+            currentButton.onclick =
+                function () {
+
+                    alert(
+                        "Your ownership verification request is already pending."
+                    );
+
+                };
+
+        }
+
+
+        setTimeout(
+            function () {
+
+                const modal =
+                    document.getElementById(
+                        "ownership-verification-modal"
+                    );
+
+
+                if (modal) {
+
+                    modal.classList.remove(
+                        "active"
+                    );
+
+                }
+
+            },
+            1200
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Ownership verification error:",
+            error
+        );
+
+
+        showOwnershipMessage(
+            error.message,
+            "error"
+        );
+
+
+        submitButton.disabled =
+            false;
+
+
+        submitButton.textContent =
+            "Submit Claim";
+
+    }
+}
+
+
+// =========================================================
+// SHOW VERIFICATION MESSAGE
+// =========================================================
+
+function showOwnershipMessage(
+    message,
+    type
+) {
+
+    const element =
+        document.getElementById(
+            "ownership-message"
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        message;
+
+
+    element.className =
+        `ownership-message show ${type}`;
+}
 
 // =========================================================
 // VIEW POSSIBLE MATCH
